@@ -24,6 +24,12 @@ export const statusConfig = {
   ok: { color: 'bg-green-100 text-green-700 border-green-200', dot: 'bg-green-500' },
 };
 
+export const orderStatusConfig = {
+  to_order: { color: 'bg-red-100 text-red-700 border-red-200' },
+  ordered: { color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  received: { color: 'bg-green-100 text-green-700 border-green-200' },
+};
+
 export const categoryKeys = {
   snacks: 'cat_snacks',
   beverages: 'cat_beverages',
@@ -31,3 +37,13 @@ export const categoryKeys = {
   fresh_products: 'cat_fresh_products',
   frozen_products: 'cat_frozen_products',
 };
+
+export const defaultRayons = [
+  'Boissons',
+  'Snacks',
+  'Produits frais',
+  'Congélateur',
+  'Caisse',
+  'Épicerie',
+  'Hygiène',
+];
