@@ -8,7 +8,6 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
-import Payment from '@/pages/Payment';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -38,7 +37,6 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/payment" element={<Payment />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

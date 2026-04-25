@@ -5,9 +5,8 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, SlidersHorizontal } from 'lucide-react';
-import { getProductStatus, defaultRayons } from '@/lib/productUtils';
+import { Plus, Search } from 'lucide-react';
+import { getProductStatus } from '@/lib/productUtils';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
@@ -26,9 +25,10 @@ export default function Dashboard() {
   const [editProduct, setEditProduct] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [rayonFilter, setRayonFilter] = useState('all');
 
-  const subscriptionActive = user?.subscription_status === 'active';
+  // Check subscription
+  const subscriptionActive = user?.subscription_status !== 'inactive';
+  const [subOverride, setSubOverride] = useState(false);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
@@ -77,39 +77,30 @@ export default function Dashboard() {
     }
   };
 
-  // Collect unique rayons from products + defaults
-  const allRayons = useMemo(() => {
-    const fromProducts = products.map(p => p.rayon).filter(Boolean);
-    const combined = [...new Set([...defaultRayons, ...fromProducts])];
-    return combined;
-  }, [products]);
-
   const filteredProducts = useMemo(() => {
     return products
       .filter(p => {
-        if (search) return p.name.toLowerCase().includes(search.toLowerCase());
+        if (search) {
+          return p.name.toLowerCase().includes(search.toLowerCase());
+        }
         return true;
       })
       .filter(p => {
         if (statusFilter === 'all') return true;
         return getProductStatus(p.expiration_date) === statusFilter;
-      })
-      .filter(p => {
-        if (rayonFilter === 'all') return true;
-        return p.rayon === rayonFilter;
       });
-  }, [products, search, statusFilter, rayonFilter]);
+  }, [products, search, statusFilter]);
 
-  if (!subscriptionActive) {
+  if (!subscriptionActive && !subOverride) {
     return (
       <>
         <DashboardHeader />
-        <SubscriptionGate />
+        <SubscriptionGate onActivated={() => setSubOverride(true)} />
       </>
     );
   }
 
-  const statusFilters = [
+  const filters = [
     { key: 'all', label: t('dash_filter_all') },
     { key: 'expired', label: t('dash_filter_expired') },
     { key: 'urgent', label: t('dash_filter_urgent') },
@@ -121,7 +112,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-secondary/30">
       <DashboardHeader />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('dash_title')}</h1>
           <div className="flex items-center gap-2">
@@ -151,50 +142,28 @@ export default function Dashboard() {
             )}
 
             {/* Filters & Search */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-border/40">
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      placeholder={t('dash_search')}
-                      className="pl-9 rounded-full"
-                    />
-                  </div>
-
-                  {/* Rayon filter */}
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <Select value={rayonFilter} onValueChange={setRayonFilter}>
-                      <SelectTrigger className="w-44 rounded-full text-sm">
-                        <SelectValue placeholder={t('dash_filter_rayon')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('dash_filter_rayon')}</SelectItem>
-                        {allRayons.map((r) => (
-                          <SelectItem key={r} value={r}>{r}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Status filters */}
-                <div className="flex items-center gap-1 flex-wrap">
-                  {statusFilters.map(f => (
-                    <Button
-                      key={f.key}
-                      variant={statusFilter === f.key ? 'default' : 'outline'}
-                      size="sm"
-                      className="rounded-full text-xs"
-                      onClick={() => setStatusFilter(f.key)}
-                    >
-                      {f.label}
-                    </Button>
-                  ))}
-                </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t('dash_search')}
+                  className="pl-9 rounded-full"
+                />
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                {filters.map(f => (
+                  <Button
+                    key={f.key}
+                    variant={statusFilter === f.key ? 'default' : 'outline'}
+                    size="sm"
+                    className="rounded-full text-xs"
+                    onClick={() => setStatusFilter(f.key)}
+                  >
+                    {f.label}
+                  </Button>
+                ))}
               </div>
             </div>
 

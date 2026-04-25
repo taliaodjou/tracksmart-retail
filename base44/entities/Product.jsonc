@@ -17,10 +17,6 @@
       ],
       "description": "Product category"
     },
-    "rayon": {
-      "type": "string",
-      "description": "Store section / Rayon"
-    },
     "expiration_date": {
       "type": "string",
       "format": "date",
@@ -29,20 +25,6 @@
     "quantity": {
       "type": "number",
       "description": "Quantity (optional)"
-    },
-    "order_status": {
-      "type": "string",
-      "enum": [
-        "to_order",
-        "ordered",
-        "received"
-      ],
-      "description": "Restocking order status (only for expired products)"
-    },
-    "order_date": {
-      "type": "string",
-      "format": "date",
-      "description": "Order date for restocking"
     }
   },
   "required": [
