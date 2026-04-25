@@ -17,6 +17,17 @@
       ],
       "description": "Product category"
     },
+    "rayon": {
+      "type": "string",
+      "enum": [
+        "boissons",
+        "snacks",
+        "produits_frais",
+        "congelateur",
+        "caisse"
+      ],
+      "description": "Store section (rayon)"
+    },
     "expiration_date": {
       "type": "string",
       "format": "date",
@@ -25,6 +36,20 @@
     "quantity": {
       "type": "number",
       "description": "Quantity (optional)"
+    },
+    "order_status": {
+      "type": "string",
+      "enum": [
+        "a_commander",
+        "commande",
+        "recu"
+      ],
+      "description": "Restocking order status (only for expired products)"
+    },
+    "order_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Order date for restocking"
     }
   },
   "required": [

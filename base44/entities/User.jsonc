@@ -1,0 +1,39 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user",
+      "description": "User role"
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "active",
+        "inactive"
+      ],
+      "default": "none",
+      "description": "Subscription status"
+    },
+    "subscription_plan": {
+      "type": "string",
+      "enum": [
+        "small",
+        "medium",
+        "large"
+      ],
+      "description": "Selected subscription plan"
+    },
+    "subscription_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date subscription was activated"
+    }
+  }
+}

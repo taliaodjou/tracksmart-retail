@@ -5,15 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
-import { categoryKeys } from '@/lib/productUtils';
+import { categoryKeys, rayonKeys, orderStatusKeys, getProductStatus } from '@/lib/productUtils';
 
 export default function ProductForm({ onSave, onCancel, editProduct }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({
     name: '',
     category: '',
+    rayon: '',
     expiration_date: '',
     quantity: '',
+    order_status: '',
+    order_date: '',
   });
 
   useEffect(() => {
@@ -21,33 +24,48 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
       setForm({
         name: editProduct.name || '',
         category: editProduct.category || '',
+        rayon: editProduct.rayon || '',
         expiration_date: editProduct.expiration_date || '',
         quantity: editProduct.quantity || '',
+        order_status: editProduct.order_status || '',
+        order_date: editProduct.order_date || '',
       });
     }
   }, [editProduct]);
+
+  const isExpired = form.expiration_date
+    ? getProductStatus(form.expiration_date) === 'expired'
+    : false;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const data = {
       name: form.name,
       category: form.category,
+      rayon: form.rayon || undefined,
       expiration_date: form.expiration_date,
     };
     if (form.quantity) data.quantity = Number(form.quantity);
+    if (isExpired) {
+      if (form.order_status) data.order_status = form.order_status;
+      if (form.order_date) data.order_date = form.order_date;
+    }
     onSave(data);
   };
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="font-semibold text-foreground">{t('dash_add_product')}</h3>
+        <h3 className="font-semibold text-foreground">
+          {editProduct ? t('edit') : t('dash_add_product')}
+        </h3>
         <Button variant="ghost" size="icon" onClick={onCancel}>
           <X className="w-4 h-4" />
         </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Name */}
         <div className="space-y-1.5">
           <Label className="text-sm">{t('dash_product_name')}</Label>
           <Input
@@ -58,6 +76,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
           />
         </div>
 
+        {/* Category */}
         <div className="space-y-1.5">
           <Label className="text-sm">{t('dash_category')}</Label>
           <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })} required>
@@ -66,14 +85,28 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
             </SelectTrigger>
             <SelectContent>
               {Object.entries(categoryKeys).map(([value, labelKey]) => (
-                <SelectItem key={value} value={value}>
-                  {t(labelKey)}
-                </SelectItem>
+                <SelectItem key={value} value={value}>{t(labelKey)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
+        {/* Rayon */}
+        <div className="space-y-1.5">
+          <Label className="text-sm">{t('dash_rayon')}</Label>
+          <Select value={form.rayon} onValueChange={(v) => setForm({ ...form, rayon: v })}>
+            <SelectTrigger>
+              <SelectValue placeholder={t('dash_rayon')} />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(rayonKeys).map(([value, labelKey]) => (
+                <SelectItem key={value} value={value}>{t(labelKey)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Expiration date */}
         <div className="space-y-1.5">
           <Label className="text-sm">{t('dash_expiration_date')}</Label>
           <Input
@@ -84,6 +117,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
           />
         </div>
 
+        {/* Quantity */}
         <div className="space-y-1.5">
           <Label className="text-sm">{t('dash_quantity')}</Label>
           <Input
@@ -94,6 +128,34 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
             placeholder="—"
           />
         </div>
+
+        {/* Restocking fields — only if expired */}
+        {isExpired && (
+          <>
+            <div className="space-y-1.5">
+              <Label className="text-sm">{t('dash_order_status')}</Label>
+              <Select value={form.order_status} onValueChange={(v) => setForm({ ...form, order_status: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t('dash_order_status')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(orderStatusKeys).map(([value, labelKey]) => (
+                    <SelectItem key={value} value={value}>{t(labelKey)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-sm">{t('dash_order_date')}</Label>
+              <Input
+                type="date"
+                value={form.order_date}
+                onChange={(e) => setForm({ ...form, order_date: e.target.value })}
+              />
+            </div>
+          </>
+        )}
 
         <div className="sm:col-span-2 flex justify-end gap-3 pt-2">
           <Button type="button" variant="outline" onClick={onCancel} className="rounded-full px-5">

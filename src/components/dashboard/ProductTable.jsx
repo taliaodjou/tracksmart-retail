@@ -1,11 +1,17 @@
 import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, orderStatusKeys } from '@/lib/productUtils';
+
+const orderStatusColors = {
+  a_commander: 'bg-red-100 text-red-700 border-red-200',
+  commande: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  recu: 'bg-green-100 text-green-700 border-green-200',
+};
 
 export default function ProductTable({ products, onEdit, onDelete }) {
   const { t } = useLanguage();
@@ -26,9 +32,11 @@ export default function ProductTable({ products, onEdit, onDelete }) {
             <TableRow className="bg-secondary/50">
               <TableHead className="font-semibold">{t('dash_product_name')}</TableHead>
               <TableHead className="font-semibold">{t('dash_category')}</TableHead>
+              <TableHead className="font-semibold">{t('dash_rayon')}</TableHead>
               <TableHead className="font-semibold">{t('dash_expiration_date')}</TableHead>
               <TableHead className="font-semibold">{t('dash_days_remaining')}</TableHead>
               <TableHead className="font-semibold">{t('dash_status')}</TableHead>
+              <TableHead className="font-semibold">{t('dash_order_status')}</TableHead>
               <TableHead className="font-semibold text-right">{t('dash_actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -37,32 +45,50 @@ export default function ProductTable({ products, onEdit, onDelete }) {
               const status = getProductStatus(product.expiration_date);
               const days = getDaysRemaining(product.expiration_date);
               const cfg = statusConfig[status];
-              const statusKey = `status_${status}`;
 
               return (
-                <TableRow key={product.id} className="hover:bg-secondary/30 transition-colors">
+                <TableRow
+                  key={product.id}
+                  className={`hover:bg-secondary/30 transition-colors ${
+                    status === 'expired' ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/30' : ''
+                  }`}
+                >
                   <TableCell className="font-medium">
                     {product.name}
                     {product.quantity && (
                       <span className="ml-2 text-xs text-muted-foreground">×{product.quantity}</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
                     {t(categoryKeys[product.category] || product.category)}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-sm">
+                    {product.rayon ? t(rayonKeys[product.rayon] || product.rayon) : '—'}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
                     {format(new Date(product.expiration_date), 'dd/MM/yyyy')}
                   </TableCell>
                   <TableCell>
-                    <span className={`font-medium ${days < 0 ? 'text-red-600' : days < 3 ? 'text-orange-600' : 'text-foreground'}`}>
-                      {days}
+                    <span className={`font-medium text-sm ${days < 0 ? 'text-red-600' : days < 3 ? 'text-orange-600' : 'text-foreground'}`}>
+                      {days}j
                     </span>
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className={`${cfg.color} border text-xs font-medium`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} mr-1.5`} />
-                      {t(statusKey)}
+                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} mr-1.5 inline-block`} />
+                      {t(`status_${status}`)}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {status === 'expired' && product.order_status ? (
+                      <Badge variant="secondary" className={`${orderStatusColors[product.order_status]} border text-xs font-medium`}>
+                        {t(orderStatusKeys[product.order_status])}
+                      </Badge>
+                    ) : status === 'expired' ? (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">

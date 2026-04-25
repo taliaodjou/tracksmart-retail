@@ -31,3 +31,29 @@ export const categoryKeys = {
   fresh_products: 'cat_fresh_products',
   frozen_products: 'cat_frozen_products',
 };
+
+export const rayonKeys = {
+  boissons: 'rayon_boissons',
+  snacks: 'rayon_snacks',
+  produits_frais: 'rayon_produits_frais',
+  congelateur: 'rayon_congelateur',
+  caisse: 'rayon_caisse',
+};
+
+export const orderStatusKeys = {
+  a_commander: 'order_a_commander',
+  commande: 'order_commande',
+  recu: 'order_recu',
+};
+
+export const ADMIN_EMAIL = 'admin@tracksmart.com';
+
+export function isAdmin(user) {
+  return user?.role === 'admin' || user?.email === ADMIN_EMAIL;
+}
+
+export function hasActiveSubscription(user) {
+  if (!user) return false;
+  if (isAdmin(user)) return true;
+  return user?.subscription_status === 'active';
+}

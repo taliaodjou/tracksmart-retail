@@ -1,23 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { ShieldOff, Loader2 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
-import { toast } from 'sonner';
+import { ShieldOff, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export default function SubscriptionGate({ onActivated }) {
+export default function SubscriptionGate({ status }) {
   const { t } = useLanguage();
-  const [activating, setActivating] = useState(false);
 
-  const handleActivate = async () => {
-    setActivating(true);
-    // Mock activation logic
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    await base44.auth.updateMe({ subscription_status: 'active' });
-    setActivating(false);
-    toast.success(t('sub_active'));
-    onActivated();
-  };
+  const isNone = status === 'none' || !status;
 
   return (
     <div className="min-h-screen bg-secondary/30 flex items-center justify-center p-4">
@@ -25,23 +15,18 @@ export default function SubscriptionGate({ onActivated }) {
         <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center mx-auto mb-6">
           <ShieldOff className="w-8 h-8 text-orange-500" />
         </div>
-        <h2 className="text-xl font-bold text-foreground mb-3">{t('sub_inactive_title')}</h2>
-        <p className="text-muted-foreground mb-8 leading-relaxed">{t('sub_inactive_msg')}</p>
-        <Button
-          onClick={handleActivate}
-          disabled={activating}
-          className="rounded-full px-8 gap-2"
-          size="lg"
-        >
-          {activating ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {t('sub_activating')}
-            </>
-          ) : (
-            t('sub_activate')
-          )}
-        </Button>
+        <h2 className="text-xl font-bold text-foreground mb-3">
+          {isNone ? t('sub_none_title') : t('sub_inactive_title')}
+        </h2>
+        <p className="text-muted-foreground mb-8 leading-relaxed">
+          {isNone ? t('sub_none_msg') : t('sub_inactive_msg')}
+        </p>
+        <Link to="/#pricing">
+          <Button className="rounded-full px-8 gap-2" size="lg">
+            {t('sub_choose_plan')}
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </Link>
       </div>
     </div>
   );
