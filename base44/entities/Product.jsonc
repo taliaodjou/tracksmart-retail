@@ -1,0 +1,35 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "snacks",
+        "beverages",
+        "dry_groceries",
+        "fresh_products",
+        "frozen_products"
+      ],
+      "description": "Product category"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expiration date"
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Quantity (optional)"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "expiration_date"
+  ]
+}
