@@ -10,23 +10,42 @@
       "type": "string",
       "enum": [
         "snacks",
-        "beverages",
-        "dry_groceries",
-        "fresh_products",
-        "frozen_products"
+        "boissons",
+        "congeles_poisson",
+        "congeles_poulet",
+        "produits_frais",
+        "epicerie_seche",
+        "confiseries",
+        "conserves",
+        "hygiene_beaute",
+        "entretien_maison",
+        "bebe",
+        "animaux",
+        "alcool",
+        "tabac"
       ],
       "description": "Product category"
     },
     "rayon": {
       "type": "string",
       "enum": [
-        "boissons",
-        "snacks",
-        "produits_frais",
-        "congelateur",
-        "caisse"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
       ],
-      "description": "Store section (rayon)"
+      "description": "Store section (rayon 1-15)"
     },
     "expiration_date": {
       "type": "string",
@@ -44,7 +63,7 @@
         "commande",
         "recu"
       ],
-      "description": "Restocking order status (only for expired products)"
+      "description": "Restocking order status"
     },
     "order_date": {
       "type": "string",

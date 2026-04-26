@@ -8,32 +8,42 @@
         "admin",
         "user"
       ],
-      "default": "user",
-      "description": "User role"
+      "default": "user"
     },
     "subscription_status": {
       "type": "string",
       "enum": [
-        "none",
         "active",
         "inactive"
       ],
-      "default": "none",
-      "description": "Subscription status"
+      "default": "inactive"
     },
-    "subscription_plan": {
-      "type": "string",
-      "enum": [
-        "small",
-        "medium",
-        "large"
-      ],
-      "description": "Selected subscription plan"
-    },
-    "subscription_date": {
+    "subscription_start_date": {
       "type": "string",
       "format": "date",
-      "description": "Date subscription was activated"
+      "description": "Monthly renewal base date"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Optional phone for SMS reports"
+    },
+    "report_channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms"
+      ],
+      "default": "email",
+      "description": "Preferred channel for weekly reports"
+    },
+    "last_reminder_sent": {
+      "type": "string",
+      "description": "Tracks last reminder level sent (14d/7d/3d)"
+    },
+    "last_weekly_report": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of last weekly report"
     }
   }
 }

@@ -8,21 +8,58 @@ import { getProductStatus, getDaysRemaining, categoryKeys, rayonKeys, orderStatu
 export default function ExportActions({ products }) {
   const { t } = useLanguage();
 
+  // Print only expired + soon products
   const handlePrint = () => {
-    window.print();
+    const printable = products.filter(p => {
+      const s = getProductStatus(p.expiration_date);
+      return s === 'expired' || s === 'urgent' || s === 'soon';
+    });
+
+    const rows = printable.map(p => {
+      const s = getProductStatus(p.expiration_date);
+      const days = getDaysRemaining(p.expiration_date);
+      return `<tr>
+        <td>${p.name}</td>
+        <td>${t(categoryKeys[p.category] || p.category)}</td>
+        <td>${p.rayon ? 'Rayon ' + p.rayon : '—'}</td>
+        <td>${format(new Date(p.expiration_date), 'dd/MM/yyyy')}</td>
+        <td>${days}j</td>
+        <td>${t('status_' + s)}</td>
+        <td>${p.order_status ? t(orderStatusKeys[p.order_status]) : '—'}</td>
+      </tr>`;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>TrackSmart — ${t('dash_print')}</title>
+<style>
+body { font-family: Arial, sans-serif; font-size: 12px; }
+h1 { font-size: 16px; margin-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+th { background: #f5f5f5; font-weight: bold; }
+</style>
+</head><body>
+<h1>TrackSmart — Produits expirés / bientôt expirés (${format(new Date(), 'dd/MM/yyyy')})</h1>
+<table>
+<thead><tr>
+<th>Produit</th><th>Catégorie</th><th>Rayon</th><th>Expiration</th><th>Jours</th><th>Statut</th><th>Commande</th>
+</tr></thead>
+<tbody>${rows}</tbody>
+</table>
+</body></html>`;
+
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    w.print();
   };
 
   const handleExportCSV = () => {
     const headers = [
-      t('dash_product_name'),
-      t('dash_category'),
-      t('dash_rayon'),
-      t('dash_expiration_date'),
-      t('dash_days_remaining'),
-      t('dash_status'),
-      t('dash_quantity'),
-      t('dash_order_status'),
-      t('dash_order_date'),
+      t('dash_product_name'), t('dash_category'), t('dash_rayon'),
+      t('dash_expiration_date'), t('dash_days_remaining'), t('dash_status'),
+      t('dash_quantity'), t('dash_order_status'), t('dash_order_date'),
     ];
 
     const rows = products.map(p => {
@@ -31,7 +68,7 @@ export default function ExportActions({ products }) {
       return [
         p.name,
         t(categoryKeys[p.category] || p.category),
-        p.rayon ? t(rayonKeys[p.rayon] || p.rayon) : '',
+        p.rayon ? `Rayon ${p.rayon}` : '',
         format(new Date(p.expiration_date), 'dd/MM/yyyy'),
         days,
         t(`status_${status}`),
@@ -41,16 +78,13 @@ export default function ExportActions({ products }) {
       ];
     });
 
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `tracksmart_export_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    link.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tracksmart_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+    a.click();
     URL.revokeObjectURL(url);
   };
 

@@ -1,0 +1,38 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Target user email"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "reminder_14d",
+        "reminder_7d",
+        "reminder_3d",
+        "subscription_blocked",
+        "weekly_report"
+      ],
+      "description": "Notification type"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message content"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false
+    },
+    "sent_at": {
+      "type": "string",
+      "description": "ISO timestamp when sent"
+    }
+  },
+  "required": [
+    "user_email",
+    "type",
+    "message"
+  ]
+}

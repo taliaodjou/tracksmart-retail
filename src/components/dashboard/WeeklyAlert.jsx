@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, statusConfig } from '@/lib/productUtils';
 import { AlertTriangle } from 'lucide-react';
 
 export default function WeeklyAlert({ products }) {
@@ -20,21 +20,18 @@ export default function WeeklyAlert({ products }) {
         <h3 className="font-semibold text-orange-900">{t('dash_weekly_summary')}</h3>
       </div>
       <div className="flex flex-wrap gap-2">
-        {watchProducts.slice(0, 8).map(p => {
+        {watchProducts.slice(0, 10).map(p => {
           const days = getDaysRemaining(p.expiration_date);
           const status = getProductStatus(p.expiration_date);
           return (
-            <span
-              key={p.id}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${statusConfig[status].color}`}
-            >
+            <span key={p.id} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${statusConfig[status].color}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[status].dot}`} />
               {p.name} ({days}j)
             </span>
           );
         })}
-        {watchProducts.length > 8 && (
-          <span className="text-xs text-orange-600 self-center">+{watchProducts.length - 8}</span>
+        {watchProducts.length > 10 && (
+          <span className="text-xs text-orange-600 self-center">+{watchProducts.length - 10}</span>
         )}
       </div>
     </div>

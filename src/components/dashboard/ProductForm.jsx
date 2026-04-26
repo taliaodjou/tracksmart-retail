@@ -10,13 +10,9 @@ import { categoryKeys, rayonKeys, orderStatusKeys, getProductStatus } from '@/li
 export default function ProductForm({ onSave, onCancel, editProduct }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({
-    name: '',
-    category: '',
-    rayon: '',
-    expiration_date: '',
-    quantity: '',
-    order_status: '',
-    order_date: '',
+    name: '', category: '', rayon: '',
+    expiration_date: '', quantity: '',
+    order_status: '', order_date: '',
   });
 
   useEffect(() => {
@@ -42,14 +38,12 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
     const data = {
       name: form.name,
       category: form.category,
-      rayon: form.rayon || undefined,
       expiration_date: form.expiration_date,
     };
+    if (form.rayon) data.rayon = form.rayon;
     if (form.quantity) data.quantity = Number(form.quantity);
-    if (isExpired) {
-      if (form.order_status) data.order_status = form.order_status;
-      if (form.order_date) data.order_date = form.order_date;
-    }
+    if (isExpired && form.order_status) data.order_status = form.order_status;
+    if (isExpired && form.order_date) data.order_date = form.order_date;
     onSave(data);
   };
 
@@ -59,30 +53,19 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         <h3 className="font-semibold text-foreground">
           {editProduct ? t('edit') : t('dash_add_product')}
         </h3>
-        <Button variant="ghost" size="icon" onClick={onCancel}>
-          <X className="w-4 h-4" />
-        </Button>
+        <Button variant="ghost" size="icon" onClick={onCancel}><X className="w-4 h-4" /></Button>
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Name */}
         <div className="space-y-1.5">
-          <Label className="text-sm">{t('dash_product_name')}</Label>
-          <Input
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            required
-            placeholder={t('dash_product_name')}
-          />
+          <Label className="text-sm">{t('dash_product_name')} *</Label>
+          <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required placeholder={t('dash_product_name')} />
         </div>
 
-        {/* Category */}
         <div className="space-y-1.5">
-          <Label className="text-sm">{t('dash_category')}</Label>
-          <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })} required>
-            <SelectTrigger>
-              <SelectValue placeholder={t('dash_category')} />
-            </SelectTrigger>
+          <Label className="text-sm">{t('dash_category')} *</Label>
+          <Select value={form.category} onValueChange={v => setForm({ ...form, category: v })} required>
+            <SelectTrigger><SelectValue placeholder={t('dash_category')} /></SelectTrigger>
             <SelectContent>
               {Object.entries(categoryKeys).map(([value, labelKey]) => (
                 <SelectItem key={value} value={value}>{t(labelKey)}</SelectItem>
@@ -91,53 +74,34 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
           </Select>
         </div>
 
-        {/* Rayon */}
         <div className="space-y-1.5">
           <Label className="text-sm">{t('dash_rayon')}</Label>
-          <Select value={form.rayon} onValueChange={(v) => setForm({ ...form, rayon: v })}>
-            <SelectTrigger>
-              <SelectValue placeholder={t('dash_rayon')} />
-            </SelectTrigger>
+          <Select value={form.rayon} onValueChange={v => setForm({ ...form, rayon: v })}>
+            <SelectTrigger><SelectValue placeholder={t('dash_rayon')} /></SelectTrigger>
             <SelectContent>
-              {Object.entries(rayonKeys).map(([value, labelKey]) => (
-                <SelectItem key={value} value={value}>{t(labelKey)}</SelectItem>
+              {Object.keys(rayonKeys).map(r => (
+                <SelectItem key={r} value={r}>Rayon {r}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {/* Expiration date */}
         <div className="space-y-1.5">
-          <Label className="text-sm">{t('dash_expiration_date')}</Label>
-          <Input
-            type="date"
-            value={form.expiration_date}
-            onChange={(e) => setForm({ ...form, expiration_date: e.target.value })}
-            required
-          />
+          <Label className="text-sm">{t('dash_expiration_date')} *</Label>
+          <Input type="date" value={form.expiration_date} onChange={e => setForm({ ...form, expiration_date: e.target.value })} required />
         </div>
 
-        {/* Quantity */}
         <div className="space-y-1.5">
           <Label className="text-sm">{t('dash_quantity')}</Label>
-          <Input
-            type="number"
-            min="0"
-            value={form.quantity}
-            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-            placeholder="—"
-          />
+          <Input type="number" min="0" value={form.quantity} onChange={e => setForm({ ...form, quantity: e.target.value })} placeholder="—" />
         </div>
 
-        {/* Restocking fields — only if expired */}
         {isExpired && (
           <>
             <div className="space-y-1.5">
               <Label className="text-sm">{t('dash_order_status')}</Label>
-              <Select value={form.order_status} onValueChange={(v) => setForm({ ...form, order_status: v })}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('dash_order_status')} />
-                </SelectTrigger>
+              <Select value={form.order_status} onValueChange={v => setForm({ ...form, order_status: v })}>
+                <SelectTrigger><SelectValue placeholder={t('dash_order_status')} /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(orderStatusKeys).map(([value, labelKey]) => (
                     <SelectItem key={value} value={value}>{t(labelKey)}</SelectItem>
@@ -145,25 +109,16 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-1.5">
               <Label className="text-sm">{t('dash_order_date')}</Label>
-              <Input
-                type="date"
-                value={form.order_date}
-                onChange={(e) => setForm({ ...form, order_date: e.target.value })}
-              />
+              <Input type="date" value={form.order_date} onChange={e => setForm({ ...form, order_date: e.target.value })} />
             </div>
           </>
         )}
 
         <div className="sm:col-span-2 flex justify-end gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={onCancel} className="rounded-full px-5">
-            {t('dash_cancel')}
-          </Button>
-          <Button type="submit" className="rounded-full px-5">
-            {t('dash_save')}
-          </Button>
+          <Button type="button" variant="outline" onClick={onCancel} className="rounded-full px-5">{t('dash_cancel')}</Button>
+          <Button type="submit" className="rounded-full px-5">{t('dash_save')}</Button>
         </div>
       </form>
     </div>
