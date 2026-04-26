@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, FileSpreadsheet } from 'lucide-react';
 import { getProductStatus, isAdmin, hasActiveSubscription, categoryKeys, rayonKeys } from '@/lib/productUtils';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -16,14 +16,16 @@ import WeeklyAlert from '@/components/dashboard/WeeklyAlert';
 import ProductForm from '@/components/dashboard/ProductForm';
 import ProductTable from '@/components/dashboard/ProductTable';
 import ExportActions from '@/components/dashboard/ExportActions';
+import ImportModal from '@/components/dashboard/ImportModal';
 
 export default function Dashboard() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
+  const [showImport, setShowImport] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -114,8 +116,12 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('dash_title')}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <ExportActions products={filteredProducts} />
+            <Button variant="outline" onClick={() => setShowImport(true)} className="rounded-full gap-2">
+              <FileSpreadsheet className="w-4 h-4" />
+              {lang === 'fr' ? 'Importer Excel' : 'Import Excel'}
+            </Button>
             <Button onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
@@ -206,6 +212,15 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
+          onImported={() => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            setShowImport(false);
+          }}
+        />
+      )}
     </div>
   );
 }
