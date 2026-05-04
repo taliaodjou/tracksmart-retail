@@ -117,9 +117,23 @@ export default function ImportModal({ onClose, onImported }) {
       json_schema: {
         type: 'object',
         properties: {
-          headers: { type: 'array', items: { type: 'string' } },
-          rows: { type: 'array', items: { type: 'object', additionalProperties: { type: 'string' } } },
-        },
+          rows: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                expiration_date: { type: 'string' },
+                category: { type: 'string' },
+                rayon: { type: 'string' },
+                quantity: { type: 'string' },
+                marque: { type: 'string' },
+                reception_date: { type: 'string' },
+                price_chf: { type: 'string' },
+              }
+            }
+          }
+        }
       },
     });
 
@@ -130,17 +144,26 @@ export default function ImportModal({ onClose, onImported }) {
       return;
     }
 
-    const { headers = [], rows = [] } = result.output;
-    if (!headers.length || !rows.length) {
+    // ExtractDataFromUploadedFile returns rows as array of objects with column names as keys
+    // We need to detect headers from the first row's keys
+    const outputRows = Array.isArray(result.output) ? result.output : (result.output.rows || []);
+
+    if (!outputRows.length) {
       setParseError(lang === 'fr' ? 'Fichier vide ou mal formaté.' : 'File empty or badly formatted.');
       return;
     }
+
+    // Get all unique column names from the data
+    const headers = [...new Set(outputRows.flatMap(r => Object.keys(r)))];
 
     const autoMapping = {};
     headers.forEach((h, idx) => {
       const field = detectField(h);
       if (field && !(field in autoMapping)) autoMapping[field] = idx;
     });
+
+    // Convert rows to array-indexed format
+    const rows = outputRows.map(r => headers.map(h => r[h] ?? ''));
 
     setRawData({ headers, rows });
     setMapping(autoMapping);
@@ -153,7 +176,7 @@ export default function ImportModal({ onClose, onImported }) {
     const errs = [];
 
     rows.forEach((row, ri) => {
-      const rowValues = headers.map(h => row[h] ?? '');
+      const rowValues = Array.isArray(row) ? row : headers.map(h => row[h] ?? '');
       const entry = {};
       const rowErrors = [];
 
@@ -303,7 +326,7 @@ export default function ImportModal({ onClose, onImported }) {
                   <tbody>
                     {rawData.rows.slice(0, 2).map((row, ri) => (
                       <tr key={ri} className="border-t border-border/30">
-                        {rawData.headers.map((h, ci) => <td key={ci} className="px-2 py-1">{row[h] || '—'}</td>)}
+                        {rawData.headers.map((h, ci) => <td key={ci} className="px-2 py-1">{(Array.isArray(row) ? row[ci] : row[h]) || '—'}</td>)}
                       </tr>
                     ))}
                   </tbody>

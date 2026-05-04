@@ -5,9 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { Button } from '@/components/ui/button';
-import { LogOut, Settings, User, Shield } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { isAdmin } from '@/lib/productUtils';
 
 export default function DashboardHeader() {
   const { t } = useLanguage();
@@ -15,7 +14,6 @@ export default function DashboardHeader() {
   const location = useLocation();
 
   const handleLogout = () => base44.auth.logout('/');
-  const admin = isAdmin(user);
 
   const navLink = (to, label, icon) => {
     const active = location.pathname === to;
@@ -54,7 +52,6 @@ export default function DashboardHeader() {
           {/* Nav */}
           <nav className="flex items-center gap-1">
             {navLink('/dashboard', t('nav_dashboard'), null)}
-            {admin && navLink('/admin', t('nav_admin'), <Shield className="w-3.5 h-3.5" />)}
             {navLink('/profile', t('nav_profile'), <User className="w-3.5 h-3.5" />)}
           </nav>
 
