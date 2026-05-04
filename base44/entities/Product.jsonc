@@ -4,7 +4,11 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Product name"
+      "description": "Nom du produit"
+    },
+    "marque": {
+      "type": "string",
+      "description": "Marque"
     },
     "category": {
       "type": "string",
@@ -24,7 +28,7 @@
         "alcool",
         "tabac"
       ],
-      "description": "Product category"
+      "description": "Cat\u00e9gorie"
     },
     "rayon": {
       "type": "string",
@@ -45,16 +49,41 @@
         "14",
         "15"
       ],
-      "description": "Store section (rayon 1-15)"
+      "description": "Rayon"
+    },
+    "reception_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de r\u00e9ception"
     },
     "expiration_date": {
       "type": "string",
       "format": "date",
-      "description": "Expiration date"
+      "description": "DLC (Date limite de consommation)"
     },
-    "quantity": {
+    "action": {
+      "type": "string",
+      "enum": [
+        "jeter",
+        "a_recommander",
+        "commande",
+        "en_transition",
+        "recu"
+      ],
+      "description": "Action si expir\u00e9"
+    },
+    "order_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date de commande"
+    },
+    "quantity_thrown": {
       "type": "number",
-      "description": "Quantity (optional)"
+      "description": "Quantit\u00e9 jet\u00e9e"
+    },
+    "price_chf": {
+      "type": "number",
+      "description": "Prix unitaire CHF"
     },
     "order_status": {
       "type": "string",
@@ -63,17 +92,11 @@
         "commande",
         "recu"
       ],
-      "description": "Restocking order status"
-    },
-    "order_date": {
-      "type": "string",
-      "format": "date",
-      "description": "Order date for restocking"
+      "description": "Statut commande"
     }
   },
   "required": [
     "name",
-    "category",
     "expiration_date"
   ]
 }

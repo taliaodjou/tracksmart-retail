@@ -43,7 +43,12 @@ export default function DashboardHeader() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">TS</span>
             </div>
-            <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart</span>
+            <div>
+              <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart</span>
+              {user?.shop_name && (
+                <span className="hidden sm:inline text-xs text-muted-foreground ml-2">— {user.shop_name}</span>
+              )}
+            </div>
           </Link>
 
           {/* Nav */}

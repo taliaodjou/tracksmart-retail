@@ -18,6 +18,8 @@ import ProductForm from '@/components/dashboard/ProductForm';
 import ProductTable from '@/components/dashboard/ProductTable';
 import ExportActions from '@/components/dashboard/ExportActions';
 import ImportModal from '@/components/dashboard/ImportModal';
+import OnboardingModal from '@/components/dashboard/OnboardingModal';
+import DashboardFooter from '@/components/dashboard/DashboardFooter';
 
 export default function Dashboard() {
   const { t, lang } = useLanguage();
@@ -33,6 +35,8 @@ export default function Dashboard() {
   const [rayonFilter, setRayonFilter] = useState('all');
 
   const canAccess = hasActiveSubscription(user);
+  const needsOnboarding = canAccess && user && !user.onboarding_complete;
+  const [onboardingDone, setOnboardingDone] = useState(false);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
@@ -100,6 +104,9 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-secondary/30">
+      {needsOnboarding && !onboardingDone && (
+        <OnboardingModal user={user} onComplete={() => setOnboardingDone(true)} />
+      )}
       <DashboardHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
@@ -176,6 +183,7 @@ export default function Dashboard() {
           onImported={() => { queryClient.invalidateQueries({ queryKey: ['products'] }); setShowImport(false); }}
         />
       )}
+      <DashboardFooter />
     </div>
   );
 }

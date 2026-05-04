@@ -15,12 +15,13 @@ import { User, Phone, Mail, MessageSquare } from 'lucide-react';
 export default function Profile() {
   const { t, lang } = useLanguage();
   const { user, checkUserAuth } = useAuth();
-  const [form, setForm] = useState({ phone_number: '', report_channel: 'email' });
+  const [form, setForm] = useState({ shop_name: '', phone_number: '', report_channel: 'email' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (user) {
       setForm({
+        shop_name: user.shop_name || '',
         phone_number: user.phone_number || '',
         report_channel: user.report_channel || 'email',
       });
@@ -30,7 +31,7 @@ export default function Profile() {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    await base44.auth.updateMe(form);
+    await base44.auth.updateMe({ shop_name: form.shop_name, phone_number: form.phone_number, report_channel: form.report_channel });
     await checkUserAuth();
     setSaving(false);
     toast.success(t('profile_saved'));
@@ -78,8 +79,18 @@ export default function Profile() {
 
         {/* Profile form */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40">
-          <h2 className="font-semibold text-foreground mb-4">{lang === 'fr' ? 'Préférences de notification' : 'Notification preferences'}</h2>
+          <h2 className="font-semibold text-foreground mb-4">{lang === 'fr' ? 'Préférences' : 'Preferences'}</h2>
           <form onSubmit={handleSave} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label className="text-sm flex items-center gap-1.5">
+                {lang === 'fr' ? 'Nom de la boutique' : 'Shop name'}
+              </Label>
+              <Input
+                value={form.shop_name}
+                onChange={e => setForm({ ...form, shop_name: e.target.value })}
+                placeholder="Ex: Épicerie du Marché"
+              />
+            </div>
             <div className="space-y-1.5">
               <Label className="text-sm flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5" />

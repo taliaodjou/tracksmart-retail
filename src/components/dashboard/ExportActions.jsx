@@ -57,24 +57,30 @@ th { background: #f5f5f5; font-weight: bold; }
 
   const handleExportCSV = () => {
     const headers = [
-      t('dash_product_name'), t('dash_category'), t('dash_rayon'),
-      t('dash_expiration_date'), t('dash_days_remaining'), t('dash_status'),
-      t('dash_quantity'), t('dash_order_status'), t('dash_order_date'),
+      'Produit', 'Marque', 'Catégorie', 'Rayon', 'Date réception', 'DLC',
+      'Jours restants', 'Statut', 'Action', 'Date commande',
+      'Quantité jetée', 'Prix CHF', 'Total CHF',
     ];
 
     const rows = products.map(p => {
       const status = getProductStatus(p.expiration_date);
       const days = getDaysRemaining(p.expiration_date);
+      const total = (p.quantity_thrown || 0) * (p.price_chf || 0);
+      const actionLabels = { jeter: 'Jeter', a_recommander: 'À recommander', commande: 'Commandé', en_transition: 'En transition', recu: 'Reçu' };
       return [
         p.name,
-        t(categoryKeys[p.category] || p.category),
+        p.marque || '',
+        p.category ? t(categoryKeys[p.category] || p.category) : '',
         p.rayon ? `Rayon ${p.rayon}` : '',
-        format(new Date(p.expiration_date), 'dd/MM/yyyy'),
+        p.reception_date || '',
+        p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '',
         days,
         t(`status_${status}`),
-        p.quantity || '',
-        p.order_status ? t(orderStatusKeys[p.order_status]) : '',
+        p.action ? (actionLabels[p.action] || p.action) : '',
         p.order_date || '',
+        p.quantity_thrown ?? '',
+        p.price_chf ?? '',
+        total > 0 ? total.toFixed(2) : '',
       ];
     });
 

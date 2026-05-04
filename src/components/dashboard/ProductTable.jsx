@@ -1,16 +1,16 @@
 import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, orderStatusKeys } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys } from '@/lib/productUtils';
 
-const orderColors = {
-  a_commander: 'bg-red-100 text-red-700 border-red-200',
-  commande:    'bg-yellow-100 text-yellow-700 border-yellow-200',
-  recu:        'bg-green-100 text-green-700 border-green-200',
+const actionLabels = {
+  jeter: 'Jeter',
+  a_recommander: 'À recommander',
+  commande: 'Commandé',
+  en_transition: 'En transition',
+  recu: 'Reçu',
 };
 
 export default function ProductTable({ products, onEdit, onDelete }) {
@@ -19,90 +19,74 @@ export default function ProductTable({ products, onEdit, onDelete }) {
   if (products.length === 0) {
     return (
       <div className="bg-white rounded-2xl p-12 shadow-sm border border-border/40 text-center">
-        <p className="text-muted-foreground">{t('dash_no_products')}</p>
+        <p className="text-muted-foreground text-sm">{t('dash_no_products')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden print:shadow-none">
+    <div className="bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden">
       <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-secondary/50">
-              <TableHead className="font-semibold">{t('dash_product_name')}</TableHead>
-              <TableHead className="font-semibold">{t('dash_category')}</TableHead>
-              <TableHead className="font-semibold">{t('dash_rayon')}</TableHead>
-              <TableHead className="font-semibold">{t('dash_expiration_date')}</TableHead>
-              <TableHead className="font-semibold">{t('dash_days_remaining')}</TableHead>
-              <TableHead className="font-semibold">{t('dash_status')}</TableHead>
-              <TableHead className="font-semibold">{t('dash_order_status')}</TableHead>
-              <TableHead className="font-semibold">{t('dash_order_date')}</TableHead>
-              <TableHead className="font-semibold text-right print:hidden">{t('dash_actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => {
-              const status = getProductStatus(product.expiration_date);
-              const days = getDaysRemaining(product.expiration_date);
+        <table className="w-full text-sm">
+          <thead className="bg-secondary/40">
+            <tr>
+              {['Produit', 'Marque', 'Catégorie', 'Rayon', 'DLC', 'Jours', 'Statut', 'Action', 'Qté jetée', 'Total CHF', ''].map((h, i) => (
+                <th key={i} className="text-left px-4 py-3 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {products.map(p => {
+              const status = getProductStatus(p.expiration_date);
+              const days = getDaysRemaining(p.expiration_date);
               const cfg = statusConfig[status];
+              const total = (p.quantity_thrown || 0) * (p.price_chf || 0);
+              const isExpired = status === 'expired';
 
               return (
-                <TableRow
-                  key={product.id}
-                  className={`hover:bg-secondary/20 transition-colors ${
-                    status === 'expired' ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/30' : ''
-                  }`}
-                >
-                  <TableCell className="font-medium">
-                    {product.name}
-                    {product.quantity && <span className="ml-2 text-xs text-muted-foreground">×{product.quantity}</span>}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {t(categoryKeys[product.category] || product.category)}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {product.rayon ? `Rayon ${product.rayon}` : '—'}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {format(new Date(product.expiration_date), 'dd/MM/yyyy')}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`font-medium text-sm ${days < 0 ? 'text-red-600' : days < 3 ? 'text-orange-600' : 'text-foreground'}`}>
-                      {days}j
+                <tr key={p.id} className={`border-t border-border/30 hover:bg-secondary/20 ${isExpired ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/40' : status === 'soon' ? 'bg-yellow-50/20' : ''}`}>
+                  <td className="px-4 py-3 font-medium text-foreground max-w-[160px] truncate">{p.name}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.marque || '—'}</td>
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                    {p.category ? t(categoryKeys[p.category] || p.category) : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.rayon ? `R${p.rayon}` : '—'}</td>
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                    {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'}
+                  </td>
+                  <td className="px-4 py-3 font-medium" style={{ color: isExpired ? '#dc2626' : days < 3 ? '#ea580c' : days < 14 ? '#ca8a04' : '#16a34a' }}>
+                    {days}j
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                      {t('status_' + status)}
                     </span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary" className={`${cfg.color} border text-xs font-medium`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} mr-1.5 inline-block`} />
-                      {t(`status_${status}`)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {status === 'expired' && product.order_status ? (
-                      <Badge variant="secondary" className={`${orderColors[product.order_status]} border text-xs font-medium`}>
-                        {t(orderStatusKeys[product.order_status])}
-                      </Badge>
-                    ) : '—'}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {product.order_date ? format(new Date(product.order_date), 'dd/MM/yyyy') : '—'}
-                  </TableCell>
-                  <TableCell className="text-right print:hidden">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(product)}>
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                    {isExpired && p.action ? actionLabels[p.action] || p.action : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {isExpired && p.quantity_thrown != null ? p.quantity_thrown : '—'}
+                  </td>
+                  <td className="px-4 py-3 font-medium text-red-700">
+                    {isExpired && total > 0 ? `${total.toFixed(2)}` : '—'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => onEdit(p)} className="h-7 w-7">
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => onDelete(product)}>
+                      <Button variant="ghost" size="icon" onClick={() => onDelete(p)} className="h-7 w-7 text-red-400 hover:text-red-600">
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               );
             })}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
     </div>
   );

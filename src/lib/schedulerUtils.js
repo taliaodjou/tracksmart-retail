@@ -98,14 +98,19 @@ export async function checkAndSendWeeklyReport(user, products) {
 
   const expiredList = expired.map(p => `- ${p.name}`).join('\n') || 'Aucun';
   const soonList = soon.map(p => `- ${p.name}`).join('\n') || 'Aucun';
+  const totalLoss = expired.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
+  const shopName = user.shop_name ? `${user.shop_name}` : 'TrackSmart';
 
-  const reportBody = `Résumé hebdomadaire TrackSmart :
+  const reportBody = `Résumé hebdomadaire – ${shopName}
 
 Produits expirés :
 ${expiredList}
 
 Produits à surveiller :
-${soonList}`;
+${soonList}
+
+Pertes estimées :
+CHF ${totalLoss.toFixed(2)}`;
 
   // Create in-app notification
   await base44.entities.Notification.create({
