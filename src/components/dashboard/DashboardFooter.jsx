@@ -15,12 +15,12 @@ export default function DashboardFooter() {
             <a href="mailto:support@tracksmart.com" className="hover:text-foreground transition-colors">
               support@tracksmart.com
             </a>
-            <span>+41 XX XXX XX XX</span>
+            <span>+41 77 222</span>
             <button className="hover:text-foreground transition-colors">Mentions légales</button>
             <button className="hover:text-foreground transition-colors">Conditions d'utilisation</button>
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
+
 }
