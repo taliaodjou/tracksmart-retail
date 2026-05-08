@@ -3,46 +3,116 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
-import { Upload, X, FileSpreadsheet, AlertCircle, CheckCircle2, Download, ChevronRight, Loader2, TriangleAlert } from 'lucide-react';
+import { getProductStatus } from '@/lib/productUtils';
+import {
+  Upload, X, FileSpreadsheet, AlertCircle, CheckCircle2,
+  Download, ChevronRight, Loader2, TriangleAlert
+} from 'lucide-react';
 
-const REQUIRED_FIELDS = ['name', 'expiration_date'];
-const ALL_FIELDS = [
-  { key: 'name',            labelFr: 'Nom du produit',      labelEn: 'Product name',    required: true },
-  { key: 'expiration_date', labelFr: "Date d'expiration",   labelEn: 'Expiration date', required: true },
-  { key: 'category',        labelFr: 'Catégorie',           labelEn: 'Category',        required: false },
-  { key: 'rayon',           labelFr: 'Rayon (1-15)',        labelEn: 'Section (1-15)',  required: false },
-  { key: 'quantity',        labelFr: 'Quantité',            labelEn: 'Quantity',        required: false },
+// Official TrackSmart column names (exact match) + aliases
+const FIELD_DEFS = [
+  {
+    key: 'name',
+    labelFr: 'Produit',
+    labelEn: 'Product',
+    required: true,
+    aliases: ['produit', 'product', 'nom', 'name', 'article', 'libellé', 'designation'],
+  },
+  {
+    key: 'marque',
+    labelFr: 'Marques',
+    labelEn: 'Brand',
+    required: false,
+    aliases: ['marques', 'marque', 'brand', 'brands', 'fabricant'],
+  },
+  {
+    key: 'category',
+    labelFr: 'Catégories',
+    labelEn: 'Categories',
+    required: false,
+    aliases: ['catégories', 'categories', 'catégorie', 'category', 'categorie', 'type'],
+  },
+  {
+    key: 'reception_date',
+    labelFr: 'Date réception',
+    labelEn: 'Reception date',
+    required: false,
+    aliases: ['date réception', 'date reception', 'reception_date', 'reception date', 'date arrivée', 'arrivée'],
+  },
+  {
+    key: 'expiration_date',
+    labelFr: 'DLC',
+    labelEn: 'Expiry date',
+    required: true,
+    aliases: ['dlc', 'date expiration', 'expiration', 'expiry', 'best before', 'péremption', 'peremption', 'date limite'],
+  },
+  {
+    key: 'rayon',
+    labelFr: 'Rayons',
+    labelEn: 'Section',
+    required: false,
+    aliases: ['rayons', 'rayon', 'section', 'emplacement', 'location'],
+  },
+  {
+    key: 'action',
+    labelFr: 'Action (si expiré)',
+    labelEn: 'Action (if expired)',
+    required: false,
+    aliases: ['action', 'action si expiré', 'action si expire', 'action (si expiré)', 'action (si expire)'],
+  },
+  {
+    key: 'order_date',
+    labelFr: 'Date de commande',
+    labelEn: 'Order date',
+    required: false,
+    aliases: ['date de commande', 'order date', 'order_date', 'commande date', 'date commande'],
+  },
+  {
+    key: 'quantity_thrown',
+    labelFr: 'Quantité jetées',
+    labelEn: 'Thrown quantity',
+    required: false,
+    aliases: ['quantité jetées', 'quantite jetees', 'quantité jettées', 'quantité jetes', 'quantite jettes',
+              'quantité jetée', 'qty thrown', 'thrown', 'quantite'],
+  },
+  {
+    key: 'price_chf',
+    labelFr: 'Prix CHF',
+    labelEn: 'Price CHF',
+    required: false,
+    aliases: ['prix chf', 'prix', 'price', 'chf', 'price chf', 'cout', 'coût'],
+  },
 ];
 
-const AUTO_DETECT = {
-  name:            ['nom', 'produit', 'product', 'name', 'article', 'libellé', 'designation'],
-  expiration_date: ['dlc', 'date', 'expir', 'peremption', 'péremption', 'bbf', 'best before'],
-  category:        ['categ', 'category', 'categorie', 'catégorie', 'type'],
-  rayon:           ['rayon', 'section', 'emplacement', 'location'],
-  quantity:        ['qte', 'qty', 'quantite', 'quantité', 'quantity', 'stock', 'nb'],
-};
-
 const CATEGORY_MAP = {
-  snacks: 'snacks', snack: 'snacks',
-  boissons: 'boissons', boisson: 'boissons', beverages: 'boissons', drinks: 'boissons',
-  'congeles poisson': 'congeles_poisson', 'congelés poisson': 'congeles_poisson',
-  'congeles poulet': 'congeles_poulet', 'congelés poulet': 'congeles_poulet',
+  snacks: 'snacks',
+  boissons: 'boissons', beverages: 'boissons', drinks: 'boissons', boisson: 'boissons',
+  'congeles poisson': 'congeles_poisson', 'congelés poisson': 'congeles_poisson', 'congelé poisson': 'congeles_poisson',
+  'congeles poulet': 'congeles_poulet', 'congelés poulet': 'congeles_poulet', 'congelé poulet': 'congeles_poulet',
   'produits frais': 'produits_frais', frais: 'produits_frais', fresh: 'produits_frais',
   'epicerie seche': 'epicerie_seche', 'épicerie sèche': 'epicerie_seche', epicerie: 'epicerie_seche',
   confiseries: 'confiseries', sucreries: 'confiseries', confectionery: 'confiseries',
   conserves: 'conserves', canned: 'conserves',
-  'hygiene beaute': 'hygiene_beaute', hygiene: 'hygiene_beaute',
+  'hygiene beaute': 'hygiene_beaute', hygiene: 'hygiene_beaute', 'hygiène beauté': 'hygiene_beaute',
   'entretien maison': 'entretien_maison', entretien: 'entretien_maison',
-  bebe: 'bebe', baby: 'bebe',
+  bebe: 'bebe', bébé: 'bebe', baby: 'bebe',
   animaux: 'animaux', pets: 'animaux',
   alcool: 'alcool', alcohol: 'alcool',
   tabac: 'tabac', tobacco: 'tabac',
 };
 
+const ACTION_MAP = {
+  jeter: 'jeter', 'à jeter': 'jeter',
+  'à recommander': 'a_recommander', 'a recommander': 'a_recommander', recommander: 'a_recommander',
+  commandé: 'commande', commande: 'commande', ordered: 'commande',
+  'en transition': 'en_transition', transition: 'en_transition',
+  reçu: 'recu', recu: 'recu', received: 'recu',
+};
+
 function detectField(header) {
-  const h = header.toLowerCase().trim();
-  for (const [field, aliases] of Object.entries(AUTO_DETECT)) {
-    if (aliases.some(a => h.includes(a) || a.includes(h))) return field;
+  const h = header.toLowerCase().trim().replace(/[_\-]/g, ' ');
+  for (const def of FIELD_DEFS) {
+    if (def.aliases.some(a => h === a || h.includes(a) || a.includes(h))) return def.key;
   }
   return '';
 }
@@ -52,7 +122,8 @@ function parseDate(raw) {
   const str = String(raw).trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
   const dmy = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
-  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`;
+  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
+  // Excel serial date
   if (/^\d{5}$/.test(str)) {
     const d = new Date((parseInt(str) - 25569) * 86400 * 1000);
     if (!isNaN(d)) return d.toISOString().split('T')[0];
@@ -64,22 +135,33 @@ function parseDate(raw) {
 
 function normalizeCategory(raw) {
   if (!raw) return '';
-  return CATEGORY_MAP[raw.toLowerCase().trim()] || '';
+  const k = raw.toLowerCase().trim().replace(/\s+/g, ' ');
+  return CATEGORY_MAP[k] || k;
 }
 
 function normalizeRayon(raw) {
   if (!raw) return '';
-  const n = parseInt(raw.replace(/\D/g, ''));
+  const n = parseInt(String(raw).replace(/\D/g, ''));
   if (n >= 1 && n <= 15) return String(n);
   return '';
 }
 
+function normalizeAction(raw) {
+  if (!raw) return '';
+  const k = raw.toLowerCase().trim();
+  return ACTION_MAP[k] || k;
+}
+
 function downloadTemplate() {
-  const headers = ['Nom du produit', 'Catégorie', 'Rayon', "Date d'expiration", 'Quantité'];
+  const headers = [
+    'Produit', 'Marques', 'Catégories', 'Date réception', 'DLC',
+    'Rayons', 'Action (si expiré)', 'Date de commande',
+    'Quantité jetées', 'Prix CHF', 'Total CHF',
+  ];
   const examples = [
-    ['Lait entier', 'produits_frais', '3', '2026-05-10', '12'],
-    ['Coca-Cola 1.5L', 'boissons', '1', '2026-12-31', '24'],
-    ['Chips barbecue', 'snacks', '2', '2026-08-15', '36'],
+    ['Lait entier', 'Migros', 'Produits frais', '01/04/2026', '10/05/2026', '3', '', '', '', '2.50', ''],
+    ['Coca-Cola 1.5L', 'Coca-Cola', 'Boissons', '15/03/2026', '31/12/2026', '1', '', '', '', '1.80', ''],
+    ['Chips barbecue', 'Lay\'s', 'Snacks', '20/04/2026', '15/08/2026', '2', 'Jeter', '05/05/2026', '3', '3.20', '9.60'],
   ];
   const csv = [headers, ...examples].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -112,6 +194,7 @@ export default function ImportModal({ onClose, onImported }) {
 
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
+    // Use a permissive schema — let the API extract all rows as key-value pairs
     const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
       file_url,
       json_schema: {
@@ -119,19 +202,7 @@ export default function ImportModal({ onClose, onImported }) {
         properties: {
           rows: {
             type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                name: { type: 'string' },
-                expiration_date: { type: 'string' },
-                category: { type: 'string' },
-                rayon: { type: 'string' },
-                quantity: { type: 'string' },
-                marque: { type: 'string' },
-                reception_date: { type: 'string' },
-                price_chf: { type: 'string' },
-              }
-            }
+            items: { type: 'object', additionalProperties: { type: 'string' } }
           }
         }
       },
@@ -144,8 +215,6 @@ export default function ImportModal({ onClose, onImported }) {
       return;
     }
 
-    // ExtractDataFromUploadedFile returns rows as array of objects with column names as keys
-    // We need to detect headers from the first row's keys
     const outputRows = Array.isArray(result.output) ? result.output : (result.output.rows || []);
 
     if (!outputRows.length) {
@@ -153,16 +222,17 @@ export default function ImportModal({ onClose, onImported }) {
       return;
     }
 
-    // Get all unique column names from the data
+    // Derive headers from all keys present in the rows
     const headers = [...new Set(outputRows.flatMap(r => Object.keys(r)))];
 
+    // Auto-detect field mappings by column name
     const autoMapping = {};
     headers.forEach((h, idx) => {
       const field = detectField(h);
       if (field && !(field in autoMapping)) autoMapping[field] = idx;
     });
 
-    // Convert rows to array-indexed format
+    // Store rows as arrays for consistent access
     const rows = outputRows.map(r => headers.map(h => r[h] ?? ''));
 
     setRawData({ headers, rows });
@@ -180,27 +250,30 @@ export default function ImportModal({ onClose, onImported }) {
       const entry = {};
       const rowErrors = [];
 
-      ALL_FIELDS.forEach(({ key, required }) => {
+      FIELD_DEFS.forEach(({ key, required }) => {
         const colIdx = mapping[key];
-        const raw = colIdx !== undefined ? rowValues[colIdx] : '';
+        const raw = colIdx !== undefined ? String(rowValues[colIdx] ?? '').trim() : '';
 
-        if (key === 'expiration_date') {
+        if (key === 'expiration_date' || key === 'reception_date' || key === 'order_date') {
           const parsed = parseDate(raw);
-          if (!parsed) {
-            if (required) rowErrors.push({ row: ri + 1, msg: lang === 'fr' ? 'Date invalide' : 'Invalid date' });
-          }
+          if (!parsed && required) rowErrors.push({ row: ri + 1, msg: lang === 'fr' ? 'DLC invalide' : 'Invalid expiry date' });
           entry[key] = parsed || '';
         } else if (key === 'category') {
           entry[key] = normalizeCategory(raw);
         } else if (key === 'rayon') {
           entry[key] = normalizeRayon(raw);
-        } else if (key === 'quantity') {
-          entry[key] = raw ? Number(raw) || '' : '';
+        } else if (key === 'action') {
+          entry[key] = normalizeAction(raw);
+        } else if (key === 'quantity_thrown' || key === 'price_chf') {
+          entry[key] = raw ? parseFloat(raw.replace(',', '.')) || '' : '';
         } else {
-          if (!raw && required) rowErrors.push({ row: ri + 1, msg: lang === 'fr' ? 'Nom manquant' : 'Name missing' });
+          if (!raw && required) rowErrors.push({ row: ri + 1, msg: lang === 'fr' ? 'Nom du produit manquant' : 'Product name missing' });
           entry[key] = raw;
         }
       });
+
+      // Skip empty rows
+      if (!entry.name && !entry.expiration_date) return;
 
       if (rowErrors.length) errs.push(...rowErrors);
       else validated.push(entry);
@@ -220,7 +293,8 @@ export default function ImportModal({ onClose, onImported }) {
     onImported();
   };
 
-  const fieldLabel = f => lang === 'fr' ? f.labelFr : f.labelEn;
+  const fieldLabel = (f) => lang === 'fr' ? f.labelFr : f.labelEn;
+  const displayFields = FIELD_DEFS.filter(f => ['name', 'marque', 'category', 'expiration_date', 'rayon', 'quantity_thrown', 'price_chf'].includes(f.key));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
@@ -242,10 +316,19 @@ export default function ImportModal({ onClose, onImported }) {
           {/* UPLOAD */}
           {step === 'upload' && (
             <div className="space-y-5">
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm text-foreground space-y-1">
+                <p className="font-semibold text-primary">
+                  {lang === 'fr' ? 'Colonnes reconnues automatiquement :' : 'Auto-recognized columns:'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Produit · Marques · Catégories · Date réception · DLC · Rayons · Action · Date de commande · Quantité jetées · Prix CHF
+                </p>
+              </div>
+
               <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-4">
                 <div>
-                  <p className="text-sm font-medium text-foreground">{lang === 'fr' ? 'Télécharger le modèle CSV' : 'Download CSV template'}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === 'fr' ? 'Colonnes préremplies' : 'Pre-filled columns'}</p>
+                  <p className="text-sm font-medium text-foreground">{lang === 'fr' ? 'Télécharger le modèle CSV TrackSmart' : 'Download TrackSmart CSV template'}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{lang === 'fr' ? 'Structure officielle TrackSmart' : 'Official TrackSmart structure'}</p>
                 </div>
                 <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={downloadTemplate}>
                   <Download className="w-4 h-4" />
@@ -255,7 +338,7 @@ export default function ImportModal({ onClose, onImported }) {
 
               <div
                 className="border-2 border-dashed border-border rounded-2xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                onClick={() => fileRef.current.click()}
+                onClick={() => !uploading && fileRef.current.click()}
               >
                 {uploading
                   ? <Loader2 className="w-10 h-10 text-primary mx-auto mb-3 animate-spin" />
@@ -263,11 +346,11 @@ export default function ImportModal({ onClose, onImported }) {
                 }
                 <p className="font-medium text-foreground mb-1">
                   {uploading
-                    ? (lang === 'fr' ? 'Lecture du fichier…' : 'Reading file…')
+                    ? (lang === 'fr' ? 'Analyse du fichier en cours…' : 'Analyzing file…')
                     : (lang === 'fr' ? 'Cliquez pour choisir un fichier' : 'Click to choose a file')
                   }
                 </p>
-                <p className="text-xs text-muted-foreground">.xlsx, .csv acceptés</p>
+                <p className="text-xs text-muted-foreground">.xlsx, .xls, .csv acceptés</p>
                 <input ref={fileRef} type="file" accept=".xlsx,.csv,.xls" className="hidden" onChange={handleFile} disabled={uploading} />
               </div>
 
@@ -284,14 +367,15 @@ export default function ImportModal({ onClose, onImported }) {
             <div className="space-y-5">
               <p className="text-sm text-muted-foreground">
                 {lang === 'fr'
-                  ? `${rawData.rows.length} ligne(s) détectée(s). Associez les colonnes.`
-                  : `${rawData.rows.length} row(s) detected. Map the columns.`}
+                  ? `${rawData.rows.length} ligne(s) détectée(s). Vérifiez et ajustez le mapping des colonnes.`
+                  : `${rawData.rows.length} row(s) detected. Review and adjust column mapping.`}
               </p>
-              <div className="space-y-3">
-                {ALL_FIELDS.map(field => (
+              <div className="space-y-2.5">
+                {FIELD_DEFS.map(field => (
                   <div key={field.key} className="flex items-center gap-3">
                     <div className="w-44 flex-shrink-0 text-sm font-medium text-foreground">
-                      {fieldLabel(field)}{field.required && <span className="text-red-500 ml-1">*</span>}
+                      {fieldLabel(field)}
+                      {field.required && <span className="text-red-500 ml-1">*</span>}
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <Select
@@ -318,15 +402,19 @@ export default function ImportModal({ onClose, onImported }) {
 
               {/* Mini preview */}
               <div className="bg-secondary/40 rounded-xl p-3 overflow-x-auto">
-                <p className="text-xs font-medium text-muted-foreground mb-2">{lang === 'fr' ? 'Aperçu (2 premières lignes)' : 'Preview (first 2 rows)'}</p>
-                <table className="text-xs w-full">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  {lang === 'fr' ? 'Aperçu (2 premières lignes)' : 'Preview (first 2 rows)'}
+                </p>
+                <table className="text-xs w-full min-w-max">
                   <thead>
-                    <tr>{rawData.headers.map((h, i) => <th key={i} className="text-left px-2 py-1 text-muted-foreground font-medium">{h}</th>)}</tr>
+                    <tr>{rawData.headers.map((h, i) => <th key={i} className="text-left px-2 py-1 text-muted-foreground font-medium whitespace-nowrap">{h}</th>)}</tr>
                   </thead>
                   <tbody>
                     {rawData.rows.slice(0, 2).map((row, ri) => (
                       <tr key={ri} className="border-t border-border/30">
-                        {rawData.headers.map((h, ci) => <td key={ci} className="px-2 py-1">{(Array.isArray(row) ? row[ci] : row[h]) || '—'}</td>)}
+                        {rawData.headers.map((h, ci) => (
+                          <td key={ci} className="px-2 py-1 whitespace-nowrap">{(Array.isArray(row) ? row[ci] : row[h]) || '—'}</td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>
@@ -337,7 +425,7 @@ export default function ImportModal({ onClose, onImported }) {
                 <Button variant="outline" className="rounded-full" onClick={() => setStep('upload')}>{t('back')}</Button>
                 <Button
                   className="rounded-full gap-2"
-                  disabled={!REQUIRED_FIELDS.every(f => mapping[f] !== undefined)}
+                  disabled={!['name', 'expiration_date'].every(f => mapping[f] !== undefined)}
                   onClick={handleConfirmMapping}
                 >
                   {lang === 'fr' ? 'Valider' : 'Validate'} <ChevronRight className="w-4 h-4" />
@@ -356,7 +444,9 @@ export default function ImportModal({ onClose, onImported }) {
                     {lang === 'fr' ? `${errors.length} ligne(s) ignorée(s)` : `${errors.length} row(s) skipped`}
                   </div>
                   {errors.slice(0, 5).map((e, i) => (
-                    <p key={i} className="text-xs text-red-600">{lang === 'fr' ? `Ligne ${e.row} — ${e.msg}` : `Row ${e.row} — ${e.msg}`}</p>
+                    <p key={i} className="text-xs text-red-600">
+                      {lang === 'fr' ? `Ligne ${e.row} — ${e.msg}` : `Row ${e.row} — ${e.msg}`}
+                    </p>
                   ))}
                 </div>
               )}
@@ -369,19 +459,25 @@ export default function ImportModal({ onClose, onImported }) {
               </div>
 
               <div className="overflow-x-auto border border-border/40 rounded-xl">
-                <table className="text-xs w-full">
+                <table className="text-xs w-full min-w-max">
                   <thead className="bg-secondary/50">
-                    <tr>{ALL_FIELDS.map(f => <th key={f.key} className="text-left px-3 py-2 font-semibold">{fieldLabel(f)}</th>)}</tr>
+                    <tr>
+                      {displayFields.map(f => (
+                        <th key={f.key} className="text-left px-3 py-2 font-semibold whitespace-nowrap">{fieldLabel(f)}</th>
+                      ))}
+                    </tr>
                   </thead>
                   <tbody>
                     {preview.slice(0, 8).map((row, i) => (
                       <tr key={i} className="border-t border-border/30">
-                        {ALL_FIELDS.map(f => <td key={f.key} className="px-3 py-2">{row[f.key] || '—'}</td>)}
+                        {displayFields.map(f => (
+                          <td key={f.key} className="px-3 py-2 whitespace-nowrap">{row[f.key] || '—'}</td>
+                        ))}
                       </tr>
                     ))}
                     {preview.length > 8 && (
                       <tr className="border-t border-border/30">
-                        <td colSpan={ALL_FIELDS.length} className="px-3 py-2 text-center text-muted-foreground">
+                        <td colSpan={displayFields.length} className="px-3 py-2 text-center text-muted-foreground">
                           +{preview.length - 8} {lang === 'fr' ? 'lignes' : 'rows'}
                         </td>
                       </tr>

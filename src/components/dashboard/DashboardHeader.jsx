@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { Button } from '@/components/ui/button';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, BarChart2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function DashboardHeader() {
@@ -52,6 +52,7 @@ export default function DashboardHeader() {
           {/* Nav */}
           <nav className="flex items-center gap-1">
             {navLink('/dashboard', t('nav_dashboard'), null)}
+            {navLink('/analytics', t('nav_analytics'), <BarChart2 className="w-3.5 h-3.5" />)}
             {navLink('/profile', t('nav_profile'), <User className="w-3.5 h-3.5" />)}
           </nav>
 

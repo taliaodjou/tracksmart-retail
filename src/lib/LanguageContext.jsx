@@ -4,6 +4,7 @@ const translations = {
   fr: {
     // Nav
     nav_dashboard: 'Tableau de bord',
+    nav_analytics: 'Analytiques',
     nav_admin: 'Administration',
     nav_profile: 'Profil',
     nav_logout: 'Déconnexion',
@@ -126,6 +127,7 @@ const translations = {
   },
   en: {
     nav_dashboard: 'Dashboard',
+    nav_analytics: 'Analytics',
     nav_admin: 'Admin',
     nav_profile: 'Profile',
     nav_logout: 'Logout',

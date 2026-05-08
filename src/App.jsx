@@ -9,6 +9,8 @@ import { LanguageProvider } from '@/lib/LanguageContext';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import Admin from '@/pages/Admin';
+import Welcome from '@/pages/Welcome';
+import Analytics from '@/pages/Analytics';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -37,9 +39,11 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      <Route path="/" element={<Welcome />} />
+      <Route path="/welcome" element={<Welcome />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/analytics" element={<Analytics />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

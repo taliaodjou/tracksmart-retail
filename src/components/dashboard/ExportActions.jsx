@@ -55,35 +55,38 @@ th { background: #f5f5f5; font-weight: bold; }
     w.print();
   };
 
-  const handleExportCSV = () => {
+  const buildRows = () => {
     const headers = [
-      'Produit', 'Marque', 'Catégorie', 'Rayon', 'Date réception', 'DLC',
-      'Jours restants', 'Statut', 'Action', 'Date commande',
-      'Quantité jetée', 'Prix CHF', 'Total CHF',
+      'Produit', 'Marques', 'Catégories', 'Date réception', 'DLC', 'Rayons',
+      'Jours restants', 'Statut', 'Action (si expiré)', 'Date de commande',
+      'Quantité jetées', 'Prix CHF', 'Total CHF',
     ];
-
+    const actionLabels = { jeter: 'Jeter', a_recommander: 'À recommander', commande: 'Commandé', en_transition: 'En transition', recu: 'Reçu' };
     const rows = products.map(p => {
       const status = getProductStatus(p.expiration_date);
       const days = getDaysRemaining(p.expiration_date);
       const total = (p.quantity_thrown || 0) * (p.price_chf || 0);
-      const actionLabels = { jeter: 'Jeter', a_recommander: 'À recommander', commande: 'Commandé', en_transition: 'En transition', recu: 'Reçu' };
       return [
-        p.name,
+        p.name || '',
         p.marque || '',
         p.category ? t(categoryKeys[p.category] || p.category) : '',
-        p.rayon ? `Rayon ${p.rayon}` : '',
-        p.reception_date || '',
+        p.reception_date ? format(new Date(p.reception_date), 'dd/MM/yyyy') : '',
         p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '',
+        p.rayon ? `Rayon ${p.rayon}` : '',
         days,
         t(`status_${status}`),
         p.action ? (actionLabels[p.action] || p.action) : '',
-        p.order_date || '',
+        p.order_date ? format(new Date(p.order_date), 'dd/MM/yyyy') : '',
         p.quantity_thrown ?? '',
         p.price_chf ?? '',
         total > 0 ? total.toFixed(2) : '',
       ];
     });
+    return { headers, rows };
+  };
 
+  const handleExportCSV = () => {
+    const { headers, rows } = buildRows();
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
     const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
