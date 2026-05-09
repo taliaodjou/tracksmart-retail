@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X } from 'lucide-react';
+import { X, ScanLine, Loader2 } from 'lucide-react';
 import { categoryKeys, rayonKeys, getProductStatus } from '@/lib/productUtils';
+import BarcodeScanner from './BarcodeScanner';
 
 const actionOptions = [
   { value: 'jeter', label: 'Jeter' },
@@ -22,8 +23,10 @@ const empty = {
 };
 
 export default function ProductForm({ onSave, onCancel, editProduct }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [form, setForm] = useState(empty);
+  const [showScanner, setShowScanner] = useState(false);
+  const [lookingUp, setLookingUp] = useState(false);
 
   useEffect(() => {
     if (editProduct) {
@@ -71,11 +74,56 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target?.value ?? e });
 
+  const handleBarcodeScan = async (barcode) => {
+    setShowScanner(false);
+    setLookingUp(true);
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await res.json();
+      if (data.status === 1 && data.product) {
+        const p = data.product;
+        setForm(prev => ({
+          ...prev,
+          name: prev.name || p.product_name_fr || p.product_name || p.generic_name || '',
+          marque: prev.marque || p.brands || '',
+        }));
+      }
+    } catch (_) {}
+    setLookingUp(false);
+  };
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40">
+      {showScanner && (
+        <BarcodeScanner
+          lang={lang}
+          onDetected={handleBarcodeScan}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-5">
         <h3 className="font-semibold text-foreground">{editProduct ? t('edit') : t('dash_add_product')}</h3>
-        <Button variant="ghost" size="icon" onClick={onCancel}><X className="w-4 h-4" /></Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-full gap-1.5 text-xs border-primary/40 text-primary hover:bg-primary/5"
+            onClick={() => setShowScanner(true)}
+            disabled={lookingUp}
+          >
+            {lookingUp
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              : <ScanLine className="w-3.5 h-3.5" />
+            }
+            {lookingUp
+              ? (lang === 'fr' ? 'Recherche…' : 'Looking up…')
+              : (lang === 'fr' ? 'Scanner' : 'Scan')
+            }
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onCancel}><X className="w-4 h-4" /></Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
