@@ -32,11 +32,14 @@ export default function NotificationBell() {
   };
 
   const typeLabel = {
-    reminder_14d: lang === 'fr' ? 'Rappel 14j' : 'Reminder 14d',
-    reminder_7d:  lang === 'fr' ? 'Rappel 7j' : 'Reminder 7d',
-    reminder_3d:  lang === 'fr' ? 'Rappel 3j' : 'Reminder 3d',
-    subscription_blocked: lang === 'fr' ? 'Accès bloqué' : 'Access blocked',
-    weekly_report: lang === 'fr' ? 'Rapport hebdo' : 'Weekly report',
+    reminder_14d: lang === 'fr' ? '🔔 Abonnement 14j' : '🔔 Subscription 14d',
+    reminder_7d:  lang === 'fr' ? '⚠️ Abonnement 7j'  : '⚠️ Subscription 7d',
+    reminder_3d:  lang === 'fr' ? '🚨 Abonnement 3j'  : '🚨 Subscription 3d',
+    expiry_14d:   lang === 'fr' ? '🔔 Expiration 14j'  : '🔔 Expiry 14d',
+    expiry_7d:    lang === 'fr' ? '⚠️ Expiration 7j'   : '⚠️ Expiry 7d',
+    expiry_3d:    lang === 'fr' ? '🚨 Expiration 3j'   : '🚨 Expiry 3d',
+    subscription_blocked: lang === 'fr' ? '🚫 Accès bloqué' : '🚫 Access blocked',
+    weekly_report: lang === 'fr' ? '📊 Rapport hebdo' : '📊 Weekly report',
   };
 
   return (
@@ -83,6 +86,9 @@ export default function NotificationBell() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full mb-1 inline-block ${
+                          n.type.startsWith('expiry_3d') ? 'bg-red-100 text-red-700' :
+                          n.type.startsWith('expiry_7d') ? 'bg-orange-100 text-orange-700' :
+                          n.type.startsWith('expiry_14d') ? 'bg-yellow-100 text-yellow-700' :
                           n.type.includes('reminder') ? 'bg-orange-100 text-orange-700' :
                           n.type === 'weekly_report' ? 'bg-blue-100 text-blue-700' :
                           'bg-red-100 text-red-700'

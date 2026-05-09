@@ -10,6 +10,22 @@
       ],
       "default": "user"
     },
+    "shop_name": {
+      "type": "string",
+      "description": "Nom de la boutique"
+    },
+    "phone_number": {
+      "type": "string",
+      "description": "Num\u00e9ro de t\u00e9l\u00e9phone"
+    },
+    "report_channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms"
+      ],
+      "default": "email"
+    },
     "subscription_status": {
       "type": "string",
       "enum": [
@@ -23,38 +39,16 @@
       "format": "date"
     },
     "last_reminder_sent": {
-      "type": "string"
+      "type": "string",
+      "description": "Tag of last subscription reminder sent"
+    },
+    "last_expiry_reminders_sent": {
+      "type": "string",
+      "description": "JSON: {date, sent} tracking product expiry reminders sent today"
     },
     "last_weekly_report": {
-      "type": "string"
-    },
-    "phone_number": {
-      "type": "string"
-    },
-    "report_channel": {
       "type": "string",
-      "enum": [
-        "email",
-        "sms"
-      ],
-      "default": "email"
-    },
-    "shop_name": {
-      "type": "string",
-      "description": "Nom de la boutique"
-    },
-    "shop_size": {
-      "type": "string",
-      "enum": [
-        "petite",
-        "moyenne",
-        "grande"
-      ],
-      "description": "Taille de la boutique"
-    },
-    "product_count_approx": {
-      "type": "number",
-      "description": "Nombre approximatif de produits"
+      "description": "Date of last weekly report sent"
     },
     "onboarding_complete": {
       "type": "boolean",

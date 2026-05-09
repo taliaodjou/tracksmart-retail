@@ -26,51 +26,110 @@ export function getNextRenewalDate(subscriptionStartDate) {
 }
 
 export async function checkAndSendReminders(user, products) {
-  if (!user || !user.subscription_start_date) return;
+  if (!user || !user.email) return;
   if (user.role === 'admin' || user.email === 'admin@tracksmart.com') return;
   if (user.subscription_status !== 'active') return;
 
-  const daysLeft = getDaysUntilRenewal(user.subscription_start_date);
-  if (daysLeft === null) return;
-
   const today = format(new Date(), 'yyyy-MM-dd');
-  const lastReminder = user.last_reminder_sent || '';
+  const thisMonth = today.slice(0, 7); // yyyy-MM
 
-  let reminderType = null;
-  let message = null;
+  // ── 1. Subscription expiry reminders ────────────────────────────────────
+  if (user.subscription_start_date) {
+    const daysLeft = getDaysUntilRenewal(user.subscription_start_date);
+    const lastReminder = user.last_reminder_sent || '';
 
-  if (daysLeft <= 3 && !lastReminder.includes(`3d-${today.slice(0, 7)}`)) {
-    reminderType = 'reminder_3d';
-    message = 'Attention : votre abonnement expire dans 3 jours. Sans renouvellement, l\'accès sera bloqué.';
-  } else if (daysLeft <= 7 && daysLeft > 3 && !lastReminder.includes(`7d-${today.slice(0, 7)}`)) {
-    reminderType = 'reminder_7d';
-    message = 'Rappel : votre abonnement expire dans 7 jours.';
-  } else if (daysLeft <= 14 && daysLeft > 7 && !lastReminder.includes(`14d-${today.slice(0, 7)}`)) {
-    reminderType = 'reminder_14d';
-    message = 'Votre abonnement arrive bientôt à échéance. Merci d\'anticiper le renouvellement.';
+    let subType = null;
+    let subMessage = null;
+
+    if (daysLeft <= 3 && !lastReminder.includes(`sub_3d-${thisMonth}`)) {
+      subType = 'reminder_3d';
+      subMessage = `⚠️ Votre abonnement TrackSmart expire dans ${daysLeft} jour(s). Sans renouvellement, votre accès sera bloqué.`;
+    } else if (daysLeft <= 7 && daysLeft > 3 && !lastReminder.includes(`sub_7d-${thisMonth}`)) {
+      subType = 'reminder_7d';
+      subMessage = `Rappel : votre abonnement TrackSmart expire dans ${daysLeft} jours. Merci d'anticiper le renouvellement.`;
+    } else if (daysLeft <= 14 && daysLeft > 7 && !lastReminder.includes(`sub_14d-${thisMonth}`)) {
+      subType = 'reminder_14d';
+      subMessage = `Votre abonnement TrackSmart arrive bientôt à échéance (${daysLeft} jours). Merci de prévoir le renouvellement.`;
+    }
+
+    if (subType && subMessage) {
+      await base44.entities.Notification.create({
+        user_email: user.email,
+        type: subType,
+        message: subMessage,
+        read: false,
+        sent_at: new Date().toISOString(),
+      });
+      await base44.integrations.Core.SendEmail({
+        to: user.email,
+        subject: 'TrackSmart — Rappel abonnement',
+        body: subMessage,
+      });
+      const tag = subType === 'reminder_3d' ? 'sub_3d' : subType === 'reminder_7d' ? 'sub_7d' : 'sub_14d';
+      await base44.auth.updateMe({ last_reminder_sent: `${tag}-${thisMonth}` });
+    }
   }
 
-  if (reminderType && message) {
-    // Create in-app notification
+  // ── 2. Product expiry reminders ─────────────────────────────────────────
+  if (!products || products.length === 0) return;
+
+  const { getDaysRemaining } = await import('@/lib/productUtils');
+
+  // Track which reminder windows we already notified today (stored as JSON string)
+  let sentToday = {};
+  try {
+    const stored = user.last_expiry_reminders_sent || '';
+    const parsed = JSON.parse(stored);
+    // Only use if it's from today
+    if (parsed.date === today) sentToday = parsed.sent || {};
+  } catch (_) {}
+
+  const thresholds = [
+    { days: 3,  type: 'expiry_3d',  label: '3 jours' },
+    { days: 7,  type: 'expiry_7d',  label: '7 jours' },
+    { days: 14, type: 'expiry_14d', label: '14 jours' },
+  ];
+
+  for (const threshold of thresholds) {
+    if (sentToday[threshold.type]) continue; // already sent today
+
+    const expiring = products.filter(p => {
+      if (!p.expiration_date) return false;
+      const d = getDaysRemaining(p.expiration_date);
+      return d >= 0 && d <= threshold.days;
+    });
+
+    if (expiring.length === 0) continue;
+
+    const productList = expiring
+      .slice(0, 10)
+      .map(p => `• ${p.name}${p.rayon ? ` (Rayon ${p.rayon})` : ''} — expire le ${format(new Date(p.expiration_date), 'dd/MM/yyyy')}`)
+      .join('\n');
+    const extra = expiring.length > 10 ? `\n…et ${expiring.length - 10} autre(s) produit(s)` : '';
+
+    const message = `🔔 ${expiring.length} produit(s) expirent dans moins de ${threshold.label} :\n${productList}${extra}`;
+
     await base44.entities.Notification.create({
       user_email: user.email,
-      type: reminderType,
+      type: threshold.type,
       message,
       read: false,
       sent_at: new Date().toISOString(),
     });
 
-    // Send email
     await base44.integrations.Core.SendEmail({
       to: user.email,
-      subject: 'TrackSmart — Rappel abonnement',
+      subject: `TrackSmart — Produits expirant dans ${threshold.label}`,
       body: message,
     });
 
-    // Update last_reminder_sent
-    const tag = reminderType === 'reminder_3d' ? '3d' : reminderType === 'reminder_7d' ? '7d' : '14d';
+    sentToday[threshold.type] = true;
+  }
+
+  // Persist which reminders were sent today
+  if (Object.keys(sentToday).length > 0) {
     await base44.auth.updateMe({
-      last_reminder_sent: `${tag}-${today.slice(0, 7)}`,
+      last_expiry_reminders_sent: JSON.stringify({ date: today, sent: sentToday }),
     });
   }
 }
