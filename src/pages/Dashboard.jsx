@@ -172,7 +172,12 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <ProductTable products={filteredProducts} onEdit={handleEdit} onDelete={handleDelete} />
+            <ProductTable
+              products={filteredProducts}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onInlineSave={(id, data) => updateMutation.mutate({ id, data })}
+            />
           </div>
         )}
       </main>

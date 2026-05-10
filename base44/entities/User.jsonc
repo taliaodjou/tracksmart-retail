@@ -54,5 +54,13 @@
       "type": "boolean",
       "default": false
     }
-  }
+  },
+  "required": [
+    "shop_name",
+    "phone_number",
+    "subscription_start_date",
+    "last_reminder_sent",
+    "last_expiry_reminders_sent",
+    "last_weekly_report"
+  ]
 }
