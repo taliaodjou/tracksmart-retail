@@ -13,6 +13,13 @@ import Welcome from '@/pages/Welcome';
 import Analytics from '@/pages/Analytics';
 import Orders from '@/pages/Orders';
 import BarcodeDatabase from '@/pages/BarcodeDatabase';
+import AdminDashboard from '@/pages/admin/AdminDashboard';
+import AdminClients from '@/pages/admin/AdminClients';
+import AdminClientDetail from '@/pages/admin/AdminClientDetail';
+import AdminSubscriptions from '@/pages/admin/AdminSubscriptions';
+import AdminAnalytics from '@/pages/admin/AdminAnalytics';
+import AdminSupport from '@/pages/admin/AdminSupport';
+import AdminSettings from '@/pages/admin/AdminSettings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -49,6 +56,13 @@ const AuthenticatedApp = () => {
       <Route path="/orders" element={<Orders />} />
       <Route path="/barcode-db" element={<BarcodeDatabase />} />
       <Route path="/admin" element={<Admin />} />
+      <Route path="/admin-portal" element={<AdminDashboard />} />
+      <Route path="/admin-portal/clients" element={<AdminClients />} />
+      <Route path="/admin-portal/clients/:id" element={<AdminClientDetail />} />
+      <Route path="/admin-portal/subscriptions" element={<AdminSubscriptions />} />
+      <Route path="/admin-portal/analytics" element={<AdminAnalytics />} />
+      <Route path="/admin-portal/support" element={<AdminSupport />} />
+      <Route path="/admin-portal/settings" element={<AdminSettings />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
