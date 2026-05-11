@@ -12,6 +12,7 @@ import Admin from '@/pages/Admin';
 import Welcome from '@/pages/Welcome';
 import Analytics from '@/pages/Analytics';
 import Orders from '@/pages/Orders';
+import BarcodeDatabase from '@/pages/BarcodeDatabase';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -46,6 +47,7 @@ const AuthenticatedApp = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/orders" element={<Orders />} />
+      <Route path="/barcode-db" element={<BarcodeDatabase />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

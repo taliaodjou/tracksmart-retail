@@ -16,15 +16,15 @@ export default function StatsCards({ products }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-2 sm:gap-4">
       {cards.map((card, i) => (
-        <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-border/40">
-          <div className="flex items-center justify-between">
+        <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm border border-border/40">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <p className="text-sm text-muted-foreground">{card.label}</p>
-              <p className="text-3xl font-bold text-foreground mt-1">{card.value}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-tight">{card.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground mt-0.5 sm:mt-1">{card.value}</p>
             </div>
-            <div className={`w-12 h-12 rounded-xl ${card.bg} flex items-center justify-center`}>
+            <div className={`hidden sm:flex w-12 h-12 rounded-xl ${card.bg} items-center justify-center`}>
               <card.icon className={`w-6 h-6 ${card.iconColor}`} />
             </div>
           </div>

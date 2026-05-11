@@ -1,0 +1,50 @@
+{
+  "name": "BarcodeProduct",
+  "type": "object",
+  "properties": {
+    "barcode": {
+      "type": "string",
+      "description": "EAN/UPC barcode number"
+    },
+    "name": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "brand": {
+      "type": "string",
+      "description": "Brand / manufacturer"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "snacks",
+        "boissons",
+        "congeles_poisson",
+        "congeles_poulet",
+        "produits_frais",
+        "epicerie_seche",
+        "confiseries",
+        "conserves",
+        "hygiene_beaute",
+        "entretien_maison",
+        "bebe",
+        "animaux",
+        "alcool",
+        "tabac"
+      ],
+      "description": "Product category"
+    },
+    "default_rayon": {
+      "type": "string",
+      "description": "Default shelf/rayon (1-15)"
+    },
+    "default_price_chf": {
+      "type": "number",
+      "description": "Default unit price in CHF"
+    }
+  },
+  "required": [
+    "barcode",
+    "name"
+  ]
+}

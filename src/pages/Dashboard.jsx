@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, FileSpreadsheet } from 'lucide-react';
+import { Plus, Search, FileSpreadsheet, ScanLine, X } from 'lucide-react';
 import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 
@@ -20,6 +20,8 @@ import ExportActions from '@/components/dashboard/ExportActions';
 import ImportModal from '@/components/dashboard/ImportModal';
 import OnboardingModal from '@/components/dashboard/OnboardingModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
+import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
+import QuickAddModal from '@/components/dashboard/QuickAddModal';
 
 export default function Dashboard() {
   const { t, lang } = useLanguage();
@@ -29,10 +31,13 @@ export default function Dashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [showImport, setShowImport] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [quickAdd, setQuickAdd] = useState(null); // { barcode, prefill }
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [rayonFilter, setRayonFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
 
   const canAccess = hasActiveSubscription(user);
   const needsOnboarding = canAccess && user && !user.onboarding_complete;
@@ -44,7 +49,13 @@ export default function Dashboard() {
     enabled: canAccess,
   });
 
-  // Run scheduler checks once on load
+  // Barcode DB — loaded once, used for local lookup
+  const { data: barcodeDB = [] } = useQuery({
+    queryKey: ['barcodes'],
+    queryFn: () => base44.entities.BarcodeProduct.list('barcode', 1000),
+    enabled: canAccess,
+  });
+
   useEffect(() => {
     if (user && canAccess && products.length >= 0) {
       checkAndSendReminders(user, products);
@@ -54,12 +65,21 @@ export default function Dashboard() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Product.create(data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['products'] }); setShowForm(false); setEditProduct(null); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setShowForm(false);
+      setEditProduct(null);
+      setQuickAdd(null);
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Product.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['products'] }); setShowForm(false); setEditProduct(null); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setShowForm(false);
+      setEditProduct(null);
+    },
   });
 
   const deleteMutation = useMutation({
@@ -77,13 +97,52 @@ export default function Dashboard() {
     if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product.id);
   };
 
+  // ── Barcode scan flow ────────────────────────────────────
+  const handleBarcodeDetected = async (code) => {
+    setShowScanner(false);
+
+    // 1. Search local DB first
+    const match = barcodeDB.find(b => b.barcode === code);
+    if (match) {
+      setQuickAdd({ barcode: code, prefill: match });
+      return;
+    }
+
+    // 2. Try Open Food Facts
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+      const data = await res.json();
+      if (data.status === 1 && data.product) {
+        const p = data.product;
+        setQuickAdd({
+          barcode: code,
+          prefill: {
+            name: p.product_name || p.product_name_fr || '',
+            brand: p.brands || '',
+            category: '',
+          },
+        });
+        return;
+      }
+    } catch (_) {}
+
+    // 3. Not found — manual entry
+    setQuickAdd({ barcode: code, prefill: null });
+  };
+
   const filteredProducts = useMemo(() => products.filter(p => {
-    if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (statusFilter !== 'all' && getProductStatus(p.expiration_date) !== statusFilter) return false;
     if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
     if (rayonFilter !== 'all' && p.rayon !== rayonFilter) return false;
     return true;
   }), [products, search, statusFilter, categoryFilter, rayonFilter]);
+
+  const activeFilterCount = [
+    statusFilter !== 'all',
+    categoryFilter !== 'all',
+    rayonFilter !== 'all',
+  ].filter(Boolean).length;
 
   if (!canAccess) {
     return (
@@ -103,13 +162,16 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen bg-secondary/30 pb-24 sm:pb-0">
       {needsOnboarding && !onboardingDone && (
         <OnboardingModal user={user} onComplete={() => setOnboardingDone(true)} />
       )}
       <DashboardHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
+
+        {/* Desktop header */}
+        <div className="hidden sm:flex items-start sm:items-center justify-between gap-4 mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('dash_title')}</h1>
           <div className="flex flex-wrap items-center gap-2">
             <ExportActions products={filteredProducts} />
@@ -117,9 +179,26 @@ export default function Dashboard() {
               <FileSpreadsheet className="w-4 h-4" />
               {lang === 'fr' ? 'Importer Excel' : 'Import Excel'}
             </Button>
+            <Button variant="outline" onClick={() => setShowScanner(true)} className="rounded-full gap-2">
+              <ScanLine className="w-4 h-4" />
+              Scanner
+            </Button>
             <Button onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile header */}
+        <div className="sm:hidden flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-foreground">{t('dash_title')}</h1>
+          <div className="flex gap-1.5">
+            <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="rounded-full h-9 px-3 gap-1.5 text-xs">
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+            </Button>
+            <Button size="sm" onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full h-9 px-3 gap-1.5 text-xs">
+              <Plus className="w-3.5 h-3.5" /> Ajouter
             </Button>
           </div>
         </div>
@@ -129,7 +208,7 @@ export default function Dashboard() {
             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <StatsCards products={products} />
             <WeeklyAlert products={products} />
 
@@ -142,34 +221,78 @@ export default function Dashboard() {
             )}
 
             {/* Filters */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-border/40 space-y-3">
-              <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('dash_search')} className="pl-9 rounded-full" />
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 flex-wrap">
-                  {statusFilters.map(f => (
-                    <Button key={f.key} variant={statusFilter === f.key ? 'default' : 'outline'} size="sm" className="rounded-full text-xs" onClick={() => setStatusFilter(f.key)}>
-                      {f.label}
-                    </Button>
-                  ))}
+            <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-border/40 space-y-3">
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder={t('dash_search')}
+                    className="pl-9 rounded-full h-10"
+                  />
                 </div>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-44 rounded-full text-xs h-8"><SelectValue placeholder={t('dash_filter_category')} /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('all')} — {t('dash_filter_category')}</SelectItem>
-                    {Object.entries(categoryKeys).map(([v, k]) => <SelectItem key={v} value={v}>{t(k)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={rayonFilter} onValueChange={setRayonFilter}>
-                  <SelectTrigger className="w-36 rounded-full text-xs h-8"><SelectValue placeholder={t('dash_filter_rayon')} /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('all')} — {t('dash_filter_rayon')}</SelectItem>
-                    {Object.keys(rayonKeys).map(r => <SelectItem key={r} value={r}>Rayon {r}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`rounded-full whitespace-nowrap gap-1.5 ${activeFilterCount > 0 ? 'border-primary text-primary' : ''}`}
+                  onClick={() => setShowFilters(f => !f)}
+                >
+                  Filtres {activeFilterCount > 0 && <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-xs">{activeFilterCount}</span>}
+                </Button>
+                {activeFilterCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-full text-muted-foreground"
+                    onClick={() => { setStatusFilter('all'); setCategoryFilter('all'); setRayonFilter('all'); }}
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                )}
               </div>
+
+              {/* Filter panel */}
+              {showFilters && (
+                <div className="space-y-3 pt-2 border-t border-border/30">
+                  {/* Status filter pills */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {statusFilters.map(f => (
+                      <button
+                        key={f.key}
+                        onClick={() => setStatusFilter(f.key)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                          statusFilter === f.key
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'border-border text-muted-foreground hover:border-primary/50'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="w-44 rounded-full text-xs h-9">
+                        <SelectValue placeholder={t('dash_filter_category')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('all')} — {t('dash_filter_category')}</SelectItem>
+                        {Object.entries(categoryKeys).map(([v, k]) => <SelectItem key={v} value={v}>{t(k)}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={rayonFilter} onValueChange={setRayonFilter}>
+                      <SelectTrigger className="w-36 rounded-full text-xs h-9">
+                        <SelectValue placeholder={t('dash_filter_rayon')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('all')} — {t('dash_filter_rayon')}</SelectItem>
+                        {Object.keys(rayonKeys).map(r => <SelectItem key={r} value={r}>Rayon {r}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
             </div>
 
             <ProductTable
@@ -182,12 +305,51 @@ export default function Dashboard() {
         )}
       </main>
 
+      {/* ── Mobile sticky FAB ── */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-border/40 px-4 py-3 flex gap-2.5">
+        <Button
+          variant="outline"
+          className="flex-1 rounded-full h-12 gap-2 text-sm font-semibold"
+          onClick={() => setShowScanner(true)}
+        >
+          <ScanLine className="w-5 h-5 text-primary" />
+          Scanner
+        </Button>
+        <Button
+          className="flex-1 rounded-full h-12 gap-2 text-sm font-semibold"
+          onClick={() => { setEditProduct(null); setShowForm(true); }}
+        >
+          <Plus className="w-5 h-5" />
+          Ajouter
+        </Button>
+      </div>
+
+      {/* Modals */}
       {showImport && (
         <ImportModal
           onClose={() => setShowImport(false)}
           onImported={() => { queryClient.invalidateQueries({ queryKey: ['products'] }); setShowImport(false); }}
         />
       )}
+
+      {showScanner && (
+        <BarcodeScanner
+          lang={lang}
+          onDetected={handleBarcodeDetected}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
+      {quickAdd && (
+        <QuickAddModal
+          barcode={quickAdd.barcode}
+          prefill={quickAdd.prefill}
+          onSave={(data) => createMutation.mutate(data)}
+          onClose={() => setQuickAdd(null)}
+          saving={createMutation.isPending}
+        />
+      )}
+
       <DashboardFooter />
     </div>
   );

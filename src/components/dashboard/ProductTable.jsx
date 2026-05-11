@@ -193,8 +193,63 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
     );
   }
 
+  // Mobile card list
+  const MobileCards = () => (
+    <div className="space-y-2 sm:hidden">
+      {products.map(p => {
+        const status = getProductStatus(p.expiration_date);
+        const days = getDaysRemaining(p.expiration_date);
+        const cfg = statusConfig[status];
+        const total = (p.quantity_thrown || 0) * (p.price_chf || 0);
+        const isExpired = status === 'expired';
+
+        return (
+          <div key={p.id} className={`bg-white rounded-xl border px-4 py-3 shadow-sm ${isExpired ? 'border-red-200 bg-red-50/30' : status === 'urgent' ? 'border-orange-200 bg-orange-50/20' : 'border-border/40'}`}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold text-sm text-foreground">{p.name}</span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                    {t('status_' + status)}
+                  </span>
+                </div>
+                {p.marque && <p className="text-xs text-muted-foreground mt-0.5">{p.marque}</p>}
+                <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground flex-wrap">
+                  {p.expiration_date && (
+                    <span className={`font-medium ${isExpired ? 'text-red-600' : days < 3 ? 'text-orange-600' : days < 14 ? 'text-yellow-600' : 'text-green-600'}`}>
+                      📅 {format(new Date(p.expiration_date), 'dd/MM/yy')} ({days}j)
+                    </span>
+                  )}
+                  {p.rayon && <span>Rayon {p.rayon}</span>}
+                  {isExpired && total > 0 && <span className="text-red-600 font-medium">CHF {total.toFixed(2)}</span>}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button
+                  onClick={() => setEditingId(editingId === p.id ? null : p.id)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => onDelete(p)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden">
+    <>
+      <MobileCards />
+      <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-secondary/40">
@@ -273,7 +328,8 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
             })}
           </tbody>
         </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
