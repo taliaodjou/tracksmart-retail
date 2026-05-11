@@ -11,6 +11,7 @@ import Profile from '@/pages/Profile';
 import Admin from '@/pages/Admin';
 import Welcome from '@/pages/Welcome';
 import Analytics from '@/pages/Analytics';
+import Orders from '@/pages/Orders';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -44,6 +45,7 @@ const AuthenticatedApp = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/analytics" element={<Analytics />} />
+      <Route path="/orders" element={<Orders />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
