@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { isAdmin, getProductStatus, getDaysRemaining, statusConfig } from '@/lib/productUtils';
+import { enterSupportMode } from '@/lib/supportMode';
 import AdminLayout from './AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +12,12 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import {
   ArrowLeft, Mail, Phone, Store, UserCheck, UserX, Send,
-  Package, AlertTriangle, TrendingDown, Calendar, CreditCard
+  Package, AlertTriangle, TrendingDown, Calendar, CreditCard, Eye
 } from 'lucide-react';
 
 export default function AdminClientDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [messageText, setMessageText] = useState('');
   const [sending, setSending] = useState(false);
@@ -147,6 +149,14 @@ export default function AdminClientDetail() {
                 <Mail className="w-4 h-4 text-primary" />
                 Rappel paiement
               </Button>
+              <Button
+                size="sm"
+                className="rounded-xl gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => { enterSupportMode(client); navigate('/dashboard'); }}
+              >
+                <Eye className="w-4 h-4" />
+                Ouvrir espace client
+              </Button>
             </div>
           </div>
         </div>
@@ -192,7 +202,7 @@ export default function AdminClientDetail() {
               <div className="space-y-3">
                 {editingPlan ? (
                   <div className="space-y-2">
-                    {['basic', 'premium'].map(plan => (
+                    {['classic', 'premium'].map(plan => (
                       <button
                         key={plan}
                         onClick={() => handleChangePlan(plan)}
@@ -202,7 +212,7 @@ export default function AdminClientDetail() {
                             : 'border-gray-200 hover:bg-gray-50 text-gray-700'
                         }`}
                       >
-                        {plan === 'basic' ? '🔹 Basic — CHF 29/mois' : '⭐ Premium — CHF 59/mois'}
+                        {plan === 'classic' ? '🔹 Classic' : '⭐ Premium — CHF 49/mois'}
                       </button>
                     ))}
                     <button onClick={() => setEditingPlan(false)} className="text-xs text-gray-400 hover:text-gray-600 w-full text-center mt-1">Annuler</button>

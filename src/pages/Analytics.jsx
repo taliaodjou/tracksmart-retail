@@ -3,7 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
-import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
+import { getSupportMode } from '@/lib/supportMode';
+import SupportModeBanner from '@/components/SupportModeBanner';
 import { format, startOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -31,12 +33,16 @@ function getMonthLabel(key, lang) {
 export default function Analytics() {
   const { t, lang } = useLanguage();
   const { user } = useAuth();
-  const canAccess = hasActiveSubscription(user);
+  const supportMode = getSupportMode();
+  const canAccess = isAdmin(user) ? true : hasActiveSubscription(user);
+  const isPremium = isAdmin(user) || user?.subscription_plan === 'premium';
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => base44.entities.Product.list('-created_date'),
-    enabled: canAccess,
+    queryKey: ['products', supportMode?.clientEmail],
+    queryFn: () => supportMode
+      ? base44.entities.Product.filter({ created_by: supportMode.clientEmail }, '-created_date')
+      : base44.entities.Product.list('-created_date'),
+    enabled: canAccess && isPremium,
   });
 
   // Build monthly data for the last MONTHS_BACK months
@@ -133,12 +139,33 @@ export default function Analytics() {
     );
   }
 
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen bg-secondary/30">
+        <DashboardHeader />
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto mb-5">
+            <span className="text-3xl">🔒</span>
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-3">Fonctionnalité Premium</h2>
+          <p className="text-muted-foreground mb-6">
+            Les analytiques avancées sont réservées aux abonnés Premium. Contactez votre administrateur pour mettre à niveau votre plan.
+          </p>
+          <a href="mailto:support@tracksmart.com" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-full font-semibold hover:bg-primary/90 transition-colors">
+            Contacter le support
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   const totalLossAll = products.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
   const totalExpired = products.filter(p => getProductStatus(p.expiration_date) === 'expired').length;
   const totalThrown = products.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
 
   return (
     <div className="min-h-screen bg-secondary/30">
+      <SupportModeBanner />
       <DashboardHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
