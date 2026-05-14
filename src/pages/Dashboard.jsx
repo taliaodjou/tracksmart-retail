@@ -97,6 +97,34 @@ export default function Dashboard() {
     if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product.id);
   };
 
+  // ── Category mapping from Open Food Facts tags ───────────
+  const OFF_CATEGORY_MAP = {
+    snack: 'snacks', crisp: 'snacks', chip: 'snacks', biscuit: 'snacks', cracker: 'snacks',
+    beverage: 'boissons', drink: 'boissons', water: 'boissons', juice: 'boissons', soda: 'boissons', milk: 'boissons',
+    fish: 'congeles_poisson', seafood: 'congeles_poisson',
+    chicken: 'congeles_poulet', poultry: 'congeles_poulet',
+    dairy: 'produits_frais', yogurt: 'produits_frais', cheese: 'produits_frais', fresh: 'produits_frais',
+    pasta: 'epicerie_seche', rice: 'epicerie_seche', flour: 'epicerie_seche', cereal: 'epicerie_seche', grain: 'epicerie_seche',
+    candy: 'confiseries', chocolate: 'confiseries', sweet: 'confiseries', confectionery: 'confiseries',
+    canned: 'conserves', tinned: 'conserves', preserve: 'conserves',
+    hygiene: 'hygiene_beaute', beauty: 'hygiene_beaute', soap: 'hygiene_beaute', shampoo: 'hygiene_beaute', cosmetic: 'hygiene_beaute',
+    cleaning: 'entretien_maison', detergent: 'entretien_maison', household: 'entretien_maison',
+    baby: 'bebe', infant: 'bebe',
+    pet: 'animaux', dog: 'animaux', cat: 'animaux',
+    alcohol: 'alcool', wine: 'alcool', beer: 'alcool', spirit: 'alcool',
+    tobacco: 'tabac', cigarette: 'tabac',
+  };
+
+  const matchCategory = (tags = []) => {
+    for (const tag of tags) {
+      const clean = tag.replace(/^[a-z]{2}:/, '').toLowerCase().replace(/-/g, ' ');
+      for (const [keyword, cat] of Object.entries(OFF_CATEGORY_MAP)) {
+        if (clean.includes(keyword)) return cat;
+      }
+    }
+    return '';
+  };
+
   // ── Barcode scan flow ────────────────────────────────────
   const handleBarcodeDetected = async (code) => {
     setShowScanner(false);
@@ -114,19 +142,21 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.status === 1 && data.product) {
         const p = data.product;
+        const category = matchCategory(p.categories_tags || []);
         setQuickAdd({
           barcode: code,
           prefill: {
-            name: p.product_name || p.product_name_fr || '',
+            name: p.product_name_fr || p.product_name || p.generic_name || '',
             brand: p.brands || '',
-            category: '',
+            category,
+            image_url: p.image_front_url || p.image_url || '',
           },
         });
         return;
       }
     } catch (_) {}
 
-    // 3. Not found — manual entry
+    // 3. Not found — manual entry (null prefill → QuickAddModal shows manual form)
     setQuickAdd({ barcode: code, prefill: null });
   };
 

@@ -7,13 +7,14 @@ import { rayonKeys, categoryKeys } from '@/lib/productUtils';
 import { useLanguage } from '@/lib/LanguageContext';
 
 /**
- * QuickAddModal — shown after barcode scan
- * Pre-filled with product info from DB or Open Food Facts.
- * Only asks for: expiry date, quantity, rayon
- * Large mobile-friendly touch targets.
+ * QuickAddModal — shown after barcode scan + product lookup
+ * Pre-filled with product info. User adds DLC + rayon then saves.
  */
 export default function QuickAddModal({ prefill, barcode, onSave, onClose, saving }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const isFr = lang === 'fr';
+
+  const today = new Date().toISOString().split('T')[0];
 
   const [form, setForm] = useState({
     name: prefill?.name || '',
@@ -21,25 +22,27 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
     category: prefill?.category || '',
     rayon: prefill?.default_rayon || '',
     expiration_date: '',
-    reception_date: new Date().toISOString().split('T')[0],
+    reception_date: today,
     price_chf: prefill?.default_price_chf || '',
   });
 
+  const imageUrl = prefill?.image_url || null;
   const isManual = !prefill?.name;
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
   const canSave = form.name && form.expiration_date;
 
   return (
     <div className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center">
-      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md overflow-hidden max-h-[92vh] flex flex-col">
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md overflow-hidden max-h-[95vh] flex flex-col">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border/30">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 flex-shrink-0">
           <div>
             <p className="font-bold text-foreground text-base">
-              {isManual ? '✏️ Ajouter manuellement' : '⚡ Ajout rapide'}
+              {isManual
+                ? (isFr ? '✏️ Ajouter manuellement' : '✏️ Add manually')
+                : (isFr ? '⚡ Ajout rapide' : '⚡ Quick add')}
             </p>
             {barcode && (
               <p className="text-xs text-muted-foreground font-mono mt-0.5">EAN: {barcode}</p>
@@ -53,13 +56,22 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
           </button>
         </div>
 
-        {/* Product info banner (if found in DB) */}
+        {/* Product info banner (if found) */}
         {!isManual && (
-          <div className="mx-5 mt-4 bg-primary/8 border border-primary/20 rounded-xl px-4 py-3 flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Package className="w-5 h-5 text-primary" />
-            </div>
-            <div className="min-w-0">
+          <div className="mx-5 mt-4 bg-primary/8 border border-primary/20 rounded-xl px-4 py-3 flex items-start gap-3 flex-shrink-0">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={form.name}
+                className="w-12 h-12 object-contain rounded-lg bg-white border border-border/30 flex-shrink-0"
+                onError={e => { e.target.style.display = 'none'; }}
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Package className="w-5 h-5 text-primary" />
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
               <p className="font-semibold text-foreground text-sm truncate">{form.name}</p>
               {form.marque && <p className="text-xs text-muted-foreground">{form.marque}</p>}
               {form.category && (
@@ -71,27 +83,27 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
           </div>
         )}
 
-        {/* Form fields */}
+        {/* Form */}
         <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
 
-          {/* If manual — show name + brand */}
+          {/* Manual: name + brand */}
           {isManual && (
             <>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
-                  Nom du produit *
+                  {isFr ? 'Nom du produit *' : 'Product name *'}
                 </label>
                 <Input
                   value={form.name}
                   onChange={e => set('name', e.target.value)}
-                  placeholder="Ex: Yaourt nature"
+                  placeholder={isFr ? 'Ex: Yaourt nature' : 'Ex: Plain yogurt'}
                   className="h-12 text-base rounded-xl"
                   autoFocus
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
-                  Marque
+                  {isFr ? 'Marque' : 'Brand'}
                 </label>
                 <Input
                   value={form.marque}
@@ -103,31 +115,51 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
             </>
           )}
 
-          {/* Expiration date — LARGE, primary field */}
+          {/* If found but name is editable */}
+          {!isManual && (
+            <div>
+              <label className="block text-sm font-semibold text-foreground mb-2">
+                {isFr ? 'Nom du produit' : 'Product name'}
+              </label>
+              <Input
+                value={form.name}
+                onChange={e => set('name', e.target.value)}
+                className="h-11 text-sm rounded-xl"
+              />
+            </div>
+          )}
+
+          {/* DLC — primary, large */}
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
-              <span className="text-red-500">📅</span> Date d'expiration (DLC) *
+            <label className="block text-sm font-semibold text-foreground mb-2">
+              📅 {isFr ? "Date d'expiration (DLC) *" : 'Expiration date *'}
             </label>
             <Input
               type="date"
               value={form.expiration_date}
               onChange={e => set('expiration_date', e.target.value)}
               className="h-14 text-lg font-medium rounded-xl border-2 border-primary/30 focus:border-primary"
-              min={new Date().toISOString().split('T')[0]}
             />
           </div>
 
-          {/* Rayon — large select */}
+          {/* Date réception — auto today, read-only display */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+            <span>📦</span>
+            <span>{isFr ? 'Date de réception' : 'Reception date'}: <strong>{today}</strong></span>
+          </div>
+
+          {/* Rayon */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-primary" /> Rayon
+              <Layers className="w-4 h-4 text-primary" />
+              {isFr ? 'Rayon *' : 'Section *'}
             </label>
             <Select value={form.rayon || '__none__'} onValueChange={v => set('rayon', v === '__none__' ? '' : v)}>
               <SelectTrigger className="h-12 text-base rounded-xl">
-                <SelectValue placeholder="Choisir un rayon…" />
+                <SelectValue placeholder={isFr ? 'Choisir un rayon…' : 'Choose a section…'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">— Non défini —</SelectItem>
+                <SelectItem value="__none__">— {isFr ? 'Non défini' : 'Not set'} —</SelectItem>
                 {Object.entries(rayonKeys).map(([v, label]) => (
                   <SelectItem key={v} value={v}>{label}</SelectItem>
                 ))}
@@ -135,30 +167,29 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
             </Select>
           </div>
 
-          {/* Category (if not pre-filled) */}
-          {(!form.category || isManual) && (
-            <div>
-              <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
-                <Tag className="w-4 h-4 text-primary" /> Catégorie
-              </label>
-              <Select value={form.category || '__none__'} onValueChange={v => set('category', v === '__none__' ? '' : v)}>
-                <SelectTrigger className="h-12 text-base rounded-xl">
-                  <SelectValue placeholder="Choisir une catégorie…" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">— Non défini —</SelectItem>
-                  {Object.entries(categoryKeys).map(([v, k]) => (
-                    <SelectItem key={v} value={v}>{t(k)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+              <Tag className="w-4 h-4 text-primary" />
+              {isFr ? 'Catégorie' : 'Category'}
+            </label>
+            <Select value={form.category || '__none__'} onValueChange={v => set('category', v === '__none__' ? '' : v)}>
+              <SelectTrigger className="h-12 text-base rounded-xl">
+                <SelectValue placeholder={isFr ? 'Choisir une catégorie…' : 'Choose a category…'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">— {isFr ? 'Non défini' : 'Not set'} —</SelectItem>
+                {Object.entries(categoryKeys).map(([v, k]) => (
+                  <SelectItem key={v} value={v}>{t(k)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Price CHF */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-2">
-              Prix unitaire CHF
+              {isFr ? 'Prix unitaire CHF' : 'Unit price CHF'}
             </label>
             <Input
               type="number"
@@ -172,8 +203,8 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
           </div>
         </div>
 
-        {/* Save button — sticky at bottom, full width, large */}
-        <div className="px-5 py-4 border-t border-border/30 bg-white">
+        {/* Save */}
+        <div className="px-5 py-4 border-t border-border/30 bg-white flex-shrink-0">
           <Button
             className="w-full h-14 text-base font-bold rounded-xl gap-2"
             disabled={!canSave || saving}
@@ -188,8 +219,8 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
             })}
           >
             {saving
-              ? <><Loader2 className="w-5 h-5 animate-spin" /> Enregistrement…</>
-              : <><CheckCircle2 className="w-5 h-5" /> Enregistrer le produit</>
+              ? <><Loader2 className="w-5 h-5 animate-spin" /> {isFr ? 'Enregistrement…' : 'Saving…'}</>
+              : <><CheckCircle2 className="w-5 h-5" /> {isFr ? 'Enregistrer le produit' : 'Save product'}</>
             }
           </Button>
         </div>
