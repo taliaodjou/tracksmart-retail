@@ -64,14 +64,14 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Landing />} />
 
-      {/* Client-only routes */}
-      <Route path="/welcome" element={<AdminGuard><Welcome /></AdminGuard>} />
-      <Route path="/dashboard" element={<AdminGuard><Dashboard /></AdminGuard>} />
-      <Route path="/profile" element={<AdminGuard><Profile /></AdminGuard>} />
-      <Route path="/analytics" element={<AdminGuard><Analytics /></AdminGuard>} />
-      <Route path="/orders" element={<AdminGuard><Orders /></AdminGuard>} />
-      <Route path="/barcode-db" element={<AdminGuard><BarcodeDatabase /></AdminGuard>} />
-      <Route path="/admin" element={<AdminGuard><Admin /></AdminGuard>} />
+      {/* Client-facing routes (accessible by all authenticated users) */}
+      <Route path="/welcome" element={<Welcome />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/analytics" element={<Analytics />} />
+      <Route path="/orders" element={<Orders />} />
+      <Route path="/barcode-db" element={<BarcodeDatabase />} />
+      <Route path="/admin" element={<Admin />} />
 
       {/* Admin-only routes */}
       <Route path="/admin-portal" element={<ClientGuard><AdminPortal /></ClientGuard>} />
