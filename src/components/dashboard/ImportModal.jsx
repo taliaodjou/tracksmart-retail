@@ -54,18 +54,11 @@ function cleanField(val) {
 }
 
 function parseExcelDate(val) {
-  if (!val && val !== 0) return '';
   if (val === null || val === undefined || val === '') return '';
 
   // Excel error strings
   if (typeof val === 'string' && val.startsWith('#')) return '';
-  if (typeof val === 'string' && ['fix', '/', '\\'].includes(val.trim())) return '';
-
-  // Excel serial number (numeric, > 1000 to avoid confusion with small numbers)
-  if (typeof val === 'number' && val > 1000) {
-    const date = new Date(Date.UTC(1899, 11, 30) + val * 86400000);
-    if (!isNaN(date.getTime())) return date.toISOString().slice(0, 10);
-  }
+  if (typeof val === 'string' && ['fix', '/'].includes(val.trim())) return '';
 
   // JavaScript Date object
   if (val instanceof Date && !isNaN(val.getTime())) {
@@ -75,6 +68,9 @@ function parseExcelDate(val) {
   const s = String(val).trim();
   if (!s) return '';
 
+  // YYYY-MM-DD already correct
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+
   // DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
   const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
   if (dmy) {
@@ -82,21 +78,25 @@ function parseExcelDate(val) {
     return `${y}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
   }
 
-  // YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
-
-  // 5-digit string serial (e.g. "46156")
-  const num = parseInt(s);
-  if (!isNaN(num) && num > 1000) {
-    const date = new Date(Date.UTC(1899, 11, 30) + num * 86400000);
-    if (!isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+  // Excel serial number — both numeric and string forms (e.g. 46156 or "46156")
+  const num = parseFloat(s);
+  if (!isNaN(num) && num > 1000 && num < 100000) {
+    const date = new Date(Date.UTC(1899, 11, 30) + Math.round(num) * 86400000);
+    if (!isNaN(date.getTime())) {
+      const y = date.getUTCFullYear();
+      const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const d = String(date.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
   }
 
   return '';
 }
 
 function isSerialDate(val) {
-  return typeof val === 'number' && val > 1000;
+  if (typeof val === 'number') return val > 1000 && val < 100000;
+  const num = parseFloat(String(val).trim());
+  return !isNaN(num) && num > 1000 && num < 100000;
 }
 
 function normalizeRayon(val) {
@@ -160,29 +160,26 @@ function detectField(header) {
   return '';
 }
 
-const SECTION_HEADER_RE = /^(rayon|frigo|cong[eé]lateur)\s*[_\s]?\d*/i;
+// Only exact section title strings (with empty DLC) should be skipped
+const SECTION_HEADER_RE = /^(rayon[_ ]?\d*|frigo[_ ]?\d*|cong[eé]lateur[_ ]?\d*|congl[_ ]?\d*)$/i;
 
 function shouldSkipRow(rowValues, colMap) {
-  // All empty
-  if (rowValues.every(cell => !cell && cell !== 0)) return true;
+  // Rule 1: skip if ALL cells are empty/null/whitespace
+  const hasAnyValue = rowValues.some(cell =>
+    cell !== null && cell !== undefined && String(cell).trim() !== ''
+  );
+  if (!hasAnyValue) return true;
 
+  // Rule 2: skip only if produit looks exactly like a section header AND dlc is empty
   const produitIdx = colMap['name'];
-  const produit = produitIdx !== undefined ? cleanField(rowValues[produitIdx]) : '';
+  const dlcIdx = colMap['expiration_date'];
 
-  // No product name
-  if (!produit) return true;
+  const produitVal = produitIdx !== undefined ? String(rowValues[produitIdx] ?? '').trim() : '';
+  const dlcVal = dlcIdx !== undefined ? String(rowValues[dlcIdx] ?? '').trim() : '';
 
-  // Section header row
-  if (SECTION_HEADER_RE.test(produit.trim())) return true;
+  if (SECTION_HEADER_RE.test(produitVal) && (dlcVal === '' || dlcVal === '0')) return true;
 
-  // Row where all "important" fields are empty (dlc, marque, category, price)
-  const dlc    = colMap['expiration_date'] !== undefined ? cleanField(rowValues[colMap['expiration_date']]) : '';
-  const marque = colMap['marque']          !== undefined ? cleanField(rowValues[colMap['marque']])          : '';
-  const cat    = colMap['category']        !== undefined ? cleanField(rowValues[colMap['category']])        : '';
-  const price  = colMap['price_chf']       !== undefined ? cleanField(rowValues[colMap['price_chf']])       : '';
-
-  if (!dlc && !marque && !cat && !price) return true;
-
+  // Everything else is a valid product row — do NOT skip
   return false;
 }
 
@@ -270,9 +267,9 @@ export default function ImportModal({ onClose, onImported }) {
     let serialDateCount = 0;
 
     rows.forEach((rowValues, ri) => {
-      // Skip section headers, empty rows, etc.
+      // Skip only truly empty rows and section header rows
       if (shouldSkipRow(rowValues, mapping)) {
-        skippedRows.push({ row: ri + 1, reason: isFr ? 'Ligne ignorée (en-tête ou vide)' : 'Skipped (header or empty)' });
+        skippedRows.push({ row: ri + 1, reason: isFr ? 'En-tête de section ou ligne vide' : 'Section header or empty row' });
         return;
       }
 
@@ -290,22 +287,24 @@ export default function ImportModal({ onClose, onImported }) {
             hasError = true;
             skippedRows.push({ row: ri + 1, reason: isFr ? 'DLC invalide ou manquante' : 'Missing/invalid expiry date' });
           }
-          entry[key] = parsed;
+          entry[key] = parsed || '';
         } else if (key === 'category') {
           const cleaned = cleanField(rawVal);
-          entry[key] = cleaned ? normalizeCategory(cleaned) : 'epicerie_seche';
+          entry[key] = normalizeCategory(cleaned); // always returns a valid category
         } else if (key === 'rayon') {
           const cleaned = cleanField(rawVal);
           entry[key] = normalizeRayon(cleaned);
-          entry._rawRayon = cleaned; // keep original for preview
+          entry._rawRayon = cleaned;
         } else if (key === 'action') {
           entry[key] = normalizeAction(cleanField(rawVal));
         } else if (key === 'quantity_thrown' || key === 'price_chf') {
           const cleaned = cleanField(rawVal);
           entry[key] = cleaned ? parseFloat(cleaned.replace(',', '.')) || '' : '';
         } else {
+          // name field
           const cleaned = cleanField(rawVal);
           if (!cleaned && required) {
+            // Missing name: skip with error
             hasError = true;
             skippedRows.push({ row: ri + 1, reason: isFr ? 'Nom du produit manquant' : 'Product name missing' });
           }
