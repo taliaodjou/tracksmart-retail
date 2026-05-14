@@ -5,13 +5,11 @@ import { useAuth } from '@/lib/AuthContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, BarChart2, ShoppingCart, Database, Menu, X, Shield } from 'lucide-react';
+import { LogOut, User, BarChart2, ShoppingCart, Database, Menu, X } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import { isAdmin } from '@/lib/productUtils';
 
 export default function DashboardHeader() {
   const { t } = useLanguage();
-  const { user } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -22,10 +20,6 @@ export default function DashboardHeader() {
     { to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> },
     { to: '/orders', label: 'Commandes', icon: <ShoppingCart className="w-3.5 h-3.5" /> },
     { to: '/barcode-db', label: 'Base EAN', icon: <Database className="w-3.5 h-3.5" /> },
-    ...(isAdmin(user) ? [
-      { to: '/admin', label: 'Gestion', icon: <Shield className="w-3.5 h-3.5" /> },
-      { to: '/admin-portal', label: 'Admin Portal', icon: <Shield className="w-3.5 h-3.5 text-primary" /> },
-    ] : []),
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
   ];
 

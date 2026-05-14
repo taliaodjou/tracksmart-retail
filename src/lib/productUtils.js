@@ -53,7 +53,7 @@ export const orderStatusKeys = {
 };
 
 export function isAdmin(user) {
-  return user?.role === 'admin' || user?.email === 'admin@tracksmart.com';
+  return user?.role === 'admin' || user?.email === 'talia.odjou@gmail.com';
 }
 
 export function hasActiveSubscription(user) {
