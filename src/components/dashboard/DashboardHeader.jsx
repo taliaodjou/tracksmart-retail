@@ -18,8 +18,8 @@ export default function DashboardHeader() {
   const navItems = [
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
     { to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> },
-    { to: '/orders', label: 'Commandes', icon: <ShoppingCart className="w-3.5 h-3.5" /> },
-    { to: '/barcode-db', label: 'Base EAN', icon: <Database className="w-3.5 h-3.5" /> },
+    { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
+    { to: '/barcode-db', label: t('nav_barcode_db'), icon: <Database className="w-3.5 h-3.5" /> },
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
   ];
 
