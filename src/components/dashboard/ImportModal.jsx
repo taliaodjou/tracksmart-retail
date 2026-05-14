@@ -141,6 +141,7 @@ function parseFile(arrayBuffer) {
   const headers = allRows[0];
   const dataRows = allRows.slice(1);
 
+  // Build colMap
   const colMap = {};
   headers.forEach((h, i) => {
     const field = headerToField(h);
@@ -172,49 +173,27 @@ function parseFile(arrayBuffer) {
       return;
     }
 
-    const qty = (() => {
-      const v = get('quantiteJetees').replace(',', '.');
-      const n = parseFloat(v);
-      return isNaN(n) ? undefined : n;
-    })();
-
-    const price = (() => {
-      const v = get('prixCHF').replace(',', '.');
-      const n = parseFloat(v);
-      return isNaN(n) ? undefined : n;
-    })();
-
-    const action = normalizeAction(get('action'));
-
-    const product = {
+    products.push({
       name: produit,
+      marque: get('marques').replace(/^#.*/, '').trim(),
+      category: normalizeCategory(get('categories')),
+      reception_date: toDate(rawReception),
       expiration_date: dlc,
-    };
-
-    const marque = get('marques').replace(/^#.*/, '').trim();
-    if (marque) product.marque = marque;
-
-    const category = normalizeCategory(get('categories'));
-    if (category) product.category = category;
-
-    const rayon = normalizeRayon(get('rayons'));
-    if (rayon) product.rayon = rayon;
-
-    const reception = toDate(rawReception);
-    if (reception) product.reception_date = reception;
-
-    if (action) product.action = action;
-
-    const orderDate = toDate(rawCommande);
-    if (orderDate) product.order_date = orderDate;
-
-    // Only save quantity_thrown and price_chf if action is 'jeter'
-    if (action === 'jeter') {
-      if (qty !== undefined) product.quantity_thrown = qty;
-      if (price !== undefined) product.price_chf = price;
-    }
-
-    products.push({ ...product, _rawRayon: get('rayons') });
+      rayon: normalizeRayon(get('rayons')),
+      action: normalizeAction(get('action')),
+      order_date: toDate(rawCommande),
+      quantity_thrown: (() => {
+        const v = get('quantiteJetees').replace(',', '.');
+        const n = parseFloat(v);
+        return isNaN(n) ? '' : n;
+      })(),
+      price_chf: (() => {
+        const v = get('prixCHF').replace(',', '.');
+        const n = parseFloat(v);
+        return isNaN(n) ? '' : n;
+      })(),
+      _rawRayon: get('rayons'),
+    });
   });
 
   return { products, errors, skipped, dateCount };
@@ -238,18 +217,16 @@ function downloadTemplate() {
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function ImportModal({ onClose, onImported }) {
-  const { lang } = useLanguage();
+  const { t, lang } = useLanguage();
   const fileRef = useRef();
   const isFr = lang === 'fr';
 
-  const [step, setStep] = useState('upload'); // upload | preview | importing | done | error
-  const [parsed, setParsed] = useState(null);
+  const [step, setStep] = useState('upload'); // upload | preview | done
+  const [parsed, setParsed] = useState(null); // { products, errors, skipped, dateCount }
   const [importing, setImporting] = useState(false);
   const [importCount, setImportCount] = useState(0);
-  const [importError, setImportError] = useState('');
   const [parseError, setParseError] = useState('');
   const [reading, setReading] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const handleFile = (e) => {
     const file = e.target.files[0];
@@ -282,58 +259,18 @@ export default function ImportModal({ onClose, onImported }) {
   };
 
   const handleImport = async () => {
-    if (!parsed || parsed.products.length === 0) return;
-
     setImporting(true);
-    setImportError('');
-    setProgress(0);
-
-    try {
-      // Strip internal _rawRayon field before saving
-      const toSave = parsed.products.map(({ _rawRayon, ...rest }) => rest);
-
-      console.log(`[ImportModal] Starting bulkCreate of ${toSave.length} products...`);
-      console.log('[ImportModal] Sample product:', JSON.stringify(toSave[0]));
-
-      // Save in batches of 50 to avoid timeouts
-      const BATCH_SIZE = 50;
-      let saved = 0;
-
-      for (let i = 0; i < toSave.length; i += BATCH_SIZE) {
-        const batch = toSave.slice(i, i + BATCH_SIZE);
-        await base44.entities.Product.bulkCreate(batch);
-        saved += batch.length;
-        setProgress(Math.round((saved / toSave.length) * 100));
-        console.log(`[ImportModal] Saved ${saved}/${toSave.length}`);
-      }
-
-      console.log(`[ImportModal] Import complete. Total saved: ${saved}`);
-      setImportCount(saved);
-      setStep('done');
-
-      // Trigger dashboard refresh
-      onImported();
-
-    } catch (err) {
-      console.error('[ImportModal] bulkCreate failed:', err);
-      setImportError(
-        isFr
-          ? `Erreur lors de l'importation : ${err.message || 'Erreur inconnue'}`
-          : `Import failed: ${err.message || 'Unknown error'}`
-      );
-      setStep('error');
-    } finally {
-      setImporting(false);
-    }
-  };
-
-  const resetToUpload = () => {
-    setStep('upload');
-    setParsed(null);
-    setImportError('');
-    setParseError('');
-    setProgress(0);
-    if (fileRef.current) fileRef.current.value = '';
+    const toSave = parsed.products.map(({ _rawRayon, quantity_thrown, price_chf, ...rest }) => {
+      const obj = { ...rest };
+      if (quantity_thrown !== '' && quantity_thrown !== null && quantity_thrown !== undefined) obj.quantity_thrown = Number(quantity_thrown);
+      if (price_chf !== '' && price_chf !== null && price_chf !== undefined) obj.price_chf = Number(price_chf);
+      return obj;
+    });
+    await base44.entities.Product.bulkCreate(toSave);
+    setImportCount(parsed.products.length);
+    setImporting(false);
+    setStep('done');
+    onImported();
   };
 
   const PREVIEW_FIELDS = [
@@ -359,9 +296,7 @@ export default function ImportModal({ onClose, onImported }) {
               {isFr ? 'Importer un fichier Excel / CSV' : 'Import Excel / CSV file'}
             </h2>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} disabled={importing}>
-            <X className="w-4 h-4" />
-          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose}><X className="w-4 h-4" /></Button>
         </div>
 
         <div className="p-6 space-y-5">
@@ -432,6 +367,7 @@ export default function ImportModal({ onClose, onImported }) {
                 )}
               </div>
 
+              {/* Errors detail */}
               {parsed.errors.length > 0 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-1">
                   <div className="flex items-center gap-2 text-yellow-800 font-medium text-sm">
@@ -499,7 +435,7 @@ export default function ImportModal({ onClose, onImported }) {
               </div>
 
               <div className="flex justify-end gap-3">
-                <Button variant="outline" className="rounded-full" onClick={resetToUpload}>
+                <Button variant="outline" className="rounded-full" onClick={() => { setStep('upload'); setParsed(null); fileRef.current && (fileRef.current.value = ''); }}>
                   {isFr ? 'Retour' : 'Back'}
                 </Button>
                 <Button
@@ -507,27 +443,9 @@ export default function ImportModal({ onClose, onImported }) {
                   disabled={parsed.products.length === 0 || importing}
                   onClick={handleImport}
                 >
-                  {importing
-                    ? <><Loader2 className="w-4 h-4 animate-spin" />{isFr ? `Import en cours… ${progress}%` : `Importing… ${progress}%`}</>
-                    : <><Upload className="w-4 h-4" />{isFr ? `Confirmer l'import (${parsed.products.length})` : `Confirm import (${parsed.products.length})`}</>
-                  }
+                  {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {isFr ? `Confirmer l'import (${parsed.products.length})` : `Confirm import (${parsed.products.length})`}
                 </Button>
-              </div>
-            </div>
-          )}
-
-          {/* IMPORTING PROGRESS */}
-          {importing && (
-            <div className="flex flex-col items-center py-6 gap-4">
-              <Loader2 className="w-10 h-10 text-primary animate-spin" />
-              <p className="font-medium text-foreground">
-                {isFr ? `Importation en cours… ${progress}%` : `Importing… ${progress}%`}
-              </p>
-              <div className="w-full bg-secondary rounded-full h-2">
-                <div
-                  className="bg-primary h-2 rounded-full transition-all"
-                  style={{ width: `${progress}%` }}
-                />
               </div>
             </div>
           )}
@@ -538,38 +456,11 @@ export default function ImportModal({ onClose, onImported }) {
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold">
-                {isFr ? 'Importation réussie !' : 'Import successful!'}
-              </h3>
-              <p className="text-muted-foreground text-lg font-semibold text-green-700">
-                ✅ {isFr ? `${importCount} produit(s) importé(s) avec succès` : `${importCount} product(s) imported successfully`}
+              <h3 className="text-xl font-bold">{isFr ? 'Importation réussie !' : 'Import successful!'}</h3>
+              <p className="text-muted-foreground">
+                {isFr ? `${importCount} produit(s) ajouté(s).` : `${importCount} product(s) added.`}
               </p>
-              <Button className="rounded-full px-8" onClick={onClose}>
-                {isFr ? 'Voir l\'inventaire' : 'View inventory'}
-              </Button>
-            </div>
-          )}
-
-          {/* ERROR STEP */}
-          {step === 'error' && (
-            <div className="text-center py-8 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto">
-                <AlertCircle className="w-8 h-8 text-red-600" />
-              </div>
-              <h3 className="text-xl font-bold text-red-700">
-                {isFr ? 'Erreur d\'importation' : 'Import Error'}
-              </h3>
-              <p className="text-sm text-muted-foreground bg-red-50 border border-red-200 rounded-xl p-4">
-                {importError}
-              </p>
-              <div className="flex justify-center gap-3">
-                <Button variant="outline" className="rounded-full" onClick={resetToUpload}>
-                  {isFr ? 'Réessayer' : 'Try again'}
-                </Button>
-                <Button variant="ghost" className="rounded-full" onClick={onClose}>
-                  {isFr ? 'Fermer' : 'Close'}
-                </Button>
-              </div>
+              <Button className="rounded-full px-8" onClick={onClose}>{t('close')}</Button>
             </div>
           )}
 
