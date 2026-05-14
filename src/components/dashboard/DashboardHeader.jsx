@@ -21,12 +21,11 @@ export default function DashboardHeader() {
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
     { to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> },
     { to: '/orders', label: 'Commandes', icon: <ShoppingCart className="w-3.5 h-3.5" /> },
+    { to: '/barcode-db', label: 'Base EAN', icon: <Database className="w-3.5 h-3.5" /> },
     ...(isAdmin(user) ? [
-      { to: '/barcode-db', label: 'Base EAN', icon: <Database className="w-3.5 h-3.5" /> },
-      { to: '/admin', label: t('nav_admin'), icon: <Shield className="w-3.5 h-3.5" /> },
-    ] : [
-      { to: '/barcode-db', label: 'Base EAN', icon: <Database className="w-3.5 h-3.5" /> },
-    ]),
+      { to: '/admin', label: 'Gestion', icon: <Shield className="w-3.5 h-3.5" /> },
+      { to: '/admin-portal', label: 'Admin Portal', icon: <Shield className="w-3.5 h-3.5 text-primary" /> },
+    ] : []),
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
   ];
 
