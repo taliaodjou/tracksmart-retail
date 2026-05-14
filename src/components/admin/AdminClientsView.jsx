@@ -29,7 +29,8 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin_users'] }),
   });
 
-  const clients = users.filter(u => u.role !== 'admin');
+  // Exclure les comptes admin de la liste clients
+  const clients = users.filter(u => u.role !== 'admin' && u.email !== 'talia.odjou@gmail.com');
 
   const filtered = clients.filter(u => {
     const q = search.toLowerCase();

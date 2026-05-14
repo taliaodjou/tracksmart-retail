@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { getProductStatus, hasActiveSubscription } from '@/lib/productUtils';
+import { getProductStatus, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ArrowRight, PackageX, AlertTriangle, TrendingDown, Clock } from 'lucide-react';
@@ -15,11 +15,13 @@ export default function Welcome() {
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const canAccess = hasActiveSubscription(user);
+  const userIsAdmin = isAdmin(user);
 
   const { data: products = [] } = useQuery({
     queryKey: ['products'],
     queryFn: () => base44.entities.Product.list('-created_date'),
-    enabled: canAccess,
+    // Admin ne charge pas les produits sur la page Welcome
+    enabled: canAccess && !userIsAdmin,
   });
 
   const stats = useMemo(() => {
@@ -82,7 +84,7 @@ export default function Welcome() {
         <p className="text-xs text-muted-foreground/50 mb-10">{capitalizedDate}</p>
 
         {/* Summary cards */}
-        {canAccess && (
+        {canAccess && !userIsAdmin && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl mb-10">
             <div className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 flex flex-col items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center">

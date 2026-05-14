@@ -9,6 +9,7 @@ import AdminAnalyticsView from '@/components/admin/AdminAnalyticsView';
 import AdminSubscriptionsView from '@/components/admin/AdminSubscriptionsView';
 import AdminSupportView from '@/components/admin/AdminSupportView';
 import AdminSettingsView from '@/components/admin/AdminSettingsView';
+import AdminPinGate from '@/components/admin/AdminPinGate';
 
 export default function AdminPortal() {
   const { user } = useAuth();
@@ -34,11 +35,13 @@ export default function AdminPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex">
-      <AdminSidebar activeSection={activeSection} onNavigate={setActiveSection} />
-      <main className="flex-1 min-w-0 overflow-auto">
-        {renderContent()}
-      </main>
-    </div>
+    <AdminPinGate userEmail={user?.email}>
+      <div className="min-h-screen bg-[#0f0f0f] flex">
+        <AdminSidebar activeSection={activeSection} onNavigate={setActiveSection} />
+        <main className="flex-1 min-w-0 overflow-auto">
+          {renderContent()}
+        </main>
+      </div>
+    </AdminPinGate>
   );
 }

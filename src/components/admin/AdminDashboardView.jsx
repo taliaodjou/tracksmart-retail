@@ -9,7 +9,8 @@ export default function AdminDashboardView({ onNavigate, onSelectClient }) {
   const { data: users = [] } = useQuery({ queryKey: ['admin_users'], queryFn: () => base44.entities.User.list() });
   const { data: products = [] } = useQuery({ queryKey: ['all_products'], queryFn: () => base44.entities.Product.list() });
 
-  const clients = users.filter(u => u.role !== 'admin');
+  // Exclure les comptes admin des statistiques clients
+  const clients = users.filter(u => u.role !== 'admin' && u.email !== 'talia.odjou@gmail.com');
   const activeClients = clients.filter(u => u.subscription_status === 'active');
   const inactiveClients = clients.filter(u => u.subscription_status !== 'active');
 
