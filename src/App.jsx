@@ -6,6 +6,9 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { LanguageProvider } from '@/lib/LanguageContext';
+import { SupportModeProvider } from '@/lib/SupportModeContext';
+import Landing from '@/pages/Landing';
+import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import Admin from '@/pages/Admin';
@@ -42,7 +45,7 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<Welcome />} />
+      <Route path="/" element={<Landing />} />
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
@@ -51,6 +54,7 @@ const AuthenticatedApp = () => {
       <Route path="/barcode-db" element={<BarcodeDatabase />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin-portal" element={<AdminPortal />} />
+      <Route path="/support-view" element={<ClientSupportView />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -60,12 +64,14 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <AuthenticatedApp />
-          </Router>
-          <Toaster />
-        </QueryClientProvider>
+        <SupportModeProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <AuthenticatedApp />
+            </Router>
+            <Toaster />
+          </QueryClientProvider>
+        </SupportModeProvider>
       </AuthProvider>
     </LanguageProvider>
   );

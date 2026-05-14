@@ -3,8 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { getProductStatus } from '@/lib/productUtils';
 import { toast } from 'sonner';
-import { Search, UserCheck, UserX, Mail, Send, ChevronRight, ArrowLeft, Package, AlertTriangle, Calendar, Phone } from 'lucide-react';
-import { format } from 'date-fns';
+import { Search, UserCheck, UserX, Mail, Send, ChevronRight, Package, AlertTriangle, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useSupportMode } from '@/lib/SupportModeContext';
 import ClientDetailView from './ClientDetailView';
 
 export default function AdminClientsView({ selectedClientId, onSelectClient }) {
@@ -15,6 +16,8 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
   const [showEmailFor, setShowEmailFor] = useState(null);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviting, setInviting] = useState(false);
+  const navigate = useNavigate();
+  const { enterSupportMode } = useSupportMode();
 
   const queryClient = useQueryClient();
 
@@ -176,7 +179,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
               </div>
 
               {/* Quick actions */}
-              <div className="border-t border-white/5 px-4 py-2 flex gap-2">
+              <div className="border-t border-white/5 px-4 py-2 flex gap-2 flex-wrap">
                 <button
                   onClick={() => handleToggle(u)}
                   className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all ${isActive ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
@@ -189,6 +192,12 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
                   className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-all"
                 >
                   <Mail className="w-3.5 h-3.5" /> Envoyer email
+                </button>
+                <button
+                  onClick={() => { enterSupportMode(u); navigate('/support-view'); }}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-amber-400 hover:bg-amber-500/10 transition-all ml-auto"
+                >
+                  <Eye className="w-3.5 h-3.5" /> 👁️ Voir boutique
                 </button>
               </div>
 
