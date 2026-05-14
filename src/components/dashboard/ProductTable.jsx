@@ -100,7 +100,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
       {/* Action */}
       <td className="px-3 py-2">
         {isExpired ? (
-          <Select value={form.action || '__none__'} onValueChange={v => setForm(f => ({ ...f, action: v === '__none__' ? '' : v }))}>
+          <Select value={form.action || '__none__'} onValueChange={v => setForm(f => ({ ...f, action: v === '__none__' ? '' : v, quantity_thrown: '', price_chf: '' }))}>
             <SelectTrigger className="h-7 text-xs min-w-[100px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="__none__">—</SelectItem>
@@ -111,7 +111,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
       </td>
       {/* Qté */}
       <td className="px-3 py-2">
-        {isExpired ? (
+        {isExpired && form.action === 'jeter' ? (
           <Input
             type="number"
             min="0"
@@ -122,18 +122,25 @@ function InlineEditRow({ product, onSave, onCancel }) {
           />
         ) : <span className="text-xs text-muted-foreground">—</span>}
       </td>
-      {/* Total CHF */}
+      {/* Prix / Total CHF */}
       <td className="px-3 py-2">
-        {isExpired ? (
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            value={form.price_chf}
-            onChange={e => setForm(f => ({ ...f, price_chf: e.target.value }))}
-            className="h-7 text-xs w-20"
-            placeholder="CHF"
-          />
+        {isExpired && form.action === 'jeter' ? (
+          <div className="space-y-1">
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.price_chf}
+              onChange={e => setForm(f => ({ ...f, price_chf: e.target.value }))}
+              className="h-7 text-xs w-20"
+              placeholder="CHF"
+            />
+            {form.quantity_thrown && form.price_chf && (
+              <p className="text-xs font-semibold text-red-600">
+                = CHF {((parseFloat(form.quantity_thrown) || 0) * (parseFloat(form.price_chf) || 0)).toFixed(2)}
+              </p>
+            )}
+          </div>
         ) : <span className="text-xs text-muted-foreground">—</span>}
       </td>
       {/* Save/Cancel */}
@@ -142,17 +149,20 @@ function InlineEditRow({ product, onSave, onCancel }) {
           <Button
             size="icon"
             className="h-7 w-7 bg-green-600 hover:bg-green-700"
-            onClick={() => onSave({
-              name: form.name,
-              marque: form.marque || undefined,
-              category: form.category || undefined,
-              rayon: form.rayon || undefined,
-              expiration_date: form.expiration_date,
-              reception_date: form.reception_date || undefined,
-              action: form.action || undefined,
-              quantity_thrown: form.quantity_thrown !== '' ? Number(form.quantity_thrown) : undefined,
-              price_chf: form.price_chf !== '' ? Number(form.price_chf) : undefined,
-            })}
+            onClick={() => {
+              const isJeter = form.action === 'jeter';
+              onSave({
+                name: form.name,
+                marque: form.marque || undefined,
+                category: form.category || undefined,
+                rayon: form.rayon || undefined,
+                expiration_date: form.expiration_date,
+                reception_date: form.reception_date || undefined,
+                action: form.action || undefined,
+                quantity_thrown: isJeter && form.quantity_thrown !== '' ? Number(form.quantity_thrown) : undefined,
+                price_chf: isJeter && form.price_chf !== '' ? Number(form.price_chf) : undefined,
+              });
+            }}
           >
             <Check className="w-3.5 h-3.5" />
           </Button>

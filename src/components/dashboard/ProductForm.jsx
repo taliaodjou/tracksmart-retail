@@ -67,8 +67,10 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
     if (isExpired) {
       if (form.action) data.action = form.action;
       if (form.order_date) data.order_date = form.order_date;
-      if (form.quantity_thrown !== '') data.quantity_thrown = Number(form.quantity_thrown);
-      if (form.price_chf !== '') data.price_chf = Number(form.price_chf);
+      if (form.action === 'jeter') {
+        if (form.quantity_thrown !== '') data.quantity_thrown = Number(form.quantity_thrown);
+        if (form.price_chf !== '') data.price_chf = Number(form.price_chf);
+      }
     }
     onSave(data);
   };
@@ -187,7 +189,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
 
             <div className="space-y-1.5">
               <Label className="text-sm">{t('form_action')}</Label>
-              <Select value={form.action} onValueChange={v => setForm({ ...form, action: v })}>
+              <Select value={form.action} onValueChange={v => setForm({ ...form, action: v, quantity_thrown: '', price_chf: '' })}>
                 <SelectTrigger><SelectValue placeholder={t('form_action')} /></SelectTrigger>
                 <SelectContent>
                   {actionOptions.map(o => <SelectItem key={o.value} value={o.value}>{t(o.key)}</SelectItem>)}
@@ -200,22 +202,26 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
               <Input type="date" value={form.order_date} onChange={set('order_date')} />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm">{t('form_qty_thrown')}</Label>
-              <Input type="number" min="0" value={form.quantity_thrown} onChange={set('quantity_thrown')} placeholder="0" />
-            </div>
+            {form.action === 'jeter' && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">{t('form_qty_thrown')}</Label>
+                  <Input type="number" min="0" value={form.quantity_thrown} onChange={set('quantity_thrown')} placeholder="0" />
+                </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm">{t('form_price_chf')}</Label>
-              <Input type="number" min="0" step="0.01" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" />
-            </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm">{t('form_price_chf')}</Label>
+                  <Input type="number" min="0" step="0.01" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" />
+                </div>
 
-            {(form.quantity_thrown || form.price_chf) && (
-              <div className="sm:col-span-2 bg-red-50 rounded-xl px-4 py-3">
-                <p className="text-sm text-red-700 font-medium">
-                  {t('form_total_chf')} : <span className="font-bold">{totalChf.toFixed(2)}</span>
-                </p>
-              </div>
+                {(form.quantity_thrown || form.price_chf) && (
+                  <div className="sm:col-span-2 bg-red-50 rounded-xl px-4 py-3">
+                    <p className="text-sm text-red-700 font-medium">
+                      {t('form_total_chf')} : <span className="font-bold">CHF {totalChf.toFixed(2)}</span>
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
