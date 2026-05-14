@@ -5,6 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useLanguage } from '@/lib/LanguageContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
+import PremiumGate from '@/components/dashboard/PremiumGate';
+import { hasActiveSubscription } from '@/lib/productUtils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { isAdmin } from '@/lib/productUtils';
@@ -76,6 +78,7 @@ export default function BarcodeDatabase() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const fileRef = useRef();
+  const canAccess = hasActiveSubscription(user);
 
   const [search, setSearch] = useState('');
   const [preview, setPreview] = useState(null); // {items, errors}
@@ -85,12 +88,23 @@ export default function BarcodeDatabase() {
   const { data: barcodes = [], isLoading } = useQuery({
     queryKey: ['barcodes'],
     queryFn: () => base44.entities.BarcodeProduct.list('-created_date', 500),
+    enabled: canAccess,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.BarcodeProduct.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['barcodes'] }),
   });
+
+  if (!canAccess) {
+    return (
+      <div className="min-h-screen bg-secondary/30 flex flex-col">
+        <DashboardHeader />
+        <PremiumGate featureName="la base de données EAN" />
+        <DashboardFooter />
+      </div>
+    );
+  }
 
   const filtered = barcodes.filter(b => {
     const q = search.toLowerCase();

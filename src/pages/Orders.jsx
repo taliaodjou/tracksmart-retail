@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useLanguage } from '@/lib/LanguageContext';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
+import PremiumGate from '@/components/dashboard/PremiumGate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -130,6 +131,18 @@ export default function Orders() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
 
+  const orderNumber = useMemo(() => `TS-${Date.now().toString().slice(-8)}`, []);
+
+  if (!canAccess) {
+    return (
+      <div className="min-h-screen bg-secondary/30 flex flex-col">
+        <DashboardHeader />
+        <PremiumGate featureName="la gestion des commandes" />
+        <DashboardFooter />
+      </div>
+    );
+  }
+
   const selectedProducts = eligibleProducts.filter(p => selectedIds.has(p.id));
   const orderItems = selectedProducts.map(p => ({
     ...p,
@@ -137,8 +150,6 @@ export default function Orders() {
     note: notes[p.id] || '',
     category: p.category ? t(categoryKeys[p.category] || p.category) : '',
   }));
-
-  const orderNumber = useMemo(() => `TS-${Date.now().toString().slice(-8)}`, []);
 
   const toggleAll = () => {
     if (selectedIds.size === eligibleProducts.length) {

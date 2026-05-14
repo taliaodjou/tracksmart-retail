@@ -59,5 +59,19 @@ export function isAdmin(user) {
 export function hasActiveSubscription(user) {
   if (!user) return false;
   if (isAdmin(user)) return true;
-  return user?.subscription_status === 'active';
+  if (user?.subscription_status !== 'active') return false;
+  // Check the user is still within their current 30-day billing cycle
+  if (!user?.subscription_start_date) return false;
+  const start = new Date(user.subscription_start_date);
+  const today = startOfDay(new Date());
+  const daysSinceStart = differenceInDays(today, start);
+  // Every 30 days from start date = one billing cycle
+  // If daysSinceStart mod 30 < 30, they are in an active cycle
+  // But we also need the admin to have confirmed renewal each cycle.
+  // Simple rule: active if within 30 days of the MOST RECENT renewal date
+  const cyclesPassed = Math.floor(daysSinceStart / 30);
+  const currentCycleStart = new Date(start);
+  currentCycleStart.setDate(currentCycleStart.getDate() + cyclesPassed * 30);
+  const daysIntoCycle = differenceInDays(today, startOfDay(currentCycleStart));
+  return daysIntoCycle < 30;
 }

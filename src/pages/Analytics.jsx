@@ -13,6 +13,7 @@ import { TrendingDown, TrendingUp, PackageX, Flame, AlertTriangle, BarChart2 } f
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
+import PremiumGate from '@/components/dashboard/PremiumGate';
 
 const MONTHS_BACK = 6;
 
@@ -125,10 +126,14 @@ export default function Analytics() {
   }, [products]);
 
   if (!canAccess) {
+    const hasSubscription = user?.subscription_status === 'active';
     return (
-      <div className="min-h-screen bg-secondary/30">
+      <div className="min-h-screen bg-secondary/30 flex flex-col">
         <DashboardHeader />
-        <SubscriptionGate />
+        {hasSubscription
+          ? <PremiumGate featureName="les analytiques" />
+          : <SubscriptionGate />
+        }
       </div>
     );
   }
