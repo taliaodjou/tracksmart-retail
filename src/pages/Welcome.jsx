@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { getProductStatus, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
+import { getProductStatus, hasActiveSubscription } from '@/lib/productUtils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ArrowRight, PackageX, AlertTriangle, TrendingDown, Sparkles } from 'lucide-react';
@@ -37,7 +37,7 @@ export default function Welcome() {
     return { expired: expired.length, urgent: urgent.length, monthlyLoss };
   }, [products]);
 
-  const handleStart = () => isAdmin(user) ? navigate('/admin-portal') : navigate('/dashboard');
+  const handleStart = () => navigate('/dashboard');
 
   const today = new Date();
   const dateStr = lang === 'fr'
@@ -120,17 +120,14 @@ export default function Welcome() {
           size="lg"
           className="rounded-full px-10 py-6 text-base font-semibold shadow-lg shadow-primary/20 gap-2 hover:gap-3 transition-all"
         >
-          {isAdmin(user)
-            ? (lang === 'fr' ? 'Portail Admin' : 'Admin Portal')
-            : (lang === 'fr' ? 'Commencer' : 'Get Started')
-          }
+          {lang === 'fr' ? 'Commencer' : 'Get Started'}
           <ArrowRight className="w-5 h-5" />
         </Button>
       </div>
 
       {/* Footer */}
       <footer className="text-center py-4 px-4 text-xs text-muted-foreground/60">
-        TrackSmart by <span className="font-semibold text-primary/70">TNO Studio</span> · support@tracksmart.com
+        Powered by TrackSmart · support@tracksmart.com · +41 77 222 97 64
       </footer>
     </div>
   );
