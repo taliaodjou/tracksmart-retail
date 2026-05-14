@@ -9,7 +9,6 @@ import { LanguageProvider } from '@/lib/LanguageContext';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
 import Admin from '@/pages/Admin';
-import { Navigate } from 'react-router-dom';
 import Welcome from '@/pages/Welcome';
 import Analytics from '@/pages/Analytics';
 import Orders from '@/pages/Orders';
@@ -56,7 +55,7 @@ const AuthenticatedApp = () => {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/barcode-db" element={<BarcodeDatabase />} />
-      <Route path="/admin" element={<Navigate to="/admin-portal" replace />} />
+      <Route path="/admin" element={<Admin />} />
       <Route path="/admin-portal" element={<AdminDashboard />} />
       <Route path="/admin-portal/clients" element={<AdminClients />} />
       <Route path="/admin-portal/clients/:id" element={<AdminClientDetail />} />

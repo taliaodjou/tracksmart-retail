@@ -8,30 +8,23 @@
         "admin",
         "user"
       ],
-      "default": "user",
-      "description": "User role"
+      "default": "user"
     },
     "shop_name": {
       "type": "string",
-      "description": "Store name"
+      "description": "Nom de la boutique"
     },
-    "shop_size": {
+    "phone_number": {
+      "type": "string",
+      "description": "Num\u00e9ro de t\u00e9l\u00e9phone"
+    },
+    "report_channel": {
       "type": "string",
       "enum": [
-        "petite",
-        "moyenne",
-        "grande"
+        "email",
+        "sms"
       ],
-      "description": "Store size"
-    },
-    "subscription_plan": {
-      "type": "string",
-      "enum": [
-        "classic",
-        "premium"
-      ],
-      "default": "classic",
-      "description": "Subscription plan"
+      "default": "email"
     },
     "subscription_status": {
       "type": "string",
@@ -39,34 +32,35 @@
         "active",
         "inactive"
       ],
-      "default": "active",
-      "description": "Subscription status"
+      "default": "inactive"
     },
-    "phone": {
+    "subscription_start_date": {
       "type": "string",
-      "description": "Phone number"
+      "format": "date"
     },
-    "report_method": {
+    "last_reminder_sent": {
       "type": "string",
-      "enum": [
-        "email",
-        "sms"
-      ],
-      "default": "email",
-      "description": "Preferred report method"
+      "description": "Tag of last subscription reminder sent"
     },
-    "last_payment_date": {
+    "last_expiry_reminders_sent": {
       "type": "string",
-      "format": "date",
-      "description": "Last payment date"
+      "description": "JSON: {date, sent} tracking product expiry reminders sent today"
     },
-    "last_activity_date": {
+    "last_weekly_report": {
       "type": "string",
-      "description": "Last activity timestamp"
+      "description": "Date of last weekly report sent"
     },
     "onboarding_complete": {
       "type": "boolean",
       "default": false
     }
-  }
+  },
+  "required": [
+    "shop_name",
+    "phone_number",
+    "subscription_start_date",
+    "last_reminder_sent",
+    "last_expiry_reminders_sent",
+    "last_weekly_report"
+  ]
 }

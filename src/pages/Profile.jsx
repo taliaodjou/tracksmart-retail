@@ -59,11 +59,6 @@ export default function Profile() {
                 : 'bg-red-100 text-red-700 border border-red-200'}>
                 {user?.subscription_status === 'active' ? t('profile_sub_active') : t('profile_sub_inactive')}
               </Badge>
-              <div className="mt-2">
-                <Badge className={user?.subscription_plan === 'premium' ? 'bg-amber-100 text-amber-700 border-0' : 'bg-gray-100 text-gray-600 border-0'}>
-                  {user?.subscription_plan === 'premium' ? '⭐ Premium' : '🔹 Classic'}
-                </Badge>
-              </div>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">{t('profile_sub_start')}</p>

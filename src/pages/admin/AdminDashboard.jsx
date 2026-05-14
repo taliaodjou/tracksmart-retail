@@ -23,9 +23,10 @@ export default function AdminDashboard() {
   const active = clients.filter(u => u.subscription_status === 'active');
   const inactive = clients.filter(u => u.subscription_status !== 'active');
 
-  const classicClients = clients.filter(u => u.subscription_plan === 'classic' || u.subscription_plan === 'basic' || !u.subscription_plan);
+  const basicClients = clients.filter(u => u.subscription_plan === 'basic' || !u.subscription_plan);
   const premiumClients = clients.filter(u => u.subscription_plan === 'premium');
-  const mrr = premiumClients.filter(u => u.subscription_status === 'active').length * 49;
+  const mrr = (basicClients.filter(u => u.subscription_status === 'active').length * 29) +
+               (premiumClients.filter(u => u.subscription_status === 'active').length * 59);
 
   const expiredProducts = products.filter(p => getProductStatus(p.expiration_date) === 'expired');
   const urgentProducts = products.filter(p => getProductStatus(p.expiration_date) === 'urgent');
@@ -45,9 +46,7 @@ export default function AdminDashboard() {
   const subscriptionChartData = [
     { name: 'Actifs', value: active.length, color: '#22c55e' },
     { name: 'Inactifs', value: inactive.length, color: '#ef4444' },
-    { name: 'Premium', value: premiumClients.length, color: '#f59e0b' },
-    { name: 'Classic', value: classicClients.length, color: '#94a3b8' },
-  ].filter(d => d.value > 0);
+  ];
 
   const categoryData = Object.entries(
     products.reduce((acc, p) => {
@@ -60,7 +59,7 @@ export default function AdminDashboard() {
   const statCards = [
     { label: 'Total clients', value: clients.length, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'Abonnements actifs', value: active.length, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'Clients Premium', value: premiumClients.length, icon: TrendingUp, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Abonnements inactifs', value: inactive.length, icon: XCircle, color: 'text-red-500', bg: 'bg-red-50' },
     { label: 'MRR estimé (CHF)', value: `${mrr}`, icon: TrendingUp, color: 'text-primary', bg: 'bg-yellow-50' },
     { label: 'Produits suivis', value: products.length, icon: Package, color: 'text-purple-600', bg: 'bg-purple-50' },
     { label: 'Produits expirés', value: expiredProducts.length, icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50' },

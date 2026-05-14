@@ -7,10 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, FileSpreadsheet, ScanLine, X } from 'lucide-react';
-import { getProductStatus, hasActiveSubscription, isAdmin, categoryKeys, rayonKeys } from '@/lib/productUtils';
+import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
-import { getSupportMode } from '@/lib/supportMode';
-import SupportModeBanner from '@/components/SupportModeBanner';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
@@ -41,16 +39,13 @@ export default function Dashboard() {
   const [rayonFilter, setRayonFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  const supportMode = getSupportMode();
-  const canAccess = isAdmin(user) ? true : hasActiveSubscription(user);
-  const needsOnboarding = canAccess && user && !user.onboarding_complete && !isAdmin(user);
+  const canAccess = hasActiveSubscription(user);
+  const needsOnboarding = canAccess && user && !user.onboarding_complete;
   const [onboardingDone, setOnboardingDone] = useState(false);
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products', supportMode?.clientEmail],
-    queryFn: () => supportMode
-      ? base44.entities.Product.filter({ created_by: supportMode.clientEmail }, '-created_date')
-      : base44.entities.Product.list('-created_date'),
+    queryKey: ['products'],
+    queryFn: () => base44.entities.Product.list('-created_date'),
     enabled: canAccess,
   });
 
@@ -149,10 +144,9 @@ export default function Dashboard() {
     rayonFilter !== 'all',
   ].filter(Boolean).length;
 
-  if (!canAccess && !isAdmin(user)) {
+  if (!canAccess) {
     return (
       <div className="min-h-screen bg-secondary/30">
-        <SupportModeBanner />
         <DashboardHeader />
         <SubscriptionGate />
       </div>
@@ -172,7 +166,6 @@ export default function Dashboard() {
       {needsOnboarding && !onboardingDone && (
         <OnboardingModal user={user} onComplete={() => setOnboardingDone(true)} />
       )}
-      <SupportModeBanner />
       <DashboardHeader />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
