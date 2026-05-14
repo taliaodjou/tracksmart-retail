@@ -29,8 +29,6 @@ export default function AdminDashboardView({ onNavigate, onSelectClient }) {
     { label: 'Abonnements actifs', value: activeClients.length, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10', trend: '' },
     { label: 'Non actifs', value: inactiveClients.length, icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10', trend: '' },
     { label: 'MRR estimé', value: `CHF ${mrr}`, icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10', trend: '' },
-    { label: 'Produits trackés', value: products.length, icon: Package, color: 'text-purple-400', bg: 'bg-purple-500/10', trend: '' },
-    { label: 'Produits expirés', value: expiredProducts.length, icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10', trend: '' },
   ];
 
   const alertClients = clients.filter(u => {

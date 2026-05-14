@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 
-const ADMIN_EMAIL = 'talia.odjou@gmail.com';
 const ADMIN_PIN = '1217';
 const STORAGE_KEY = 'tracksmart_admin_pin_ok';
 
@@ -18,8 +17,7 @@ export default function AdminPinGate({ userEmail, children }) {
     }
   }, []);
 
-  // Only require PIN for the specific admin account
-  if (userEmail !== ADMIN_EMAIL || unlocked) {
+  if (unlocked) {
     return children;
   }
 

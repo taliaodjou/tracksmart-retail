@@ -18,7 +18,8 @@ export default function Landing() {
   };
 
   const handleAdmin = () => {
-    if (isAuthenticated && user && isAdmin(user)) {
+    // Toujours diriger vers /admin-portal : le PIN gate s'affiche là-bas avant tout accès
+    if (isAuthenticated && user) {
       navigate('/admin-portal');
     } else {
       base44.auth.redirectToLogin('/admin-portal');

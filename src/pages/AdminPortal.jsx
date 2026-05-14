@@ -35,7 +35,7 @@ export default function AdminPortal() {
   };
 
   return (
-    <AdminPinGate userEmail={user?.email}>
+    <AdminPinGate>
       <div className="min-h-screen bg-[#0f0f0f] flex">
         <AdminSidebar activeSection={activeSection} onNavigate={setActiveSection} />
         <main className="flex-1 min-w-0 overflow-auto">
