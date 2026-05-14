@@ -44,6 +44,9 @@ export const rayonKeys = {
   '1': 'Rayon 1', '2': 'Rayon 2', '3': 'Rayon 3', '4': 'Rayon 4', '5': 'Rayon 5',
   '6': 'Rayon 6', '7': 'Rayon 7', '8': 'Rayon 8', '9': 'Rayon 9', '10': 'Rayon 10',
   '11': 'Rayon 11', '12': 'Rayon 12', '13': 'Rayon 13', '14': 'Rayon 14', '15': 'Rayon 15',
+  'Frigo 1': 'Frigo 1', 'Frigo 2': 'Frigo 2', 'Frigo 3': 'Frigo 3',
+  'Frigo 4': 'Frigo 4', 'Frigo 5': 'Frigo 5',
+  'Congélateur 1': 'Congélateur 1', 'Congélateur 2': 'Congélateur 2', 'Congélateur 3': 'Congélateur 3',
 };
 
 export const orderStatusKeys = {

@@ -3,103 +3,38 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
-import { getProductStatus } from '@/lib/productUtils';
 import {
   Upload, X, FileSpreadsheet, AlertCircle, CheckCircle2,
   Download, ChevronRight, Loader2, TriangleAlert
 } from 'lucide-react';
 
-// Official TrackSmart column names (exact match) + aliases
+// ─── FIELD DEFINITIONS ──────────────────────────────────────────────────────
 const FIELD_DEFS = [
-  {
-    key: 'name',
-    labelFr: 'Produit',
-    labelEn: 'Product',
-    required: true,
-    aliases: ['produit', 'product', 'nom', 'name', 'article', 'libellé', 'designation'],
-  },
-  {
-    key: 'marque',
-    labelFr: 'Marques',
-    labelEn: 'Brand',
-    required: false,
-    aliases: ['marques', 'marque', 'brand', 'brands', 'fabricant'],
-  },
-  {
-    key: 'category',
-    labelFr: 'Catégories',
-    labelEn: 'Categories',
-    required: false,
-    aliases: ['catégories', 'categories', 'catégorie', 'category', 'categorie', 'type'],
-  },
-  {
-    key: 'reception_date',
-    labelFr: 'Date réception',
-    labelEn: 'Reception date',
-    required: false,
-    aliases: ['date réception', 'date reception', 'reception_date', 'reception date', 'date arrivée', 'arrivée'],
-  },
-  {
-    key: 'expiration_date',
-    labelFr: 'DLC',
-    labelEn: 'Expiry date',
-    required: true,
-    aliases: ['dlc', 'date expiration', 'expiration', 'expiry', 'best before', 'péremption', 'peremption', 'date limite'],
-  },
-  {
-    key: 'rayon',
-    labelFr: 'Rayons',
-    labelEn: 'Section',
-    required: false,
-    aliases: ['rayons', 'rayon', 'section', 'emplacement', 'location'],
-  },
-  {
-    key: 'action',
-    labelFr: 'Action (si expiré)',
-    labelEn: 'Action (if expired)',
-    required: false,
-    aliases: ['action', 'action si expiré', 'action si expire', 'action (si expiré)', 'action (si expire)'],
-  },
-  {
-    key: 'order_date',
-    labelFr: 'Date de commande',
-    labelEn: 'Order date',
-    required: false,
-    aliases: ['date de commande', 'order date', 'order_date', 'commande date', 'date commande'],
-  },
-  {
-    key: 'quantity_thrown',
-    labelFr: 'Quantité jetées',
-    labelEn: 'Thrown quantity',
-    required: false,
+  { key: 'name',            labelFr: 'Produit',           labelEn: 'Product',       required: true,
+    aliases: ['produit', 'product', 'nom', 'name', 'article', 'libellé', 'designation'] },
+  { key: 'marque',          labelFr: 'Marques',           labelEn: 'Brand',         required: false,
+    aliases: ['marques', 'marque', 'brand', 'brands', 'fabricant'] },
+  { key: 'category',        labelFr: 'Catégories',        labelEn: 'Categories',    required: false,
+    aliases: ['catégories', 'categories', 'catégorie', 'category', 'categorie', 'type'] },
+  { key: 'reception_date',  labelFr: 'Date réception',    labelEn: 'Reception date',required: false,
+    aliases: ['date réception', 'date reception', 'reception_date', 'reception date', 'date arrivée', 'arrivée'] },
+  { key: 'expiration_date', labelFr: 'DLC',               labelEn: 'Expiry date',   required: true,
+    aliases: ['dlc', 'date expiration', 'expiration', 'expiry', 'best before', 'péremption', 'peremption', 'date limite'] },
+  { key: 'rayon',           labelFr: 'Rayons',            labelEn: 'Section',       required: false,
+    aliases: ['rayons', 'rayon', 'section', 'emplacement', 'location'] },
+  { key: 'action',          labelFr: 'Action (si expiré)',labelEn: 'Action (if expired)', required: false,
+    aliases: ['action', 'action si expiré', 'action si expire', 'action (si expiré)', 'action (si expire)'] },
+  { key: 'order_date',      labelFr: 'Date de commande',  labelEn: 'Order date',    required: false,
+    aliases: ['date de commande', 'order date', 'order_date', 'commande date', 'date commande'] },
+  { key: 'quantity_thrown', labelFr: 'Quantité jetées',   labelEn: 'Thrown qty',    required: false,
     aliases: ['quantité jetées', 'quantite jetees', 'quantité jettées', 'quantité jetes', 'quantite jettes',
-              'quantité jetée', 'qty thrown', 'thrown', 'quantite'],
-  },
-  {
-    key: 'price_chf',
-    labelFr: 'Prix CHF',
-    labelEn: 'Price CHF',
-    required: false,
-    aliases: ['prix chf', 'prix', 'price', 'chf', 'price chf', 'cout', 'coût'],
-  },
+              'quantité jetée', 'qty thrown', 'thrown', 'quantite'] },
+  { key: 'price_chf',       labelFr: 'Prix CHF',          labelEn: 'Price CHF',     required: false,
+    aliases: ['prix chf', 'prix', 'price', 'chf', 'price chf', 'cout', 'coût'] },
 ];
 
-const CATEGORY_MAP = {
-  snacks: 'snacks',
-  boissons: 'boissons', beverages: 'boissons', drinks: 'boissons', boisson: 'boissons',
-  'congeles poisson': 'congeles_poisson', 'congelés poisson': 'congeles_poisson', 'congelé poisson': 'congeles_poisson',
-  'congeles poulet': 'congeles_poulet', 'congelés poulet': 'congeles_poulet', 'congelé poulet': 'congeles_poulet',
-  'produits frais': 'produits_frais', frais: 'produits_frais', fresh: 'produits_frais',
-  'epicerie seche': 'epicerie_seche', 'épicerie sèche': 'epicerie_seche', epicerie: 'epicerie_seche',
-  confiseries: 'confiseries', sucreries: 'confiseries', confectionery: 'confiseries',
-  conserves: 'conserves', canned: 'conserves',
-  'hygiene beaute': 'hygiene_beaute', hygiene: 'hygiene_beaute', 'hygiène beauté': 'hygiene_beaute',
-  'entretien maison': 'entretien_maison', entretien: 'entretien_maison',
-  bebe: 'bebe', bébé: 'bebe', baby: 'bebe',
-  animaux: 'animaux', pets: 'animaux',
-  alcool: 'alcool', alcohol: 'alcool',
-  tabac: 'tabac', tobacco: 'tabac',
-};
+// Columns that must never be imported (always recalculated)
+const SKIP_COLUMNS = ['jours restants', 'statut', 'total chf', 'days remaining', 'status', 'total'];
 
 const ACTION_MAP = {
   jeter: 'jeter', 'à jeter': 'jeter',
@@ -109,70 +44,164 @@ const ACTION_MAP = {
   reçu: 'recu', recu: 'recu', received: 'recu',
 };
 
+// ─── PARSING UTILITIES ───────────────────────────────────────────────────────
+
+function cleanField(val) {
+  if (val === null || val === undefined) return '';
+  const s = String(val).trim();
+  if (s.startsWith('#')) return ''; // Excel errors: #VALUE!, #REF!, #N/A
+  return s;
+}
+
+function parseExcelDate(val) {
+  if (!val && val !== 0) return '';
+  if (val === null || val === undefined || val === '') return '';
+
+  // Excel error strings
+  if (typeof val === 'string' && val.startsWith('#')) return '';
+  if (typeof val === 'string' && ['fix', '/', '\\'].includes(val.trim())) return '';
+
+  // Excel serial number (numeric, > 1000 to avoid confusion with small numbers)
+  if (typeof val === 'number' && val > 1000) {
+    const date = new Date(Date.UTC(1899, 11, 30) + val * 86400000);
+    if (!isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+  }
+
+  // JavaScript Date object
+  if (val instanceof Date && !isNaN(val.getTime())) {
+    return val.toISOString().slice(0, 10);
+  }
+
+  const s = String(val).trim();
+  if (!s) return '';
+
+  // DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+  const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+  if (dmy) {
+    const y = dmy[3].length === 2 ? '20' + dmy[3] : dmy[3];
+    return `${y}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
+  }
+
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+
+  // 5-digit string serial (e.g. "46156")
+  const num = parseInt(s);
+  if (!isNaN(num) && num > 1000) {
+    const date = new Date(Date.UTC(1899, 11, 30) + num * 86400000);
+    if (!isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+  }
+
+  return '';
+}
+
+function isSerialDate(val) {
+  return typeof val === 'number' && val > 1000;
+}
+
+function normalizeRayon(val) {
+  if (!val) return '';
+  const v = String(val).trim().toLowerCase();
+
+  const rayonMatch = v.match(/rayon[_ ]?(\d+)/);
+  if (rayonMatch) return String(parseInt(rayonMatch[1]));
+
+  const frigoMatch = v.match(/frigo[_ ]?(\d+)/);
+  if (frigoMatch) return `Frigo ${frigoMatch[1]}`;
+
+  const conglMatch = v.match(/congl[_ ]?(\d+)|cong[eé]lateur[_ ]?(\d+)/);
+  if (conglMatch) return `Congélateur ${conglMatch[1] || conglMatch[2]}`;
+
+  // plain number → rayon number
+  const n = parseInt(v);
+  if (!isNaN(n) && n >= 1 && n <= 15) return String(n);
+
+  return val;
+}
+
+function normalizeCategory(val) {
+  if (!val) return 'epicerie_seche';
+  const v = String(val).trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  if (v.includes('snack')) return 'snacks';
+  if (v.includes('glace')) return 'snacks';
+  if (v.includes('boisson')) return 'boissons';
+  if (v.includes('congel') && v.includes('poisson')) return 'congeles_poisson';
+  if (v.includes('congel') && v.includes('poulet')) return 'congeles_poulet';
+  if (v.includes('congel')) return 'congeles_poulet'; // generic frozen
+  if (v.includes('frais')) return 'produits_frais';
+  if (v.includes('epicerie') || v.includes('seche')) return 'epicerie_seche';
+  if (v.includes('confiserie') || v.includes('sucrerie')) return 'confiseries';
+  if (v.includes('conserve')) return 'conserves';
+  if (v.includes('hygiene') || v.includes('beaute')) return 'hygiene_beaute';
+  if (v.includes('entretien')) return 'entretien_maison';
+  if (v.includes('bebe')) return 'bebe';
+  if (v.includes('animal')) return 'animaux';
+  if (v.includes('alcool') || v.includes('biere') || v.includes('vin') || v.includes('spirit')) return 'alcool';
+  if (v.includes('tabac')) return 'tabac';
+
+  return 'epicerie_seche';
+}
+
+function normalizeAction(raw) {
+  if (!raw) return '';
+  const k = raw.toLowerCase().trim();
+  return ACTION_MAP[k] || '';
+}
+
 function detectField(header) {
   const h = header.toLowerCase().trim().replace(/[_\-]/g, ' ');
+  // Skip calculated columns
+  if (SKIP_COLUMNS.some(s => h === s || h.includes(s))) return '__skip__';
   for (const def of FIELD_DEFS) {
     if (def.aliases.some(a => h === a || h.includes(a) || a.includes(h))) return def.key;
   }
   return '';
 }
 
-function parseDate(raw) {
-  if (!raw) return null;
-  const str = String(raw).trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-  const dmy = str.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{4})$/);
-  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
-  // Excel serial date
-  if (/^\d{5}$/.test(str)) {
-    const d = new Date((parseInt(str) - 25569) * 86400 * 1000);
-    if (!isNaN(d)) return d.toISOString().split('T')[0];
-  }
-  const d = new Date(str);
-  if (!isNaN(d)) return d.toISOString().split('T')[0];
-  return null;
-}
+const SECTION_HEADER_RE = /^(rayon|frigo|cong[eé]lateur)\s*[_\s]?\d*/i;
 
-function normalizeCategory(raw) {
-  if (!raw) return '';
-  const k = raw.toLowerCase().trim().replace(/\s+/g, ' ');
-  return CATEGORY_MAP[k] || k;
-}
+function shouldSkipRow(rowValues, colMap) {
+  // All empty
+  if (rowValues.every(cell => !cell && cell !== 0)) return true;
 
-function normalizeRayon(raw) {
-  if (!raw) return '';
-  const n = parseInt(String(raw).replace(/\D/g, ''));
-  if (n >= 1 && n <= 15) return String(n);
-  return '';
-}
+  const produitIdx = colMap['name'];
+  const produit = produitIdx !== undefined ? cleanField(rowValues[produitIdx]) : '';
 
-function normalizeAction(raw) {
-  if (!raw) return '';
-  const k = raw.toLowerCase().trim();
-  return ACTION_MAP[k] || k;
+  // No product name
+  if (!produit) return true;
+
+  // Section header row
+  if (SECTION_HEADER_RE.test(produit.trim())) return true;
+
+  // Row where all "important" fields are empty (dlc, marque, category, price)
+  const dlc    = colMap['expiration_date'] !== undefined ? cleanField(rowValues[colMap['expiration_date']]) : '';
+  const marque = colMap['marque']          !== undefined ? cleanField(rowValues[colMap['marque']])          : '';
+  const cat    = colMap['category']        !== undefined ? cleanField(rowValues[colMap['category']])        : '';
+  const price  = colMap['price_chf']       !== undefined ? cleanField(rowValues[colMap['price_chf']])       : '';
+
+  if (!dlc && !marque && !cat && !price) return true;
+
+  return false;
 }
 
 function downloadTemplate() {
-  const headers = [
-    'Produit', 'Marques', 'Catégories', 'Date réception', 'DLC',
-    'Rayons', 'Action (si expiré)', 'Date de commande',
-    'Quantité jetées', 'Prix CHF', 'Total CHF',
-  ];
+  const headers = ['Produit','Marques','Catégories','Date réception','DLC','Rayons','Action (si expiré)','Date de commande','Quantité jetées','Prix CHF'];
   const examples = [
-    ['Lait entier', 'Migros', 'Produits frais', '01/04/2026', '10/05/2026', '3', '', '', '', '2.50', ''],
-    ['Coca-Cola 1.5L', 'Coca-Cola', 'Boissons', '15/03/2026', '31/12/2026', '1', '', '', '', '1.80', ''],
-    ['Chips barbecue', 'Lay\'s', 'Snacks', '20/04/2026', '15/08/2026', '2', 'Jeter', '05/05/2026', '3', '3.20', '9.60'],
+    ['Lait entier','Migros','Produits frais','01/04/2026','10/05/2026','Rayon 3','','','','2.50'],
+    ['Coca-Cola 1.5L','Coca-Cola','Boissons','15/03/2026','31/12/2026','Frigo 1','','','','1.80'],
+    ['Chips barbecue','Lay\'s','Snacks','20/04/2026','15/08/2026','Rayon 2','Jeter','05/05/2026','3','3.20'],
   ];
   const csv = [headers, ...examples].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
   const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'tracksmart_modele.csv';
-  a.click();
+  a.href = url; a.download = 'tracksmart_modele.csv'; a.click();
   URL.revokeObjectURL(url);
 }
 
+// ─── COMPONENT ───────────────────────────────────────────────────────────────
 export default function ImportModal({ onClose, onImported }) {
   const { t, lang } = useLanguage();
   const fileRef = useRef();
@@ -180,11 +209,14 @@ export default function ImportModal({ onClose, onImported }) {
   const [rawData, setRawData] = useState(null);
   const [mapping, setMapping] = useState({});
   const [preview, setPreview] = useState([]);
-  const [errors, setErrors] = useState([]);
+  const [skipped, setSkipped] = useState([]);
+  const [dateConvertCount, setDateConvertCount] = useState(0);
   const [importing, setImporting] = useState(false);
   const [importCount, setImportCount] = useState(0);
   const [parseError, setParseError] = useState('');
   const [uploading, setUploading] = useState(false);
+
+  const isFr = lang === 'fr';
 
   const handleFile = async (e) => {
     const file = e.target.files[0];
@@ -193,17 +225,12 @@ export default function ImportModal({ onClose, onImported }) {
     setUploading(true);
 
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
-
-    // Use a permissive schema — let the API extract all rows as key-value pairs
     const result = await base44.integrations.Core.ExtractDataFromUploadedFile({
       file_url,
       json_schema: {
         type: 'object',
         properties: {
-          rows: {
-            type: 'array',
-            items: { type: 'object', additionalProperties: { type: 'string' } }
-          }
+          rows: { type: 'array', items: { type: 'object', additionalProperties: true } }
         }
       },
     });
@@ -211,29 +238,25 @@ export default function ImportModal({ onClose, onImported }) {
     setUploading(false);
 
     if (result.status !== 'success' || !result.output) {
-      setParseError(lang === 'fr' ? 'Impossible de lire le fichier.' : 'Could not read the file.');
+      setParseError(isFr ? 'Impossible de lire le fichier.' : 'Could not read the file.');
       return;
     }
 
     const outputRows = Array.isArray(result.output) ? result.output : (result.output.rows || []);
-
     if (!outputRows.length) {
-      setParseError(lang === 'fr' ? 'Fichier vide ou mal formaté.' : 'File empty or badly formatted.');
+      setParseError(isFr ? 'Fichier vide ou mal formaté.' : 'File empty or badly formatted.');
       return;
     }
 
-    // Derive headers from all keys present in the rows
     const headers = [...new Set(outputRows.flatMap(r => Object.keys(r)))];
+    const rows = outputRows.map(r => headers.map(h => r[h] ?? ''));
 
-    // Auto-detect field mappings by column name
+    // Auto-detect field mappings (skip calculated columns)
     const autoMapping = {};
     headers.forEach((h, idx) => {
       const field = detectField(h);
-      if (field && !(field in autoMapping)) autoMapping[field] = idx;
+      if (field && field !== '__skip__' && !(field in autoMapping)) autoMapping[field] = idx;
     });
-
-    // Store rows as arrays for consistent access
-    const rows = outputRows.map(r => headers.map(h => r[h] ?? ''));
 
     setRawData({ headers, rows });
     setMapping(autoMapping);
@@ -241,60 +264,79 @@ export default function ImportModal({ onClose, onImported }) {
   };
 
   const handleConfirmMapping = () => {
-    const { headers, rows } = rawData;
+    const { rows } = rawData;
     const validated = [];
-    const errs = [];
+    const skippedRows = [];
+    let serialDateCount = 0;
 
-    rows.forEach((row, ri) => {
-      const rowValues = Array.isArray(row) ? row : headers.map(h => row[h] ?? '');
+    rows.forEach((rowValues, ri) => {
+      // Skip section headers, empty rows, etc.
+      if (shouldSkipRow(rowValues, mapping)) {
+        skippedRows.push({ row: ri + 1, reason: isFr ? 'Ligne ignorée (en-tête ou vide)' : 'Skipped (header or empty)' });
+        return;
+      }
+
       const entry = {};
-      const rowErrors = [];
+      let hasError = false;
 
       FIELD_DEFS.forEach(({ key, required }) => {
         const colIdx = mapping[key];
-        const raw = colIdx !== undefined ? String(rowValues[colIdx] ?? '').trim() : '';
+        const rawVal = colIdx !== undefined ? rowValues[colIdx] : undefined;
 
         if (key === 'expiration_date' || key === 'reception_date' || key === 'order_date') {
-          const parsed = parseDate(raw);
-          if (!parsed && required) rowErrors.push({ row: ri + 1, msg: lang === 'fr' ? 'DLC invalide' : 'Invalid expiry date' });
-          entry[key] = parsed || '';
+          if (isSerialDate(rawVal)) serialDateCount++;
+          const parsed = parseExcelDate(rawVal);
+          if (!parsed && required) {
+            hasError = true;
+            skippedRows.push({ row: ri + 1, reason: isFr ? 'DLC invalide ou manquante' : 'Missing/invalid expiry date' });
+          }
+          entry[key] = parsed;
         } else if (key === 'category') {
-          entry[key] = normalizeCategory(raw);
+          const cleaned = cleanField(rawVal);
+          entry[key] = cleaned ? normalizeCategory(cleaned) : 'epicerie_seche';
         } else if (key === 'rayon') {
-          entry[key] = normalizeRayon(raw);
+          const cleaned = cleanField(rawVal);
+          entry[key] = normalizeRayon(cleaned);
+          entry._rawRayon = cleaned; // keep original for preview
         } else if (key === 'action') {
-          entry[key] = normalizeAction(raw);
+          entry[key] = normalizeAction(cleanField(rawVal));
         } else if (key === 'quantity_thrown' || key === 'price_chf') {
-          entry[key] = raw ? parseFloat(raw.replace(',', '.')) || '' : '';
+          const cleaned = cleanField(rawVal);
+          entry[key] = cleaned ? parseFloat(cleaned.replace(',', '.')) || '' : '';
         } else {
-          if (!raw && required) rowErrors.push({ row: ri + 1, msg: lang === 'fr' ? 'Nom du produit manquant' : 'Product name missing' });
-          entry[key] = raw;
+          const cleaned = cleanField(rawVal);
+          if (!cleaned && required) {
+            hasError = true;
+            skippedRows.push({ row: ri + 1, reason: isFr ? 'Nom du produit manquant' : 'Product name missing' });
+          }
+          entry[key] = cleaned;
         }
       });
 
-      // Skip empty rows
-      if (!entry.name && !entry.expiration_date) return;
-
-      if (rowErrors.length) errs.push(...rowErrors);
-      else validated.push(entry);
+      if (!hasError) validated.push(entry);
     });
 
-    setErrors(errs);
+    setDateConvertCount(serialDateCount);
+    setSkipped(skippedRows);
     setPreview(validated);
     setStep('preview');
   };
 
   const handleImport = async () => {
     setImporting(true);
-    await base44.entities.Product.bulkCreate(preview);
+    // Strip internal _rawRayon before saving
+    const toSave = preview.map(({ _rawRayon, ...rest }) => rest);
+    await base44.entities.Product.bulkCreate(toSave);
     setImportCount(preview.length);
     setImporting(false);
     setStep('done');
     onImported();
   };
 
-  const fieldLabel = (f) => lang === 'fr' ? f.labelFr : f.labelEn;
-  const displayFields = FIELD_DEFS.filter(f => ['name', 'marque', 'category', 'expiration_date', 'rayon', 'quantity_thrown', 'price_chf'].includes(f.key));
+  const fieldLabel = (f) => isFr ? f.labelFr : f.labelEn;
+  const displayFields = FIELD_DEFS.filter(f =>
+    ['name', 'marque', 'category', 'expiration_date', 'rayon', 'quantity_thrown', 'price_chf'].includes(f.key)
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
@@ -305,7 +347,7 @@ export default function ImportModal({ onClose, onImported }) {
               <FileSpreadsheet className="w-5 h-5 text-primary" />
             </div>
             <h2 className="font-bold text-lg text-foreground">
-              {lang === 'fr' ? 'Importer un fichier Excel / CSV' : 'Import Excel / CSV file'}
+              {isFr ? 'Importer un fichier Excel / CSV' : 'Import Excel / CSV file'}
             </h2>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}><X className="w-4 h-4" /></Button>
@@ -316,44 +358,37 @@ export default function ImportModal({ onClose, onImported }) {
           {/* UPLOAD */}
           {step === 'upload' && (
             <div className="space-y-5">
-              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm text-foreground space-y-1">
-                <p className="font-semibold text-primary">
-                  {lang === 'fr' ? 'Colonnes reconnues automatiquement :' : 'Auto-recognized columns:'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Produit · Marques · Catégories · Date réception · DLC · Rayons · Action · Date de commande · Quantité jetées · Prix CHF
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm space-y-1">
+                <p className="font-semibold text-primary">{isFr ? 'Colonnes reconnues automatiquement :' : 'Auto-recognized columns:'}</p>
+                <p className="text-xs text-muted-foreground">Produit · Marques · Catégories · Date réception · DLC · Rayons · Action · Date de commande · Quantité jetées · Prix CHF</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {isFr ? '✅ Dates Excel (numéros sériels) converties automatiquement.' : '✅ Excel serial dates converted automatically.'}
                 </p>
               </div>
-
               <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-4">
                 <div>
-                  <p className="text-sm font-medium text-foreground">{lang === 'fr' ? 'Télécharger le modèle CSV TrackSmart' : 'Download TrackSmart CSV template'}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{lang === 'fr' ? 'Structure officielle TrackSmart' : 'Official TrackSmart structure'}</p>
+                  <p className="text-sm font-medium">{isFr ? 'Télécharger le modèle CSV' : 'Download CSV template'}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{isFr ? 'Structure officielle TrackSmart' : 'Official TrackSmart structure'}</p>
                 </div>
                 <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={downloadTemplate}>
-                  <Download className="w-4 h-4" />
-                  {lang === 'fr' ? 'Modèle' : 'Template'}
+                  <Download className="w-4 h-4" />{isFr ? 'Modèle' : 'Template'}
                 </Button>
               </div>
-
               <div
                 className="border-2 border-dashed border-border rounded-2xl p-10 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
                 onClick={() => !uploading && fileRef.current.click()}
               >
                 {uploading
                   ? <Loader2 className="w-10 h-10 text-primary mx-auto mb-3 animate-spin" />
-                  : <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                }
+                  : <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />}
                 <p className="font-medium text-foreground mb-1">
                   {uploading
-                    ? (lang === 'fr' ? 'Analyse du fichier en cours…' : 'Analyzing file…')
-                    : (lang === 'fr' ? 'Cliquez pour choisir un fichier' : 'Click to choose a file')
-                  }
+                    ? (isFr ? 'Analyse du fichier en cours…' : 'Analyzing file…')
+                    : (isFr ? 'Cliquez pour choisir un fichier' : 'Click to choose a file')}
                 </p>
                 <p className="text-xs text-muted-foreground">.xlsx, .xls, .csv acceptés</p>
                 <input ref={fileRef} type="file" accept=".xlsx,.csv,.xls" className="hidden" onChange={handleFile} disabled={uploading} />
               </div>
-
               {parseError && (
                 <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 rounded-xl p-4">
                   <AlertCircle className="w-4 h-4 flex-shrink-0" />{parseError}
@@ -366,16 +401,15 @@ export default function ImportModal({ onClose, onImported }) {
           {step === 'map' && rawData && (
             <div className="space-y-5">
               <p className="text-sm text-muted-foreground">
-                {lang === 'fr'
-                  ? `${rawData.rows.length} ligne(s) détectée(s). Vérifiez et ajustez le mapping des colonnes.`
-                  : `${rawData.rows.length} row(s) detected. Review and adjust column mapping.`}
+                {isFr
+                  ? `${rawData.rows.length} ligne(s) détectée(s). Vérifiez le mapping des colonnes.`
+                  : `${rawData.rows.length} row(s) detected. Review column mapping.`}
               </p>
               <div className="space-y-2.5">
                 {FIELD_DEFS.map(field => (
                   <div key={field.key} className="flex items-center gap-3">
-                    <div className="w-44 flex-shrink-0 text-sm font-medium text-foreground">
-                      {fieldLabel(field)}
-                      {field.required && <span className="text-red-500 ml-1">*</span>}
+                    <div className="w-44 flex-shrink-0 text-sm font-medium">
+                      {fieldLabel(field)}{field.required && <span className="text-red-500 ml-1">*</span>}
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     <Select
@@ -387,10 +421,10 @@ export default function ImportModal({ onClose, onImported }) {
                       }}
                     >
                       <SelectTrigger className="flex-1">
-                        <SelectValue placeholder={lang === 'fr' ? 'Choisir colonne…' : 'Choose column…'} />
+                        <SelectValue placeholder={isFr ? 'Choisir colonne…' : 'Choose column…'} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="__none__">{lang === 'fr' ? '— Ignorer —' : '— Ignore —'}</SelectItem>
+                        <SelectItem value="__none__">{isFr ? '— Ignorer —' : '— Ignore —'}</SelectItem>
                         {rawData.headers.map((h, idx) => (
                           <SelectItem key={idx} value={String(idx)}>{h}</SelectItem>
                         ))}
@@ -399,12 +433,9 @@ export default function ImportModal({ onClose, onImported }) {
                   </div>
                 ))}
               </div>
-
               {/* Mini preview */}
               <div className="bg-secondary/40 rounded-xl p-3 overflow-x-auto">
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  {lang === 'fr' ? 'Aperçu (2 premières lignes)' : 'Preview (first 2 rows)'}
-                </p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">{isFr ? 'Aperçu (2 premières lignes)' : 'Preview (first 2 rows)'}</p>
                 <table className="text-xs w-full min-w-max">
                   <thead>
                     <tr>{rawData.headers.map((h, i) => <th key={i} className="text-left px-2 py-1 text-muted-foreground font-medium whitespace-nowrap">{h}</th>)}</tr>
@@ -413,14 +444,13 @@ export default function ImportModal({ onClose, onImported }) {
                     {rawData.rows.slice(0, 2).map((row, ri) => (
                       <tr key={ri} className="border-t border-border/30">
                         {rawData.headers.map((h, ci) => (
-                          <td key={ci} className="px-2 py-1 whitespace-nowrap">{(Array.isArray(row) ? row[ci] : row[h]) || '—'}</td>
+                          <td key={ci} className="px-2 py-1 whitespace-nowrap">{row[ci] ?? '—'}</td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-
               <div className="flex justify-end gap-3">
                 <Button variant="outline" className="rounded-full" onClick={() => setStep('upload')}>{t('back')}</Button>
                 <Button
@@ -428,7 +458,7 @@ export default function ImportModal({ onClose, onImported }) {
                   disabled={!['name', 'expiration_date'].every(f => mapping[f] !== undefined)}
                   onClick={handleConfirmMapping}
                 >
-                  {lang === 'fr' ? 'Valider' : 'Validate'} <ChevronRight className="w-4 h-4" />
+                  {isFr ? 'Valider' : 'Validate'} <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -437,27 +467,50 @@ export default function ImportModal({ onClose, onImported }) {
           {/* PREVIEW */}
           {step === 'preview' && (
             <div className="space-y-5">
-              {errors.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-1">
-                  <div className="flex items-center gap-2 text-red-700 font-medium text-sm">
+              {/* Summary banner */}
+              <div className="bg-secondary/50 border border-border/40 rounded-xl p-4 text-sm space-y-1">
+                <p>✅ <strong>{preview.length}</strong> {isFr ? 'produit(s) valide(s)' : 'valid product(s)'}</p>
+                {skipped.length > 0 && (
+                  <p>⚠️ <strong>{skipped.length}</strong> {isFr ? 'ligne(s) ignorée(s)' : 'row(s) skipped'}</p>
+                )}
+                {dateConvertCount > 0 && (
+                  <p>🔄 <strong>{dateConvertCount}</strong> {isFr ? 'date(s) converties depuis le format Excel' : 'date(s) converted from Excel serial format'}</p>
+                )}
+              </div>
+
+              {/* Skipped rows detail */}
+              {skipped.length > 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 space-y-1">
+                  <div className="flex items-center gap-2 text-yellow-800 font-medium text-sm">
                     <TriangleAlert className="w-4 h-4" />
-                    {lang === 'fr' ? `${errors.length} ligne(s) ignorée(s)` : `${errors.length} row(s) skipped`}
+                    {isFr ? `${skipped.length} ligne(s) ignorée(s)` : `${skipped.length} row(s) skipped`}
                   </div>
-                  {errors.slice(0, 5).map((e, i) => (
-                    <p key={i} className="text-xs text-red-600">
-                      {lang === 'fr' ? `Ligne ${e.row} — ${e.msg}` : `Row ${e.row} — ${e.msg}`}
+                  {skipped.slice(0, 5).map((e, i) => (
+                    <p key={i} className="text-xs text-yellow-700">
+                      {isFr ? `Ligne ${e.row} — ${e.reason}` : `Row ${e.row} — ${e.reason}`}
                     </p>
                   ))}
+                  {skipped.length > 5 && (
+                    <p className="text-xs text-yellow-600">+{skipped.length - 5} {isFr ? 'autres' : 'more'}…</p>
+                  )}
                 </div>
               )}
 
-              <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl p-4">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-                <span className="text-sm text-green-800 font-medium">
-                  {lang === 'fr' ? `${preview.length} produit(s) prêt(s) à importer` : `${preview.length} product(s) ready to import`}
-                </span>
-              </div>
+              {preview.length === 0 ? (
+                <div className="flex items-center gap-2 text-red-600 bg-red-50 rounded-xl p-4 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  {isFr ? 'Aucun produit valide trouvé.' : 'No valid products found.'}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl p-4">
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  <span className="text-sm text-green-800 font-medium">
+                    {isFr ? `${preview.length} produit(s) prêt(s) à importer` : `${preview.length} product(s) ready to import`}
+                  </span>
+                </div>
+              )}
 
+              {/* Preview table with original rayon column */}
               <div className="overflow-x-auto border border-border/40 rounded-xl">
                 <table className="text-xs w-full min-w-max">
                   <thead className="bg-secondary/50">
@@ -465,20 +518,32 @@ export default function ImportModal({ onClose, onImported }) {
                       {displayFields.map(f => (
                         <th key={f.key} className="text-left px-3 py-2 font-semibold whitespace-nowrap">{fieldLabel(f)}</th>
                       ))}
+                      <th className="text-left px-3 py-2 font-semibold whitespace-nowrap text-muted-foreground">
+                        {isFr ? 'Rayon original' : 'Original rayon'}
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {preview.slice(0, 8).map((row, i) => (
+                    {preview.slice(0, 10).map((row, i) => (
                       <tr key={i} className="border-t border-border/30">
                         {displayFields.map(f => (
-                          <td key={f.key} className="px-3 py-2 whitespace-nowrap">{row[f.key] || '—'}</td>
+                          <td key={f.key} className="px-3 py-2 whitespace-nowrap">
+                            {f.key === 'rayon'
+                              ? (row[f.key] ? (
+                                  <span className="font-medium text-primary">{row[f.key]}</span>
+                                ) : '—')
+                              : (row[f.key] || '—')}
+                          </td>
                         ))}
+                        <td className="px-3 py-2 whitespace-nowrap text-muted-foreground text-xs">
+                          {row._rawRayon || '—'}
+                        </td>
                       </tr>
                     ))}
-                    {preview.length > 8 && (
+                    {preview.length > 10 && (
                       <tr className="border-t border-border/30">
-                        <td colSpan={displayFields.length} className="px-3 py-2 text-center text-muted-foreground">
-                          +{preview.length - 8} {lang === 'fr' ? 'lignes' : 'rows'}
+                        <td colSpan={displayFields.length + 1} className="px-3 py-2 text-center text-muted-foreground">
+                          +{preview.length - 10} {isFr ? 'lignes' : 'rows'}
                         </td>
                       </tr>
                     )}
@@ -488,9 +553,13 @@ export default function ImportModal({ onClose, onImported }) {
 
               <div className="flex justify-end gap-3">
                 <Button variant="outline" className="rounded-full" onClick={() => setStep('map')}>{t('back')}</Button>
-                <Button className="rounded-full gap-2" disabled={preview.length === 0 || importing} onClick={handleImport}>
+                <Button
+                  className="rounded-full gap-2"
+                  disabled={preview.length === 0 || importing}
+                  onClick={handleImport}
+                >
                   {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {lang === 'fr' ? `Importer ${preview.length} produit(s)` : `Import ${preview.length} product(s)`}
+                  {isFr ? `Importer ${preview.length} produit(s)` : `Import ${preview.length} product(s)`}
                 </Button>
               </div>
             </div>
@@ -502,9 +571,9 @@ export default function ImportModal({ onClose, onImported }) {
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold">{lang === 'fr' ? 'Importation réussie !' : 'Import successful!'}</h3>
+              <h3 className="text-xl font-bold">{isFr ? 'Importation réussie !' : 'Import successful!'}</h3>
               <p className="text-muted-foreground">
-                {lang === 'fr' ? `${importCount} produit(s) ajouté(s).` : `${importCount} product(s) added.`}
+                {isFr ? `${importCount} produit(s) ajouté(s).` : `${importCount} product(s) added.`}
               </p>
               <Button className="rounded-full px-8" onClick={onClose}>{t('close')}</Button>
             </div>

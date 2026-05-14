@@ -47,9 +47,17 @@
         "12",
         "13",
         "14",
-        "15"
+        "15",
+        "Frigo 1",
+        "Frigo 2",
+        "Frigo 3",
+        "Frigo 4",
+        "Frigo 5",
+        "Cong\u00e9lateur 1",
+        "Cong\u00e9lateur 2",
+        "Cong\u00e9lateur 3"
       ],
-      "description": "Rayon"
+      "description": "Rayon / Section"
     },
     "reception_date": {
       "type": "string",
