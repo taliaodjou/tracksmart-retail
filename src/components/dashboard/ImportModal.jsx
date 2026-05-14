@@ -260,7 +260,12 @@ export default function ImportModal({ onClose, onImported }) {
 
   const handleImport = async () => {
     setImporting(true);
-    const toSave = parsed.products.map(({ _rawRayon, ...rest }) => rest);
+    const toSave = parsed.products.map(({ _rawRayon, quantity_thrown, price_chf, ...rest }) => {
+      const obj = { ...rest };
+      if (quantity_thrown !== '' && quantity_thrown !== null && quantity_thrown !== undefined) obj.quantity_thrown = Number(quantity_thrown);
+      if (price_chf !== '' && price_chf !== null && price_chf !== undefined) obj.price_chf = Number(price_chf);
+      return obj;
+    });
     await base44.entities.Product.bulkCreate(toSave);
     setImportCount(parsed.products.length);
     setImporting(false);
