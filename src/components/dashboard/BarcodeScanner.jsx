@@ -5,36 +5,30 @@ import { X, Camera, Loader2, AlertCircle, CheckCircle2, Keyboard } from 'lucide-
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { NotFoundException } from '@zxing/library';
 
-/**
- * BarcodeScanner — full-screen modal
- * 1. Tries live camera + @zxing/browser real-time decoding (rear camera preferred)
- * 2. On detection: green border flash + haptic + calls onDetected(code)
- * 3. Fallback: manual barcode input if camera unavailable or permission denied
- */
 export default function BarcodeScanner({ onDetected, onClose, lang }) {
   const videoRef = useRef(null);
   const readerRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   const [mode, setMode] = useState('init'); // init | camera | detected | error | manual
   const [errorMsg, setErrorMsg] = useState('');
   const [lastBarcode, setLastBarcode] = useState('');
-  const [detected, setDetected] = useState(false); // green flash
   const [manualCode, setManualCode] = useState('');
   const [manualLoading, setManualLoading] = useState(false);
 
   const isFr = lang === 'fr';
 
   const stopReader = useCallback(() => {
-    if (readerRef.current) {
-      try { BrowserMultiFormatReader.releaseAllStreams(); } catch (_) {}
-      readerRef.current = null;
-    }
+    try { BrowserMultiFormatReader.releaseAllStreams(); } catch (_) {}
+    readerRef.current = null;
   }, []);
 
+  // Start scanner after component mounts so videoRef.current is ready
   useEffect(() => {
-    initScanner();
-    return () => stopReader();
+    const timer = setTimeout(initScanner, 150);
+    return () => {
+      clearTimeout(timer);
+      stopReader();
+    };
   }, []);
 
   const initScanner = async () => {
@@ -42,53 +36,43 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
       setMode('manual');
       return;
     }
-
     try {
       const reader = new BrowserMultiFormatReader();
       readerRef.current = reader;
 
-      // Get available devices, prefer back camera
       const devices = await BrowserMultiFormatReader.listVideoInputDevices();
-      const backCamera = devices.find(d =>
-        /back|rear|environment/i.test(d.label)
-      ) || devices[devices.length - 1];
-
-      const deviceId = backCamera?.deviceId || undefined;
+      const backCamera = devices.find(d => /back|rear|environment/i.test(d.label))
+        || devices[devices.length - 1];
 
       setMode('camera');
 
-      await reader.decodeFromVideoDevice(deviceId, videoRef.current, (result, err) => {
-        if (result) {
-          handleDetected(result.getText());
+      // decodeFromVideoDevice manages the stream internally — video element must be in DOM
+      await reader.decodeFromVideoDevice(
+        backCamera?.deviceId || undefined,
+        videoRef.current,
+        (result, err) => {
+          if (result) handleDetected(result.getText());
+          if (err && !(err instanceof NotFoundException)) {
+            console.warn('ZXing decode error:', err);
+          }
         }
-        // NotFoundException is normal when no barcode in frame — ignore
-        if (err && !(err instanceof NotFoundException)) {
-          console.warn('ZXing error:', err);
-        }
-      });
+      );
     } catch (err) {
+      console.error('Camera init error:', err);
       if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
-        setMode('manual');
         setErrorMsg(isFr
-          ? 'Permission caméra refusée. Saisissez le code-barres manuellement.'
-          : 'Camera permission denied. Enter the barcode manually.');
-      } else {
-        setMode('manual');
+          ? 'Permission caméra refusée.'
+          : 'Camera permission denied.');
       }
+      setMode('manual');
     }
   };
 
   const handleDetected = (code) => {
-    if (detected) return; // prevent double-fire
     stopReader();
-
-    // Haptic feedback
     if (navigator.vibrate) navigator.vibrate(200);
-
-    setDetected(true);
     setLastBarcode(code);
     setMode('detected');
-
     setTimeout(() => onDetected(code), 800);
   };
 
@@ -96,16 +80,21 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
     const code = manualCode.trim();
     if (!code) return;
     setManualLoading(true);
-    // Small delay for UX then call onDetected — lookup happens in Dashboard
-    await new Promise(r => setTimeout(r, 300));
+    await new Promise(r => setTimeout(r, 200));
     setManualLoading(false);
     onDetected(code);
+  };
+
+  const handleRetry = () => {
+    setMode('init');
+    setErrorMsg('');
+    setTimeout(initScanner, 100);
   };
 
   return (
     <div className="fixed inset-0 z-[60] bg-black flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 bg-black/80 backdrop-blur-sm z-10">
+      <div className="flex items-center justify-between px-4 py-4 bg-black/80 z-10 flex-shrink-0">
         <div className="flex items-center gap-2">
           <Camera className="w-5 h-5 text-white/80" />
           <span className="font-semibold text-sm text-white">
@@ -122,10 +111,39 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
         </Button>
       </div>
 
-      {/* Body */}
+      {/* Video — always in DOM so ref exists when ZXing starts */}
+      <div className={`absolute inset-0 top-14 ${mode === 'camera' ? 'block' : 'hidden'}`}>
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover"
+          muted
+          playsInline
+          autoPlay
+        />
+        {/* Viewfinder overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative z-10 w-72 h-44">
+            {/* Corner brackets */}
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-[3px] border-l-[3px] border-white rounded-tl-md" />
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-[3px] border-r-[3px] border-white rounded-tr-md" />
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-[3px] border-l-[3px] border-white rounded-bl-md" />
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-[3px] border-r-[3px] border-white rounded-br-md" />
+            {/* Scan line */}
+            <div
+              className="absolute left-1 right-1 h-0.5 bg-primary/90"
+              style={{ animation: 'scanline 2s ease-in-out infinite' }}
+            />
+          </div>
+          <p className="relative z-10 mt-6 text-white/80 text-sm text-center px-6">
+            {isFr ? 'Pointez vers le code-barres — détection auto' : 'Point at the barcode — auto detect'}
+          </p>
+        </div>
+      </div>
+
+      {/* Body — overlaid states */}
       <div className="flex-1 flex flex-col items-center justify-center">
 
-        {/* === INIT === */}
         {mode === 'init' && (
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="w-10 h-10 text-white animate-spin" />
@@ -133,64 +151,13 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
           </div>
         )}
 
-        {/* === CAMERA MODE === */}
-        {mode === 'camera' && (
-          <div className="w-full h-full relative">
-            {/* Live video — full screen */}
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              muted
-              playsInline
-              autoPlay
-            />
-
-            {/* Green border flash on detect */}
-            {detected && (
-              <div className="absolute inset-0 border-4 border-green-400 rounded-none animate-pulse pointer-events-none z-10" />
-            )}
-
-            {/* Viewfinder overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              {/* Dark mask with transparent center */}
-              <div className="absolute inset-0 bg-black/40" />
-
-              {/* Scan box */}
-              <div className="relative z-10 w-72 h-44">
-                {/* Corners */}
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-3 border-l-3 border-white rounded-tl-md" style={{ borderWidth: '3px' }} />
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-3 border-r-3 border-white rounded-tr-md" style={{ borderWidth: '3px' }} />
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-3 border-l-3 border-white rounded-bl-md" style={{ borderWidth: '3px' }} />
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-3 border-r-3 border-white rounded-br-md" style={{ borderWidth: '3px' }} />
-
-                {/* Animated scan line */}
-                <div
-                  className="absolute left-1 right-1 h-0.5 bg-primary/90 shadow-[0_0_8px_3px_hsl(var(--primary)/0.6)]"
-                  style={{ animation: 'scanline 2s ease-in-out infinite' }}
-                />
-              </div>
-
-              <p className="relative z-10 mt-6 text-white/80 text-sm text-center px-6">
-                {isFr
-                  ? 'Pointez vers le code-barres — détection automatique'
-                  : 'Point at the barcode — automatic detection'}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* === DETECTED === */}
         {mode === 'detected' && (
-          <div className="flex flex-col items-center gap-4 px-8">
+          <div className="flex flex-col items-center gap-4 px-8 z-20">
             <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/40">
               <CheckCircle2 className="w-9 h-9 text-white" />
             </div>
-            <p className="font-bold text-white text-lg">
-              {isFr ? 'Code détecté !' : 'Barcode detected!'}
-            </p>
-            <p className="text-xs font-mono bg-white/10 text-white/80 px-4 py-2 rounded-full">
-              {lastBarcode}
-            </p>
+            <p className="font-bold text-white text-lg">{isFr ? 'Code détecté !' : 'Barcode detected!'}</p>
+            <p className="text-xs font-mono bg-white/10 text-white/80 px-4 py-2 rounded-full">{lastBarcode}</p>
             <div className="flex items-center gap-2 text-white/60 text-xs">
               <Loader2 className="w-3 h-3 animate-spin" />
               {isFr ? 'Recherche du produit…' : 'Looking up product…'}
@@ -198,25 +165,8 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
           </div>
         )}
 
-        {/* === ERROR === */}
-        {mode === 'error' && (
-          <div className="flex flex-col items-center gap-4 px-8">
-            <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
-              <AlertCircle className="w-9 h-9 text-red-400" />
-            </div>
-            <p className="text-white/80 text-sm text-center">{errorMsg}</p>
-            <Button
-              className="rounded-full"
-              onClick={() => { setMode('manual'); }}
-            >
-              {isFr ? 'Saisir manuellement' : 'Enter manually'}
-            </Button>
-          </div>
-        )}
-
-        {/* === MANUAL INPUT === */}
         {mode === 'manual' && (
-          <div className="flex flex-col items-center gap-5 px-8 w-full max-w-sm">
+          <div className="flex flex-col items-center gap-5 px-8 w-full max-w-sm z-20">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
               <Keyboard className="w-8 h-8 text-white/80" />
             </div>
@@ -225,12 +175,9 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
                 {errorMsg || (isFr ? 'Caméra non disponible' : 'Camera unavailable')}
               </p>
               <p className="text-white/60 text-sm">
-                {isFr
-                  ? 'Saisissez ou collez le code-barres ci-dessous'
-                  : 'Type or paste the barcode below'}
+                {isFr ? 'Saisissez le code-barres ci-dessous' : 'Type the barcode below'}
               </p>
             </div>
-
             <div className="w-full flex gap-2">
               <Input
                 value={manualCode}
@@ -246,17 +193,12 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
                 onClick={handleManualSearch}
                 disabled={!manualCode.trim() || manualLoading}
               >
-                {manualLoading
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : (isFr ? 'Rechercher' : 'Search')
-                }
+                {manualLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (isFr ? 'OK' : 'Go')}
               </Button>
             </div>
-
-            {/* Try camera again */}
             <button
               className="text-white/50 text-xs underline underline-offset-2 hover:text-white/80 transition-colors"
-              onClick={() => { setMode('init'); setErrorMsg(''); initScanner(); }}
+              onClick={handleRetry}
             >
               {isFr ? 'Réessayer avec la caméra' : 'Try camera again'}
             </button>
@@ -264,9 +206,9 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
         )}
       </div>
 
-      {/* Bottom: switch to manual (only in camera mode) */}
+      {/* Bottom switcher — only in camera mode */}
       {mode === 'camera' && (
-        <div className="px-6 py-5 bg-black/70 backdrop-blur-sm flex justify-center">
+        <div className="px-6 py-5 bg-black/70 flex justify-center flex-shrink-0 z-10">
           <button
             className="text-white/50 text-xs underline underline-offset-2 hover:text-white/70 transition-colors"
             onClick={() => { stopReader(); setMode('manual'); }}
@@ -278,9 +220,9 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
 
       <style>{`
         @keyframes scanline {
-          0%   { top: 0; opacity: 1; }
-          50%  { top: calc(100% - 2px); opacity: 1; }
-          100% { top: 0; opacity: 1; }
+          0%   { top: 0; }
+          50%  { top: calc(100% - 2px); }
+          100% { top: 0; }
         }
       `}</style>
     </div>
