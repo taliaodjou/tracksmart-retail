@@ -181,7 +181,7 @@ export default function Dashboard() {
             </Button>
             <Button variant="outline" onClick={() => setShowScanner(true)} className="rounded-full gap-2">
               <ScanLine className="w-4 h-4" />
-              Scanner
+              {t('btn_scanner')}
             </Button>
             <Button onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
@@ -198,7 +198,7 @@ export default function Dashboard() {
               <FileSpreadsheet className="w-3.5 h-3.5" />
             </Button>
             <Button size="sm" onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full h-9 px-3 gap-1.5 text-xs">
-              <Plus className="w-3.5 h-3.5" /> Ajouter
+              <Plus className="w-3.5 h-3.5" /> {t('btn_add')}
             </Button>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function Dashboard() {
                   className={`rounded-full whitespace-nowrap gap-1.5 ${activeFilterCount > 0 ? 'border-primary text-primary' : ''}`}
                   onClick={() => setShowFilters(f => !f)}
                 >
-                  Filtres {activeFilterCount > 0 && <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-xs">{activeFilterCount}</span>}
+                  {t('filter_label')} {activeFilterCount > 0 && <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-xs">{activeFilterCount}</span>}
                 </Button>
                 {activeFilterCount > 0 && (
                   <Button
@@ -313,14 +313,14 @@ export default function Dashboard() {
           onClick={() => setShowScanner(true)}
         >
           <ScanLine className="w-5 h-5 text-primary" />
-          Scanner
+          {t('btn_scanner')}
         </Button>
         <Button
           className="flex-1 rounded-full h-12 gap-2 text-sm font-semibold"
           onClick={() => { setEditProduct(null); setShowForm(true); }}
         >
           <Plus className="w-5 h-5" />
-          Ajouter
+          {t('btn_add')}
         </Button>
       </div>
 

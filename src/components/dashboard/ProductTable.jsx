@@ -7,24 +7,17 @@ import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys } from '@/lib/productUtils';
 
-const actionOptions = [
-  { value: 'jeter', label: 'Jeter' },
-  { value: 'a_recommander', label: 'À recommander' },
-  { value: 'commande', label: 'Commandé' },
-  { value: 'en_transition', label: 'En transition' },
-  { value: 'recu', label: 'Reçu' },
-];
-
-const actionLabels = {
-  jeter: 'Jeter',
-  a_recommander: 'À recommander',
-  commande: 'Commandé',
-  en_transition: 'En transition',
-  recu: 'Reçu',
+const ACTION_KEYS = {
+  jeter: 'action_jeter',
+  a_recommander: 'action_a_recommander',
+  commande: 'action_commande',
+  en_transition: 'action_en_transition',
+  recu: 'action_recu',
 };
 
 function InlineEditRow({ product, onSave, onCancel }) {
   const { t } = useLanguage();
+  const actionOptions = Object.entries(ACTION_KEYS).map(([value, key]) => ({ value, key }));
   const [form, setForm] = useState({
     name: product.name || '',
     marque: product.marque || '',
@@ -111,7 +104,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
             <SelectTrigger className="h-7 text-xs min-w-[100px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="__none__">—</SelectItem>
-              {actionOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              {actionOptions.map(o => <SelectItem key={o.value} value={o.value}>{t(o.key)}</SelectItem>)}
             </SelectContent>
           </Select>
         ) : <span className="text-xs text-muted-foreground">—</span>}
@@ -254,7 +247,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
         <table className="w-full text-sm">
           <thead className="bg-secondary/40">
             <tr>
-              {['Produit', 'Marque', 'Catégorie', 'Rayon', 'DLC', 'Jours', 'Statut', 'Action', 'Qté jetée', 'Prix CHF', ''].map((h, i) => (
+              {[t('col_product'), t('col_brand'), t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), ''].map((h, i) => (
                 <th key={i} className="text-left px-4 py-3 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
               ))}
             </tr>
@@ -299,7 +292,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">
-                    {isExpired && p.action ? actionLabels[p.action] || p.action : '—'}
+                    {isExpired && p.action ? t(ACTION_KEYS[p.action] || p.action) : '—'}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {isExpired && p.quantity_thrown != null ? p.quantity_thrown : '—'}

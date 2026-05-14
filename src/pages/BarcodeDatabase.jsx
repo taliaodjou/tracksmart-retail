@@ -100,7 +100,7 @@ export default function BarcodeDatabase() {
     return (
       <div className="min-h-screen bg-secondary/30 flex flex-col">
         <DashboardHeader />
-        <PremiumGate featureName="la base de données EAN" />
+        <PremiumGate featureName={t('barcode_feature')} />
         <DashboardFooter />
       </div>
     );
@@ -137,12 +137,12 @@ export default function BarcodeDatabase() {
     setUploading(false);
 
     if (result.status !== 'success' || !result.output) {
-      toast.error('Impossible de lire le fichier.');
+      toast.error(t('barcode_read_error'));
       return;
     }
 
     const outputRows = Array.isArray(result.output) ? result.output : (result.output.rows || []);
-    if (!outputRows.length) { toast.error('Fichier vide.'); return; }
+    if (!outputRows.length) { toast.error(t('barcode_empty_file')); return; }
 
     const headers = [...new Set(outputRows.flatMap(r => Object.keys(r)))];
     // Auto-detect mapping
@@ -185,8 +185,8 @@ export default function BarcodeDatabase() {
     });
 
     setPreview({ items, errors });
-    if (items.length === 0) toast.error('Aucun produit valide détecté.');
-    else toast.success(`${items.length} produits détectés — vérifiez l'aperçu.`);
+    if (items.length === 0) toast.error(t('barcode_no_valid'));
+    else toast.success(`${items.length} ${t('barcode_detected')}`);
   };
 
   const handleConfirmImport = async () => {
@@ -194,7 +194,7 @@ export default function BarcodeDatabase() {
     setImporting(true);
     await base44.entities.BarcodeProduct.bulkCreate(preview.items);
     queryClient.invalidateQueries({ queryKey: ['barcodes'] });
-    toast.success(`✅ ${preview.items.length} codes-barres importés !`);
+    toast.success(`✅ ${preview.items.length} ${t('barcode_imported')}`);
     setPreview(null);
     setImporting(false);
   };
@@ -209,10 +209,10 @@ export default function BarcodeDatabase() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
               <Database className="w-7 h-7 text-primary" />
-              Base de données EAN
+              {t('barcode_title')}
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              {barcodes.length} produit(s) enregistré(s) — utilisés lors des scans
+              {barcodes.length} {t('barcode_subtitle')}
             </p>
           </div>
           <Button
@@ -221,8 +221,8 @@ export default function BarcodeDatabase() {
             disabled={uploading}
           >
             {uploading
-              ? <><Loader2 className="w-4 h-4 animate-spin" /> Traitement…</>
-              : <><Upload className="w-4 h-4" /> Importer CSV / Excel</>
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('barcode_processing')}</>
+              : <><Upload className="w-4 h-4" /> {t('barcode_import')}</>
             }
           </Button>
           <input
@@ -236,11 +236,8 @@ export default function BarcodeDatabase() {
 
         {/* Format info */}
         <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm mb-6">
-          <p className="font-semibold text-primary mb-1">📋 Colonnes reconnues automatiquement</p>
-          <p className="text-xs text-muted-foreground">
-            <strong>EAN / Barcode</strong> · <strong>Nom / Product</strong> · <strong>Marque / Brand</strong> ·
-            <strong> Catégorie</strong> · <strong>Rayon</strong> · <strong>Prix CHF</strong>
-          </p>
+          <p className="font-semibold text-primary mb-1">{t('barcode_columns_info')}</p>
+          <p className="text-xs text-muted-foreground">{t('barcode_columns_desc')}</p>
         </div>
 
         {/* Preview */}
@@ -248,15 +245,15 @@ export default function BarcodeDatabase() {
           <div className="bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden mb-6">
             <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
               <h2 className="font-semibold text-foreground">
-                Aperçu — {preview.items.length} produit(s)
+                {t('barcode_preview_title')} — {preview.items.length} {t('barcode_preview_products')}
               </h2>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="rounded-full" onClick={() => setPreview(null)}>
-                  <X className="w-4 h-4 mr-1" /> Annuler
+                  <X className="w-4 h-4 mr-1" /> {t('barcode_cancel')}
                 </Button>
                 <Button size="sm" className="rounded-full gap-1.5" onClick={handleConfirmImport} disabled={importing || preview.items.length === 0}>
                   {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Confirmer l'import
+                  {t('barcode_confirm_import')}
                 </Button>
               </div>
             </div>
@@ -264,7 +261,7 @@ export default function BarcodeDatabase() {
             {preview.errors.length > 0 && (
               <div className="mx-5 mt-4 bg-red-50 border border-red-200 rounded-xl p-3">
                 <p className="text-red-700 font-medium text-sm flex items-center gap-1.5 mb-1">
-                  <TriangleAlert className="w-4 h-4" /> {preview.errors.length} ligne(s) ignorée(s)
+                  <TriangleAlert className="w-4 h-4" /> {preview.errors.length} {t('barcode_ignored_lines')}
                 </p>
                 {preview.errors.slice(0, 5).map((e, i) => (
                   <p key={i} className="text-xs text-red-600">• {e}</p>
@@ -276,7 +273,7 @@ export default function BarcodeDatabase() {
               <table className="w-full text-sm">
                 <thead className="bg-secondary/40">
                   <tr>
-                    {['EAN', 'Nom', 'Marque', 'Catégorie', 'Rayon', 'Prix CHF'].map(h => (
+                    {[t('col_ean'), t('col_name'), t('col_brand'), t('col_category'), t('col_rayon'), t('col_price_chf')].map(h => (
                       <th key={h} className="text-left px-4 py-2.5 font-semibold text-xs text-foreground whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -295,7 +292,7 @@ export default function BarcodeDatabase() {
                   {preview.items.length > 20 && (
                     <tr className="border-t border-border/30">
                       <td colSpan={6} className="px-4 py-3 text-center text-muted-foreground text-xs">
-                        +{preview.items.length - 20} autres lignes…
+                        +{preview.items.length - 20} {t('barcode_more_lines')}
                       </td>
                     </tr>
                   )}
@@ -313,7 +310,7 @@ export default function BarcodeDatabase() {
               <Input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Rechercher par EAN, nom, marque…"
+                placeholder={t('barcode_search_placeholder')}
                 className="pl-9 rounded-full"
               />
             </div>
@@ -326,15 +323,15 @@ export default function BarcodeDatabase() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground text-sm">
               <Database className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p>{search ? 'Aucun résultat' : 'Aucun code-barres enregistré.'}</p>
-              <p className="text-xs mt-1">Importez un fichier CSV/Excel pour commencer.</p>
+              <p>{search ? t('barcode_no_result') : t('barcode_empty')}</p>
+              <p className="text-xs mt-1">{t('barcode_empty_hint')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-secondary/40">
                   <tr>
-                    {['EAN', 'Nom', 'Marque', 'Catégorie', 'Rayon', 'Prix CHF', ''].map((h, i) => (
+                    {[t('col_ean'), t('col_name'), t('col_brand'), t('col_category'), t('col_rayon'), t('col_price_chf'), ''].map((h, i) => (
                       <th key={i} className="text-left px-4 py-2.5 font-semibold text-xs text-foreground whitespace-nowrap">{h}</th>
                     ))}
                   </tr>

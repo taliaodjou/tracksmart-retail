@@ -137,7 +137,7 @@ export default function Orders() {
     return (
       <div className="min-h-screen bg-secondary/30 flex flex-col">
         <DashboardHeader />
-        <PremiumGate featureName="la gestion des commandes" />
+        <PremiumGate featureName={t('orders_feature')} />
         <DashboardFooter />
       </div>
     );
@@ -168,7 +168,7 @@ export default function Orders() {
   };
 
   const handlePrint = () => {
-    if (orderItems.length === 0) { toast.error('Sélectionnez au moins un produit.'); return; }
+    if (orderItems.length === 0) { toast.error(t('orders_select_product')); return; }
     const html = generateOrderPDFContent(supplier, orderItems, user, orderNumber);
     const win = window.open('', '_blank');
     win.document.write(html);
@@ -178,8 +178,8 @@ export default function Orders() {
   };
 
   const handleSendEmail = async () => {
-    if (orderItems.length === 0) { toast.error('Sélectionnez au moins un produit.'); return; }
-    if (!supplier.email) { toast.error('Veuillez renseigner l\'email du fournisseur.'); return; }
+    if (orderItems.length === 0) { toast.error(t('orders_select_product')); return; }
+    if (!supplier.email) { toast.error(t('orders_fill_email')); return; }
     setSending(true);
     const lines = orderItems.map(it =>
       `• ${it.name}${it.marque ? ' (' + it.marque + ')' : ''} — Qté : ${it.quantity}${it.note ? ' — ' + it.note : ''}`
@@ -206,8 +206,7 @@ export default function Orders() {
       soon: 'bg-yellow-100 text-yellow-700',
       ok: 'bg-green-100 text-green-700',
     };
-    const labels = { expired: 'Expiré', urgent: 'Urgent', soon: 'Bientôt', ok: 'OK' };
-    return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[s]}`}>{labels[s]}</span>;
+    return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[s]}`}>{t('status_' + s)}</span>;
   };
 
   return (
@@ -220,16 +219,16 @@ export default function Orders() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
               <ShoppingCart className="w-7 h-7 text-primary" />
-              Gestion des commandes
+              {t('orders_title')}
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              {eligibleProducts.length} produit(s) identifié(s) à recommander ou réapprovisionner
+              {eligibleProducts.length} {t('orders_subtitle_plural')}
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="rounded-full gap-2" onClick={handlePrint} disabled={selectedIds.size === 0}>
               <Download className="w-4 h-4" />
-              PDF / Imprimer
+              {t('orders_pdf')}
             </Button>
             <Button
               className="rounded-full gap-2"
@@ -237,7 +236,7 @@ export default function Orders() {
               disabled={selectedIds.size === 0 || sending}
             >
               {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : sent ? <CheckCircle2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-              {sent ? 'Envoyé !' : 'Envoyer par email'}
+              {sent ? t('orders_sent') : t('orders_send_email')}
             </Button>
           </div>
         </div>
@@ -250,13 +249,13 @@ export default function Orders() {
               <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
                 <h2 className="font-semibold text-foreground flex items-center gap-2">
                   <Package className="w-4 h-4 text-primary" />
-                  Produits à commander
+                  {t('orders_products_title')}
                 </h2>
                 <button
                   className="text-xs text-primary hover:underline font-medium"
                   onClick={toggleAll}
                 >
-                  {selectedIds.size === eligibleProducts.length ? 'Tout désélectionner' : 'Tout sélectionner'}
+                  {selectedIds.size === eligibleProducts.length ? t('orders_deselect_all') : t('orders_select_all')}
                 </button>
               </div>
 
@@ -267,8 +266,8 @@ export default function Orders() {
               ) : eligibleProducts.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground text-sm">
                   <Package className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                  <p>Aucun produit à recommander pour l'instant.</p>
-                  <p className="text-xs mt-1">Marquez des produits comme "À recommander" dans le tableau de bord.</p>
+                  <p>{t('orders_empty')}</p>
+                  <p className="text-xs mt-1">{t('orders_empty_hint')}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-border/30">
@@ -294,21 +293,21 @@ export default function Orders() {
                             {statusBadge(p)}
                             {p.action === 'a_recommander' && (
                               <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
-                                À recommander
+                                {t('orders_to_recommend')}
                               </span>
                             )}
                           </div>
                           <div className="text-xs text-muted-foreground mt-1 flex gap-3 flex-wrap">
                             {p.category && <span>{t(categoryKeys[p.category] || p.category)}</span>}
                             {p.rayon && <span>Rayon {p.rayon}</span>}
-                            <span>DLC : {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'} ({days}j)</span>
+                            <span>{t('orders_dlc')} : {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'} ({days}j)</span>
                           </div>
                         </div>
 
                         {isSelected && (
                           <div className="flex items-center gap-2 flex-shrink-0" onClick={e => e.stopPropagation()}>
                             <div>
-                              <label className="text-xs text-muted-foreground block mb-1">Qté</label>
+                              <label className="text-xs text-muted-foreground block mb-1">{t('orders_qty_label')}</label>
                               <Input
                                 type="number"
                                 min="1"
@@ -318,12 +317,12 @@ export default function Orders() {
                               />
                             </div>
                             <div>
-                              <label className="text-xs text-muted-foreground block mb-1">Note</label>
+                              <label className="text-xs text-muted-foreground block mb-1">{t('orders_note_label')}</label>
                               <Input
                                 value={notes[p.id] || ''}
                                 onChange={e => setNotes(n => ({ ...n, [p.id]: e.target.value }))}
                                 className="h-7 w-28 text-xs"
-                                placeholder="Remarque…"
+                                placeholder={t('orders_note_placeholder')}
                               />
                             </div>
                           </div>
@@ -343,11 +342,11 @@ export default function Orders() {
             <div className="bg-white rounded-2xl shadow-sm border border-border/40 p-5">
               <h2 className="font-semibold text-foreground flex items-center gap-2 mb-4">
                 <Building2 className="w-4 h-4 text-primary" />
-                Coordonnées fournisseur
+                {t('orders_supplier_title')}
               </h2>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Nom fournisseur *</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{t('orders_supplier_name')}</label>
                   <Input
                     value={supplier.name}
                     onChange={e => setSupplier(s => ({ ...s, name: e.target.value }))}
@@ -356,17 +355,17 @@ export default function Orders() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Contact</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{t('orders_supplier_contact')}</label>
                   <Input
                     value={supplier.contact}
                     onChange={e => setSupplier(s => ({ ...s, contact: e.target.value }))}
-                    placeholder="Nom du commercial"
+                    placeholder={t('orders_supplier_contact_placeholder')}
                     className="text-sm"
                   />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground block mb-1 flex items-center gap-1">
-                    <Mail className="w-3 h-3" /> Email *
+                    <Mail className="w-3 h-3" /> {t('orders_supplier_email')}
                   </label>
                   <Input
                     type="email"
@@ -378,7 +377,7 @@ export default function Orders() {
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground block mb-1 flex items-center gap-1">
-                    <Phone className="w-3 h-3" /> Téléphone
+                    <Phone className="w-3 h-3" /> {t('orders_supplier_phone')}
                   </label>
                   <Input
                     value={supplier.phone}
@@ -388,11 +387,11 @@ export default function Orders() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">Adresse</label>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{t('orders_supplier_address')}</label>
                   <Input
                     value={supplier.address}
                     onChange={e => setSupplier(s => ({ ...s, address: e.target.value }))}
-                    placeholder="Rue, Ville, Code postal"
+                    placeholder={t('orders_supplier_address_placeholder')}
                     className="text-sm"
                   />
                 </div>
@@ -403,22 +402,22 @@ export default function Orders() {
             <div className="bg-white rounded-2xl shadow-sm border border-border/40 p-5">
               <h2 className="font-semibold text-foreground flex items-center gap-2 mb-4">
                 <FileText className="w-4 h-4 text-primary" />
-                Récapitulatif
+                {t('orders_summary_title')}
               </h2>
               {selectedIds.size === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">Aucun produit sélectionné</p>
+                <p className="text-sm text-muted-foreground text-center py-4">{t('orders_summary_empty')}</p>
               ) : (
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Articles sélectionnés</span>
+                    <span className="text-muted-foreground">{t('orders_summary_items')}</span>
                     <span className="font-semibold">{selectedIds.size}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Quantité totale</span>
-                    <span className="font-semibold">{orderItems.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0)} unités</span>
+                    <span className="text-muted-foreground">{t('orders_summary_qty')}</span>
+                    <span className="font-semibold">{orderItems.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0)} {t('units')}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">N° bon de commande</span>
+                    <span className="text-muted-foreground">{t('orders_summary_order_num')}</span>
                     <span className="font-mono text-xs text-primary font-semibold">#{orderNumber}</span>
                   </div>
                   <div className="border-t border-border/40 pt-3 mt-3 space-y-1">
@@ -445,7 +444,7 @@ export default function Orders() {
                 disabled={selectedIds.size === 0}
               >
                 <Download className="w-4 h-4" />
-                Télécharger / Imprimer PDF
+                {t('orders_download')}
               </Button>
               <Button
                 className="rounded-full gap-2 w-full"
@@ -453,7 +452,7 @@ export default function Orders() {
                 disabled={selectedIds.size === 0 || sending}
               >
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : sent ? <CheckCircle2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-                {sent ? 'Envoyé !' : 'Envoyer par email au fournisseur'}
+                {sent ? t('orders_sent') : t('orders_send_supplier')}
               </Button>
             </div>
           </div>
