@@ -240,7 +240,6 @@ export default function Dashboard() {
         ) : (
           <div className="space-y-4 sm:space-y-6">
             <StatsCards products={products} />
-            <WeeklyAlert products={products} />
 
             {showForm && (
               <ProductForm
@@ -249,6 +248,8 @@ export default function Dashboard() {
                 editProduct={editProduct}
               />
             )}
+
+            <WeeklyAlert products={products} />
 
             {/* Filters */}
             <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-border/40 space-y-3">
@@ -259,7 +260,7 @@ export default function Dashboard() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder={t('dash_search')}
-                    className="pl-9 rounded-full h-10"
+                    className="pl-9 rounded-full h-9 text-xs"
                   />
                 </div>
                 <Button
