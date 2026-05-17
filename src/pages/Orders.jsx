@@ -287,21 +287,23 @@ export default function Orders() {
                           onClick={e => e.stopPropagation()}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-foreground">{p.name}</span>
-                            {p.marque && <span className="text-xs text-muted-foreground">({p.marque})</span>}
-                            {statusBadge(p)}
-                            {p.action === 'a_recommander' && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
-                                {t('orders_to_recommend')}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-xs text-muted-foreground mt-1 flex gap-3 flex-wrap">
-                            {p.category && <span>{t(categoryKeys[p.category] || p.category)}</span>}
-                            {p.rayon && <span>Rayon {p.rayon}</span>}
-                            <span>{t('orders_dlc')} : {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'} ({days}j)</span>
-                          </div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-medium text-foreground text-sm">{p.name}</span>
+                          {p.marque && <span className="text-xs text-muted-foreground">({p.marque})</span>}
+                          {statusBadge(p)}
+                          {p.action === 'a_recommander' && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
+                              {t('orders_to_recommend')}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1 flex flex-row flex-nowrap gap-2 overflow-x-auto">
+                          {p.category && <span className="whitespace-nowrap">{t(categoryKeys[p.category] || p.category)}</span>}
+                          {p.category && (p.rayon || p.expiration_date) && <span>·</span>}
+                          {p.rayon && <span className="whitespace-nowrap">Rayon {p.rayon}</span>}
+                          {p.rayon && p.expiration_date && <span>·</span>}
+                          {p.expiration_date && <span className="whitespace-nowrap">{t('orders_dlc')} : {format(new Date(p.expiration_date), 'dd/MM/yyyy')} ({days}j)</span>}
+                        </div>
                         </div>
 
                         {isSelected && (
