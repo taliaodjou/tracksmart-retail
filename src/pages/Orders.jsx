@@ -221,7 +221,7 @@ export default function Orders() {
               <ShoppingCart className="w-7 h-7 text-primary" />
               {t('orders_title')}
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-muted-foreground text-xs mt-1">
               {eligibleProducts.length} {t('orders_subtitle_plural')}
             </p>
           </div>
