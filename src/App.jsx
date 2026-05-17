@@ -16,7 +16,6 @@ import Admin from '@/pages/Admin';
 import Welcome from '@/pages/Welcome';
 import Analytics from '@/pages/Analytics';
 import Orders from '@/pages/Orders';
-import BarcodeDatabase from '@/pages/BarcodeDatabase';
 import AdminPortal from '@/pages/AdminPortal';
 
 const AuthenticatedApp = () => {
@@ -70,7 +69,6 @@ const AuthenticatedApp = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/orders" element={<Orders />} />
-      <Route path="/barcode-db" element={<BarcodeDatabase />} />
       <Route path="/admin" element={<Admin />} />
 
       {/* Admin-only routes */}
@@ -99,4 +97,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
