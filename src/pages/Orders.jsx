@@ -14,7 +14,7 @@ import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription
 import { format } from 'date-fns';
 import {
   ShoppingCart, FileText, Send, Download, Plus, Trash2,
-  Package, Mail, Building2, Phone, Loader2, CheckCircle2
+  Package, Mail, Building2, Phone, Loader2, CheckCircle2, Search
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -130,6 +130,7 @@ export default function Orders() {
   const [supplier, setSupplier] = useState({ name: '', contact: '', email: '', phone: '', address: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [search, setSearch] = useState('');
 
   const orderNumber = useMemo(() => `TS-${Date.now().toString().slice(-8)}`, []);
 
@@ -142,6 +143,13 @@ export default function Orders() {
       </div>
     );
   }
+
+  const filteredProducts = search.trim()
+    ? eligibleProducts.filter(p =>
+        p.name?.toLowerCase().includes(search.toLowerCase()) ||
+        p.marque?.toLowerCase().includes(search.toLowerCase())
+      )
+    : eligibleProducts;
 
   const selectedProducts = eligibleProducts.filter(p => selectedIds.has(p.id));
   const orderItems = selectedProducts.map(p => ({
@@ -246,17 +254,28 @@ export default function Orders() {
           {/* Left — product list */}
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden">
-              <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
-                <h2 className="font-semibold text-foreground flex items-center gap-2">
-                  <Package className="w-4 h-4 text-primary" />
-                  {t('orders_products_title')}
-                </h2>
-                <button
-                  className="text-xs text-primary hover:underline font-medium"
-                  onClick={toggleAll}
-                >
-                  {selectedIds.size === eligibleProducts.length ? t('orders_deselect_all') : t('orders_select_all')}
-                </button>
+              <div className="px-5 py-4 border-b border-border/40 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-semibold text-foreground flex items-center gap-2">
+                    <Package className="w-4 h-4 text-primary" />
+                    {t('orders_products_title')}
+                  </h2>
+                  <button
+                    className="text-xs text-primary hover:underline font-medium"
+                    onClick={toggleAll}
+                  >
+                    {selectedIds.size === eligibleProducts.length ? t('orders_deselect_all') : t('orders_select_all')}
+                  </button>
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder="Rechercher un produit..."
+                    className="pl-8 h-8 text-xs rounded-full"
+                  />
+                </div>
               </div>
 
               {isLoading ? (
@@ -271,7 +290,7 @@ export default function Orders() {
                 </div>
               ) : (
                 <div className="divide-y divide-border/30">
-                  {eligibleProducts.map(p => {
+                  {filteredProducts.map(p => {
                     const isSelected = selectedIds.has(p.id);
                     const days = getDaysRemaining(p.expiration_date);
                     return (
