@@ -75,7 +75,7 @@ export default function Welcome() {
           )}
         </h1>
 
-        <p className="text-muted-foreground text-base sm:text-lg max-w-md mb-2">
+        <p className="text-muted-foreground text-sm sm:text-base max-w-md mb-2">
           {lang === 'fr'
             ? 'Votre espace intelligent de suivi des produits et des pertes.'
             : 'Your smart product expiration and loss tracking space.'}
