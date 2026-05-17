@@ -358,7 +358,9 @@ export default function Dashboard() {
       {showImport && (
         <ImportModal
           onClose={() => setShowImport(false)}
-          onImported={() => { queryClient.invalidateQueries({ queryKey: ['products'] }); setShowImport(false); }}
+          onImported={() => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+          }}
         />
       )}
 

@@ -2,13 +2,25 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { getProductStatus } from '@/lib/productUtils';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, LineChart, Line, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#b5924c', '#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ec4899'];
 
 export default function AdminAnalyticsView() {
   const { data: users = [] } = useQuery({ queryKey: ['admin_users'], queryFn: () => base44.entities.User.list() });
-  const { data: products = [] } = useQuery({ queryKey: ['all_products'], queryFn: () => base44.entities.Product.list() });
+  const { data: allProductsRes = {}, isLoading: loadingProducts } = useQuery({
+    queryKey: ['admin_all_products'],
+    queryFn: () => base44.functions.invoke('adminGetAllProducts', {}),
+  });
+  const products = allProductsRes?.data?.products || [];
+
+  if (loadingProducts) {
+    return (
+      <div className="p-6 lg:p-8 pt-16 lg:pt-8 flex items-center justify-center py-32">
+        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const clients = users.filter(u => u.role !== 'admin');
   const activeClients = clients.filter(u => u.subscription_status === 'active');

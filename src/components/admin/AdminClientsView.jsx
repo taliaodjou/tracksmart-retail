@@ -22,7 +22,11 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading } = useQuery({ queryKey: ['admin_users'], queryFn: () => base44.entities.User.list() });
-  const { data: products = [] } = useQuery({ queryKey: ['all_products'], queryFn: () => base44.entities.Product.list() });
+  const { data: allProductsRes = {} } = useQuery({
+    queryKey: ['admin_all_products'],
+    queryFn: () => base44.functions.invoke('adminGetAllProducts', {}),
+  });
+  const products = allProductsRes?.data?.products || [];
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
