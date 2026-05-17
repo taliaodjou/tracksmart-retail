@@ -198,7 +198,7 @@ export default function Dashboard() {
       )}
       <DashboardHeader />
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 pb-6 sm:pt-10 sm:pb-8">
 
         {/* Desktop header */}
         <div className="hidden sm:flex items-start sm:items-center justify-between gap-4 mb-8">
