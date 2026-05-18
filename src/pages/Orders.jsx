@@ -114,8 +114,8 @@ export default function Orders() {
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
-    queryFn: () => base44.entities.Product.list('-created_date'),
-    enabled: canAccess,
+    queryFn: () => base44.entities.Product.filter({ created_by: user.email }, '-created_date'),
+    enabled: canAccess && !!user?.email,
   });
 
   // Products eligible for re-order
