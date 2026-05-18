@@ -150,24 +150,24 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         {/* Produit */}
         <div className="space-y-1.5">
-          <Label className="text-sm">{t('form_product')}</Label>
-          <Input required value={form.name} onChange={set('name')} placeholder={t('dash_product_name')} />
+          <Label className="text-xs">{t('form_product')}</Label>
+          <Input required value={form.name} onChange={set('name')} placeholder={t('dash_product_name')} className="h-8 text-sm" />
         </div>
 
         {/* Marque */}
-        <div className="space-y-1.5">
-          <Label className="text-sm">{t('form_brand')}</Label>
-          <Input value={form.marque} onChange={set('marque')} placeholder="Ex: Nestlé" />
+        <div className="space-y-1">
+          <Label className="text-xs">{t('form_brand')}</Label>
+          <Input value={form.marque} onChange={set('marque')} placeholder="Ex: Nestlé" className="h-8 text-sm" />
         </div>
 
         {/* Catégorie */}
-        <div className="space-y-1.5">
-          <Label className="text-sm">{t('form_category')}</Label>
+        <div className="space-y-1">
+          <Label className="text-xs">{t('form_category')}</Label>
           <Select value={form.category} onValueChange={v => setForm({ ...form, category: v })}>
-            <SelectTrigger><SelectValue placeholder={t('form_category')} /></SelectTrigger>
+            <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('form_category')} /></SelectTrigger>
             <SelectContent>
               {Object.entries(categoryKeys).map(([value, key]) => (
                 <SelectItem key={value} value={value}>{t(key)}</SelectItem>
@@ -177,10 +177,10 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         </div>
 
         {/* Rayon */}
-        <div className="space-y-1.5">
-          <Label className="text-sm">{t('form_rayon')}</Label>
+        <div className="space-y-1">
+          <Label className="text-xs">{t('form_rayon')}</Label>
           <Select value={form.rayon} onValueChange={v => setForm({ ...form, rayon: v })}>
-            <SelectTrigger><SelectValue placeholder={t('form_rayon')} /></SelectTrigger>
+            <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('form_rayon')} /></SelectTrigger>
             <SelectContent>
               {Object.keys(rayonKeys).map(r => (
                 <SelectItem key={r} value={r}>{t('dash_filter_rayon')} {r}</SelectItem>
@@ -190,15 +190,15 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         </div>
 
         {/* Date réception */}
-        <div className="space-y-1.5">
-          <Label className="text-sm">{t('form_reception_date')}</Label>
-          <Input type="date" value={form.reception_date} onChange={set('reception_date')} />
+        <div className="space-y-1">
+          <Label className="text-xs">{t('form_reception_date')}</Label>
+          <Input type="date" value={form.reception_date} onChange={set('reception_date')} className="h-8 text-sm" />
         </div>
 
         {/* DLC */}
-        <div className="space-y-1.5">
-          <Label className="text-sm">{t('form_dlc')}</Label>
-          <Input required type="date" value={form.expiration_date} onChange={set('expiration_date')} />
+        <div className="space-y-1">
+          <Label className="text-xs">{t('form_dlc')}</Label>
+          <Input required type="date" value={form.expiration_date} onChange={set('expiration_date')} className="h-8 text-sm" />
         </div>
 
         {/* Conditional: expired fields */}
@@ -208,31 +208,31 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
               <p className="text-xs font-semibold text-red-600 uppercase tracking-wide mb-3">{t('form_expired_section')}</p>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm">{t('form_action')}</Label>
+            <div className="space-y-1">
+              <Label className="text-xs">{t('form_action')}</Label>
               <Select value={form.action} onValueChange={v => setForm({ ...form, action: v, quantity_thrown: '', price_chf: '' })}>
-                <SelectTrigger><SelectValue placeholder={t('form_action')} /></SelectTrigger>
+                <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('form_action')} /></SelectTrigger>
                 <SelectContent>
                   {actionOptions.map(o => <SelectItem key={o.value} value={o.value}>{t(o.key)}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm">{t('form_order_date')}</Label>
-              <Input type="date" value={form.order_date} onChange={set('order_date')} />
+            <div className="space-y-1">
+              <Label className="text-xs">{t('form_order_date')}</Label>
+              <Input type="date" value={form.order_date} onChange={set('order_date')} className="h-8 text-sm" />
             </div>
 
             {form.action === 'jeter' && (
               <>
-                <div className="space-y-1.5">
-                  <Label className="text-sm">{t('form_qty_thrown')}</Label>
-                  <Input type="number" min="0" value={form.quantity_thrown} onChange={set('quantity_thrown')} placeholder="0" />
+                <div className="space-y-1">
+                  <Label className="text-xs">{t('form_qty_thrown')}</Label>
+                  <Input type="number" min="0" value={form.quantity_thrown} onChange={set('quantity_thrown')} placeholder="0" className="h-8 text-sm" />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-sm">{t('form_price_chf')}</Label>
-                  <Input type="number" min="0" step="0.01" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" />
+                <div className="space-y-1">
+                  <Label className="text-xs">{t('form_price_chf')}</Label>
+                  <Input type="number" min="0" step="0.01" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" className="h-8 text-sm" />
                 </div>
 
                 {(form.quantity_thrown || form.price_chf) && (
