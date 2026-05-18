@@ -20,8 +20,8 @@ export default function StatsCards({ products }) {
       {cards.map((card, i) => (
         <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm border border-border/40">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-tight">{card.label}</p>
+            <div className="flex flex-col justify-between h-full">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-tight min-h-[2.5em]">{card.label}</p>
               <p className="text-2xl sm:text-3xl font-bold text-foreground mt-0.5 sm:mt-1">{card.value}</p>
             </div>
             <div className={`hidden sm:flex w-12 h-12 rounded-xl ${card.bg} items-center justify-center`}>
