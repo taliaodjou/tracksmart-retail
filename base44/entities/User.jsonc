@@ -58,14 +58,10 @@
       "type": "boolean",
       "default": false,
       "description": "True if user unsubscribed from emails"
+    },
+    "stripe_customer_id": {
+      "type": "string",
+      "description": "Stripe customer ID"
     }
-  },
-  "required": [
-    "shop_name",
-    "phone_number",
-    "subscription_start_date",
-    "last_reminder_sent",
-    "last_expiry_reminders_sent",
-    "last_weekly_report"
-  ]
+  }
 }

@@ -12,6 +12,7 @@ import { format, addMonths } from 'date-fns';
 import { getNextRenewalDate } from '@/lib/schedulerUtils';
 import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, BellOff, Bell } from 'lucide-react';
 import AccountingSettings from '@/components/profile/AccountingSettings';
+import SubscriptionPlans from '@/components/profile/SubscriptionPlans';
 
 export default function Profile() {
   const { t, lang } = useLanguage();
@@ -50,36 +51,9 @@ export default function Profile() {
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <h1 className="text-2xl font-bold text-foreground mb-8">{t('profile_title')}</h1>
 
-        {/* Subscription card */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40 mb-6">
-          <h2 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-            <User className="w-4 h-4 text-primary" />
-            {t('profile_subscription')}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">{t('profile_sub_status')}</p>
-              <Badge className={user?.subscription_status === 'active'
-                ? 'bg-green-100 text-green-700 border border-green-200'
-                : 'bg-red-100 text-red-700 border border-red-200'}>
-                {user?.subscription_status === 'active' ? t('profile_sub_active') : t('profile_sub_inactive')}
-              </Badge>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">{t('profile_sub_start')}</p>
-              <p className="text-sm font-medium text-foreground">
-                {user?.subscription_start_date
-                  ? format(new Date(user.subscription_start_date), 'dd/MM/yyyy')
-                  : '—'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">{t('profile_next_renewal')}</p>
-              <p className="text-sm font-medium text-foreground">
-                {nextRenewal ? format(nextRenewal, 'dd/MM/yyyy') : '—'}
-              </p>
-            </div>
-          </div>
+        {/* Subscription plans */}
+        <div className="mb-6">
+          <SubscriptionPlans user={user} />
         </div>
 
         {/* Support card */}
