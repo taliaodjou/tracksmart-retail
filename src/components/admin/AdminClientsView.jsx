@@ -43,15 +43,84 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
     return matchSearch && matchStatus;
   });
 
+  const emailTemplate = (title, accentColor, bodyContent) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f0;padding:40px 0;">
+    <tr><td align="center">
+      <table width="580" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <!-- Header -->
+        <tr>
+          <td style="background:#111111;padding:28px 40px;text-align:left;">
+            <table cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#C9A64C;border-radius:10px;padding:8px 14px;display:inline-block;">
+                  <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart</span>
+                </td>
+                <td style="padding-left:14px;color:rgba(255,255,255,0.35);font-size:11px;">by TNO Studio</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Accent bar -->
+        <tr><td style="height:4px;background:${accentColor};"></td></tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#111111;">${title}</h1>
+            ${bodyContent}
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f9f9f7;border-top:1px solid #eeeeee;padding:24px 40px;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#999999;">© ${new Date().getFullYear()} TNO Studio · TrackSmart</p>
+            <p style="margin:6px 0 0;font-size:12px;color:#bbbbbb;">support@tracksmart.com</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
   const handleToggle = async (u) => {
     const newStatus = u.subscription_status === 'active' ? 'inactive' : 'active';
     await updateMutation.mutateAsync({ id: u.id, data: { subscription_status: newStatus, ...(newStatus === 'active' && !u.subscription_start_date ? { subscription_start_date: new Date().toISOString().split('T')[0] } : {}) } });
+
+    const shopName = u.shop_name || u.full_name || 'votre boutique';
+
+    const body = newStatus === 'active'
+      ? emailTemplate(
+          '🎉 Votre abonnement est activé',
+          '#10b981',
+          `<p style="margin:0 0 16px;font-size:15px;color:#444444;line-height:1.7;">Bonjour <strong>${shopName}</strong>,</p>
+           <p style="margin:0 0 20px;font-size:15px;color:#444444;line-height:1.7;">Votre abonnement <strong>TrackSmart</strong> a été activé avec succès. Vous avez désormais accès à l'ensemble des fonctionnalités de votre tableau de bord.</p>
+           <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+             <tr><td style="background:#10b981;border-radius:10px;padding:12px 28px;">
+               <a href="https://tracksmart.base44.app/dashboard" style="color:#ffffff;font-weight:700;font-size:14px;text-decoration:none;">Accéder à mon tableau de bord →</a>
+             </td></tr>
+           </table>
+           <p style="margin:0;font-size:13px;color:#999999;">Si vous avez des questions, contactez-nous à support@tracksmart.com.</p>`
+        )
+      : emailTemplate(
+          '⚠️ Accès suspendu',
+          '#ef4444',
+          `<p style="margin:0 0 16px;font-size:15px;color:#444444;line-height:1.7;">Bonjour <strong>${shopName}</strong>,</p>
+           <p style="margin:0 0 20px;font-size:15px;color:#444444;line-height:1.7;">Votre accès <strong>TrackSmart</strong> a été temporairement suspendu. Pour renouveler votre abonnement et retrouver l'accès à vos données, veuillez nous contacter.</p>
+           <p style="margin:0;font-size:14px;color:#444444;">📧 <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;">support@tracksmart.com</a></p>`
+        );
+
     await base44.integrations.Core.SendEmail({
       to: u.email,
-      subject: 'TrackSmart — ' + (newStatus === 'active' ? 'Abonnement activé' : 'Accès suspendu'),
-      body: newStatus === 'active'
-        ? 'Votre abonnement TrackSmart a été activé. Vous pouvez maintenant accéder à votre tableau de bord.'
-        : 'Votre accès TrackSmart est suspendu. Veuillez contacter TNO Studio pour renouveler votre abonnement.',
+      subject: newStatus === 'active' ? 'TrackSmart — Abonnement activé 🎉' : 'TrackSmart — Accès suspendu',
+      body,
     });
     toast.success(newStatus === 'active' ? 'Client activé' : 'Client désactivé');
   };
@@ -59,7 +128,21 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
   const handleSendEmail = async (u) => {
     if (!emailMsg.trim()) return;
     setSendingEmail(u.id);
-    await base44.integrations.Core.SendEmail({ to: u.email, subject: 'TrackSmart — Message de votre gestionnaire', body: emailMsg });
+    const shopName = u.shop_name || u.full_name || 'votre boutique';
+    const body = emailTemplate(
+      'Message de votre gestionnaire',
+      '#C9A64C',
+      `<p style="margin:0 0 16px;font-size:15px;color:#444444;line-height:1.7;">Bonjour <strong>${shopName}</strong>,</p>
+       <div style="background:#f9f9f7;border-left:4px solid #C9A64C;border-radius:4px;padding:16px 20px;margin:0 0 20px;">
+         <p style="margin:0;font-size:15px;color:#333333;line-height:1.7;white-space:pre-wrap;">${emailMsg.replace(/</g, '&lt;')}</p>
+       </div>
+       <p style="margin:0;font-size:13px;color:#999999;">Pour toute question, répondez directement à cet email ou contactez support@tracksmart.com.</p>`
+    );
+    await base44.integrations.Core.SendEmail({
+      to: u.email,
+      subject: 'TrackSmart — Message de votre gestionnaire',
+      body,
+    });
     toast.success('Email envoyé');
     setEmailMsg('');
     setShowEmailFor(null);
