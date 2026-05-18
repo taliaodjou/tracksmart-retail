@@ -65,8 +65,8 @@ export default function Landing() {
               <Store className="w-7 h-7 text-primary" />
             </div>
             <div>
-              <div className="text-xl font-bold text-foreground mb-2">🏪 Je suis une boutique</div>
-              <div className="text-muted-foreground text-sm leading-relaxed">
+              <div className="text-base font-bold text-foreground mb-1.5">🏪 Je suis une boutique</div>
+              <div className="text-muted-foreground text-xs leading-relaxed">
                 Accédez à votre espace de gestion des produits et des pertes.
               </div>
             </div>
@@ -85,8 +85,8 @@ export default function Landing() {
               <Shield className="w-7 h-7 text-muted-foreground" />
             </div>
             <div>
-              <div className="text-xl font-bold text-foreground mb-2">⚙️ Je suis administrateur</div>
-              <div className="text-muted-foreground text-sm leading-relaxed">
+              <div className="text-base font-bold text-foreground mb-1.5">⚙️ Je suis administrateur</div>
+              <div className="text-muted-foreground text-xs leading-relaxed">
                 Espace privé de gestion TrackSmart.
               </div>
             </div>
