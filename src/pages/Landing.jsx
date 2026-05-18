@@ -59,9 +59,9 @@ export default function Landing() {
           {/* Boutique card */}
           <button
             onClick={handleBoutique}
-            className="group flex-1 bg-white hover:bg-white border border-border/50 hover:border-primary/40 rounded-2xl p-8 text-left transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-primary/10 flex flex-col gap-5"
+            className="group flex-1 bg-white hover:bg-white border border-border/50 hover:border-primary/40 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-primary/10 flex flex-col items-center gap-5"
           >
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/15 transition-colors group-hover:-translate-y-1 group-hover:scale-110 duration-300">
               <Store className="w-7 h-7 text-primary" />
             </div>
             <div>
@@ -79,9 +79,9 @@ export default function Landing() {
           {/* Admin card */}
           <button
             onClick={handleAdmin}
-            className="group flex-1 bg-white hover:bg-white border border-border/50 hover:border-foreground/20 rounded-2xl p-8 text-left transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col gap-5"
+            className="group flex-1 bg-white hover:bg-white border border-border/50 hover:border-foreground/20 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-lg flex flex-col items-center gap-5"
           >
-            <div className="w-14 h-14 rounded-2xl bg-secondary border border-border flex items-center justify-center group-hover:bg-foreground/8 transition-colors">
+            <div className="w-14 h-14 rounded-2xl bg-secondary border border-border flex items-center justify-center group-hover:bg-foreground/8 transition-colors group-hover:-translate-y-1 group-hover:scale-110 duration-300">
               <Shield className="w-7 h-7 text-muted-foreground" />
             </div>
             <div>
