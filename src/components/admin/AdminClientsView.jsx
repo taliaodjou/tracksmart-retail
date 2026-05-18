@@ -101,7 +101,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
 
       {/* Invite form */}
       <div className="bg-[#1a1a1a] rounded-2xl p-5 border border-white/5">
-        <h3 className="text-white/70 text-sm font-semibold mb-3 flex items-center gap-2">
+        <h3 className="text-white/70 text-xs font-semibold mb-3 flex items-center gap-2">
           <Mail className="w-4 h-4 text-primary" /> Inviter un nouveau client
         </h3>
         <form onSubmit={handleInvite} className="flex gap-3">
@@ -111,9 +111,9 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
             type="email"
             placeholder="email@boutique.com"
             required
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-primary/50"
+            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-xs placeholder:text-white/30 focus:outline-none focus:border-primary/50"
           />
-          <button type="submit" disabled={inviting} className="px-5 py-2 bg-primary text-black rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2">
+          <button type="submit" disabled={inviting} className="px-5 py-2 bg-primary text-black rounded-xl text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2">
             <Send className="w-4 h-4" /> {inviting ? '...' : 'Inviter'}
           </button>
         </form>
