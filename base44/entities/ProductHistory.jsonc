@@ -1,0 +1,97 @@
+{
+  "name": "ProductHistory",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "ID of the related product"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who performed the action"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "jeter",
+        "commande",
+        "recu",
+        "a_recommander",
+        "en_transition",
+        "modifie"
+      ],
+      "description": "Action performed"
+    },
+    "action_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of the action"
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Quantity involved (for jeter)"
+    },
+    "price_chf": {
+      "type": "number",
+      "description": "Unit price in CHF (for jeter)"
+    },
+    "note": {
+      "type": "string",
+      "description": "Optional note"
+    }
+  },
+  "required": [
+    "product_id",
+    "action"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

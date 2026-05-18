@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X, ScanLine, Loader2 } from 'lucide-react';
 import { categoryKeys, rayonKeys, getProductStatus } from '@/lib/productUtils';
 import BarcodeScanner from './BarcodeScanner';
+import ProductHistorySection from './ProductHistorySection';
+import { base44 } from '@/api/base44Client';
 
 const ACTION_KEYS = {
   jeter: 'action_jeter',
@@ -54,7 +56,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
 
   const totalChf = (parseFloat(form.quantity_thrown) || 0) * (parseFloat(form.price_chf) || 0);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const data = {
       name: form.name,
@@ -72,6 +74,25 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         if (form.price_chf !== '') data.price_chf = Number(form.price_chf);
       }
     }
+
+    // Save history entry if editing an existing product with an action
+    if (editProduct?.id && isExpired && form.action) {
+      const prevAction = editProduct.action;
+      const historyEntry = {
+        product_id: editProduct.id,
+        action: form.action,
+        action_date: form.order_date || new Date().toISOString().split('T')[0],
+      };
+      if (form.action === 'jeter') {
+        if (form.quantity_thrown !== '') historyEntry.quantity = Number(form.quantity_thrown);
+        if (form.price_chf !== '') historyEntry.price_chf = Number(form.price_chf);
+      }
+      // Only log if action changed or it's a new action assignment
+      if (form.action !== prevAction || form.action === 'jeter') {
+        base44.entities.ProductHistory.create(historyEntry).catch(() => {});
+      }
+    }
+
     onSave(data);
   };
 
@@ -224,6 +245,10 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
               </>
             )}
           </>
+        )}
+
+        {editProduct?.id && (
+          <ProductHistorySection productId={editProduct.id} />
         )}
 
         <div className="sm:col-span-2 flex justify-end gap-3 pt-2">
