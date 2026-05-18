@@ -188,6 +188,10 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
     setEditingId(null);
   };
 
+  const handleMobileEdit = (p) => {
+    if (onEdit) onEdit(p);
+  };
+
   if (products.length === 0) {
     return (
       <div className="bg-white rounded-2xl p-12 shadow-sm border border-border/40 text-center">
@@ -230,7 +234,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button
-                  onClick={() => setEditingId(editingId === p.id ? null : p.id)}
+                  onClick={() => handleMobileEdit(p)}
                   className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
                 >
                   <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
