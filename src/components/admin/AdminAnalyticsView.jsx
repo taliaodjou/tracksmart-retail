@@ -91,10 +91,10 @@ export default function AdminAnalyticsView() {
         {/* Status pie */}
         <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5">
           <h3 className="text-white font-semibold mb-4 text-sm">Répartition des statuts</h3>
-          <div className="flex items-center gap-6">
-            <ResponsiveContainer width="50%" height={180}>
+          <div className="flex items-center gap-4">
+            <ResponsiveContainer width="45%" height={150}>
               <PieChart>
-                <Pie data={statusData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
+                <Pie data={statusData} cx="50%" cy="50%" innerRadius={35} outerRadius={60} paddingAngle={3} dataKey="value">
                   {statusData.map((_, i) => (
                     <Cell key={i} fill={['#10b981', '#f59e0b', '#f97316', '#ef4444'][i]} />
                   ))}
