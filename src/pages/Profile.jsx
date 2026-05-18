@@ -10,7 +10,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Badge } from '@/components/ui/badge';
 import { format, addMonths } from 'date-fns';
 import { getNextRenewalDate } from '@/lib/schedulerUtils';
-import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink } from 'lucide-react';
+import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 import AccountingSettings from '@/components/profile/AccountingSettings';
 
 export default function Profile() {
@@ -18,6 +18,8 @@ export default function Profile() {
   const { user, checkUserAuth } = useAuth();
   const [form, setForm] = useState({ shop_name: '', phone_number: '', report_channel: 'email' });
   const [saving, setSaving] = useState(false);
+  const [prefOpen, setPrefOpen] = useState(false);
+  const [savedBanner, setSavedBanner] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -35,7 +37,9 @@ export default function Profile() {
     await base44.auth.updateMe({ shop_name: form.shop_name, phone_number: form.phone_number, report_channel: form.report_channel });
     await checkUserAuth();
     setSaving(false);
-    toast.success(t('profile_saved'));
+    setPrefOpen(false);
+    setSavedBanner(true);
+    setTimeout(() => setSavedBanner(false), 3000);
   };
 
   const nextRenewal = user?.subscription_start_date ? getNextRenewalDate(user.subscription_start_date) : null;
@@ -113,71 +117,91 @@ export default function Profile() {
         <AccountingSettings user={user} onSaved={checkUserAuth} />
 
         {/* Profile form */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40 mt-6">
-          <h2 className="font-semibold text-foreground mb-4">{lang === 'fr' ? 'Préférences' : 'Preferences'}</h2>
-          <form onSubmit={handleSave} className="space-y-5">
-            <div className="space-y-1.5">
-              <Label className="text-sm flex items-center gap-1.5">
-                {lang === 'fr' ? 'Nom de la boutique' : 'Shop name'}
-              </Label>
-              <Input
-                value={form.shop_name}
-                onChange={e => setForm({ ...form, shop_name: e.target.value })}
-                placeholder="Ex: Épicerie du Marché"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-sm flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5" />
-                {t('profile_phone')}
-              </Label>
-              <Input
-                value={form.phone_number}
-                onChange={e => setForm({ ...form, phone_number: e.target.value })}
-                placeholder="+41 79 000 00 00"
-                type="tel"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm">{t('profile_report_channel')}</Label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, report_channel: 'email' })}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
-                    form.report_channel === 'email'
-                      ? 'border-primary bg-primary/5 text-primary'
-                      : 'border-border text-muted-foreground hover:border-primary/40'
-                  }`}
-                >
-                  <Mail className="w-4 h-4" />
-                  {t('profile_email')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setForm({ ...form, report_channel: 'sms' })}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
-                    form.report_channel === 'sms'
-                      ? 'border-primary bg-primary/5 text-primary'
-                      : 'border-border text-muted-foreground hover:border-primary/40'
-                  }`}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  {t('profile_sms')}
-                </button>
-              </div>
-              {form.report_channel === 'sms' && !form.phone_number && (
-                <p className="text-xs text-orange-600">{lang === 'fr' ? 'Veuillez entrer un numéro de téléphone.' : 'Please enter a phone number.'}</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-border/40 mt-6 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setPrefOpen(o => !o)}
+            className="w-full flex items-center justify-between p-6 text-left hover:bg-secondary/20 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-foreground">{lang === 'fr' ? 'Préférences' : 'Preferences'}</h2>
+              {savedBanner && !prefOpen && (
+                <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {lang === 'fr' ? 'Enregistré' : 'Saved'}
+                </span>
               )}
             </div>
+            {prefOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+          </button>
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={saving} className="rounded-full px-8">
-                {saving ? t('loading') : t('profile_save')}
-              </Button>
+          {prefOpen && (
+            <div className="px-6 pb-6 border-t border-border/30">
+              <form onSubmit={handleSave} className="space-y-5 pt-5">
+                <div className="space-y-1.5">
+                  <Label className="text-sm flex items-center gap-1.5">
+                    {lang === 'fr' ? 'Nom de la boutique' : 'Shop name'}
+                  </Label>
+                  <Input
+                    value={form.shop_name}
+                    onChange={e => setForm({ ...form, shop_name: e.target.value })}
+                    placeholder="Ex: Épicerie du Marché"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-sm flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5" />
+                    {t('profile_phone')}
+                  </Label>
+                  <Input
+                    value={form.phone_number}
+                    onChange={e => setForm({ ...form, phone_number: e.target.value })}
+                    placeholder="+41 79 000 00 00"
+                    type="tel"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">{t('profile_report_channel')}</Label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, report_channel: 'email' })}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                        form.report_channel === 'email'
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-border text-muted-foreground hover:border-primary/40'
+                      }`}
+                    >
+                      <Mail className="w-4 h-4" />
+                      {t('profile_email')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, report_channel: 'sms' })}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                        form.report_channel === 'sms'
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-border text-muted-foreground hover:border-primary/40'
+                      }`}
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      {t('profile_sms')}
+                    </button>
+                  </div>
+                  {form.report_channel === 'sms' && !form.phone_number && (
+                    <p className="text-xs text-orange-600">{lang === 'fr' ? 'Veuillez entrer un numéro de téléphone.' : 'Please enter a phone number.'}</p>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  <Button type="submit" disabled={saving} className="rounded-full px-8">
+                    {saving ? t('loading') : t('profile_save')}
+                  </Button>
+                </div>
+              </form>
             </div>
-          </form>
+          )}
         </div>
       </main>
     </div>
