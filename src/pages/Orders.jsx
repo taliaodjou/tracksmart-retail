@@ -10,11 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, categoryKeys, rayonKeys, hasActiveSubscription } from '@/lib/productUtils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import {
-  ShoppingCart, FileText, Send, Download, Plus, Trash2,
-  Package, Mail, Building2, Phone, Loader2, CheckCircle2, Search
+  ShoppingCart, FileText, Send, Download,
+  Package, Mail, Building2, Phone, Loader2, CheckCircle2, Search, SlidersHorizontal, X
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -131,8 +132,23 @@ export default function Orders() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [rayonFilter, setRayonFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const orderNumber = useMemo(() => `TS-${Date.now().toString().slice(-8)}`, []);
+
+  const filteredProducts = useMemo(() => eligibleProducts.filter(p => {
+    if (search.trim() && !p.name?.toLowerCase().includes(search.toLowerCase()) && !p.marque?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
+    if (rayonFilter !== 'all' && p.rayon !== rayonFilter) return false;
+    if (statusFilter !== 'all') {
+      const s = getProductStatus(p.expiration_date);
+      if (statusFilter === 'a_recommander' && p.action !== 'a_recommander') return false;
+      if (statusFilter !== 'a_recommander' && s !== statusFilter) return false;
+    }
+    return true;
+  }), [eligibleProducts, search, categoryFilter, rayonFilter, statusFilter]);
 
   if (!canAccess) {
     return (
@@ -143,13 +159,6 @@ export default function Orders() {
       </div>
     );
   }
-
-  const filteredProducts = search.trim()
-    ? eligibleProducts.filter(p =>
-        p.name?.toLowerCase().includes(search.toLowerCase()) ||
-        p.marque?.toLowerCase().includes(search.toLowerCase())
-      )
-    : eligibleProducts;
 
   const selectedProducts = eligibleProducts.filter(p => selectedIds.has(p.id));
   const orderItems = selectedProducts.map(p => ({
@@ -275,6 +284,52 @@ export default function Orders() {
                     placeholder="Rechercher un produit..."
                     className="pl-8 h-8 text-xs rounded-full"
                   />
+                </div>
+                {/* Filters */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-8 text-xs rounded-full w-36">
+                      <SelectValue placeholder="Statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      <SelectItem value="expired">{t('status_expired')}</SelectItem>
+                      <SelectItem value="urgent">{t('status_urgent')}</SelectItem>
+                      <SelectItem value="soon">{t('status_soon')}</SelectItem>
+                      <SelectItem value="a_recommander">{t('orders_to_recommend')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="h-8 text-xs rounded-full w-36">
+                      <SelectValue placeholder="Catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes catégories</SelectItem>
+                      {Object.entries(categoryKeys).map(([v, k]) => (
+                        <SelectItem key={v} value={v}>{t(k)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={rayonFilter} onValueChange={setRayonFilter}>
+                    <SelectTrigger className="h-8 text-xs rounded-full w-32">
+                      <SelectValue placeholder="Rayon" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les rayons</SelectItem>
+                      {Object.keys(rayonKeys).map(r => (
+                        <SelectItem key={r} value={r}>Rayon {r}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {(statusFilter !== 'all' || categoryFilter !== 'all' || rayonFilter !== 'all') && (
+                    <button
+                      onClick={() => { setStatusFilter('all'); setCategoryFilter('all'); setRayonFilter('all'); }}
+                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="w-3 h-3" /> Réinitialiser
+                    </button>
+                  )}
                 </div>
               </div>
 
