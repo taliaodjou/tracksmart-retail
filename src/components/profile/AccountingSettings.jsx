@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mail, MessageSquare, BarChart2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Mail, MessageSquare, BarChart2, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const GOLD = '#C9A646';
@@ -23,6 +23,8 @@ export default function AccountingSettings({ user, onSaved }) {
     phone_number: '',
   });
   const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [savedBanner, setSavedBanner] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -47,21 +49,38 @@ export default function AccountingSettings({ user, onSaved }) {
       phone_number: form.phone_number,
     });
     setSaving(false);
-    toast.success('Paramètres comptables enregistrés');
+    setOpen(false);
+    setSavedBanner(true);
+    setTimeout(() => setSavedBanner(false), 3000);
     if (onSaved) onSaved();
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40">
-      <h2 className="font-bold text-foreground mb-1 flex items-center gap-2">
-        <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GOLD }}>
-          <BarChart2 className="w-3.5 h-3.5 text-white" />
+    <div className="bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between p-6 text-left hover:bg-secondary/20 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: GOLD }}>
+            <BarChart2 className="w-3.5 h-3.5 text-white" />
+          </div>
+          <span className="font-bold text-foreground">Paramètres comptables</span>
+          {savedBanner && !open && (
+            <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Enregistré
+            </span>
+          )}
         </div>
-        Paramètres comptables
-      </h2>
-      <p className="text-xs text-muted-foreground mb-6">Configurez votre cycle trimestriel et la réception automatique des rapports.</p>
+        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+      </button>
 
-      <form onSubmit={handleSave} className="space-y-5">
+      {open && (
+      <div className="px-6 pb-6 border-t border-border/30">
+        <p className="text-xs text-muted-foreground mt-4 mb-5">Configurez votre cycle trimestriel et la réception automatique des rapports.</p>
+        <form onSubmit={handleSave} className="space-y-5">
         {/* Quarter start */}
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">Début du trimestre comptable</Label>
@@ -161,7 +180,9 @@ export default function AccountingSettings({ user, onSaved }) {
             {saving ? 'Enregistrement…' : 'Enregistrer'}
           </Button>
         </div>
-      </form>
+        </form>
+      </div>
+      )}
     </div>
   );
 }
