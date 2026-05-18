@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { format, addMonths } from 'date-fns';
 import { getNextRenewalDate } from '@/lib/schedulerUtils';
 import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink } from 'lucide-react';
+import AccountingSettings from '@/components/profile/AccountingSettings';
 
 export default function Profile() {
   const { t, lang } = useLanguage();
@@ -108,8 +109,11 @@ export default function Profile() {
           </div>
         </div>
 
+        {/* Accounting settings */}
+        <AccountingSettings user={user} onSaved={checkUserAuth} />
+
         {/* Profile form */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40 mt-6">
           <h2 className="font-semibold text-foreground mb-4">{lang === 'fr' ? 'Préférences' : 'Preferences'}</h2>
           <form onSubmit={handleSave} className="space-y-5">
             <div className="space-y-1.5">

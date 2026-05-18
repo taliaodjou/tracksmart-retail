@@ -17,6 +17,7 @@ import Welcome from '@/pages/Welcome';
 import Analytics from '@/pages/Analytics';
 import Orders from '@/pages/Orders';
 import AdminPortal from '@/pages/AdminPortal';
+import Reports from '@/pages/Reports';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
@@ -69,6 +70,7 @@ const AuthenticatedApp = () => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/orders" element={<Orders />} />
+      <Route path="/reports" element={<Reports />} />
       <Route path="/admin" element={<Admin />} />
 
       {/* Admin-only routes */}

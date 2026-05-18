@@ -1,0 +1,74 @@
+{
+  "name": "QuarterlyReport",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Owner email"
+    },
+    "shop_name": {
+      "type": "string"
+    },
+    "quarter_label": {
+      "type": "string",
+      "description": "e.g. T1 2025"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date"
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date"
+    },
+    "total_loss_chf": {
+      "type": "number"
+    },
+    "total_products_thrown": {
+      "type": "number"
+    },
+    "total_products_tracked": {
+      "type": "number"
+    },
+    "total_expired": {
+      "type": "number"
+    },
+    "previous_quarter_loss_chf": {
+      "type": "number"
+    },
+    "top_categories": {
+      "type": "string",
+      "description": "JSON array of {name, loss}"
+    },
+    "top_rayons": {
+      "type": "string",
+      "description": "JSON array of {name, loss}"
+    },
+    "monthly_breakdown": {
+      "type": "string",
+      "description": "JSON array of {month, loss, count}"
+    },
+    "thrown_products": {
+      "type": "string",
+      "description": "JSON array of product rows"
+    },
+    "insights": {
+      "type": "string",
+      "description": "JSON array of insight strings"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "generated",
+        "sent"
+      ],
+      "default": "generated"
+    }
+  },
+  "required": [
+    "user_email",
+    "quarter_label",
+    "period_start",
+    "period_end"
+  ]
+}
