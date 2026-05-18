@@ -43,7 +43,17 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
     return matchSearch && matchStatus;
   });
 
-  const emailTemplate = (title, accentColor, bodyContent) => `
+  const unsubscribeFooter = (userId) => `
+    <tr>
+      <td style="background:#f9f9f7;border-top:1px solid #eeeeee;padding:16px 40px;text-align:center;">
+        <p style="margin:0;font-size:11px;color:#bbbbbb;">
+          Vous ne souhaitez plus recevoir ces emails ?
+          <a href="https://tracksmart.base44.app/email-preferences?uid=${userId}&action=unsubscribe" style="color:#999999;text-decoration:underline;">Se désabonner</a>
+        </p>
+      </td>
+    </tr>`;
+
+  const emailTemplate = (title, accentColor, bodyContent, userId = '') => `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -84,6 +94,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
             <p style="margin:6px 0 0;font-size:12px;color:#bbbbbb;">support@tracksmart.com</p>
           </td>
         </tr>
+        ${userId ? unsubscribeFooter(userId) : ''}
       </table>
     </td></tr>
   </table>
@@ -107,14 +118,16 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
                <a href="https://tracksmart.base44.app/dashboard" style="color:#ffffff;font-weight:700;font-size:14px;text-decoration:none;">Accéder à mon tableau de bord →</a>
              </td></tr>
            </table>
-           <p style="margin:0;font-size:13px;color:#999999;">Si vous avez des questions, contactez-nous à support@tracksmart.com.</p>`
+           <p style="margin:0;font-size:13px;color:#999999;">Si vous avez des questions, contactez-nous à support@tracksmart.com.</p>`,
+          u.id
         )
       : emailTemplate(
           '⚠️ Accès suspendu',
           '#ef4444',
           `<p style="margin:0 0 16px;font-size:15px;color:#444444;line-height:1.7;">Bonjour <strong>${shopName}</strong>,</p>
            <p style="margin:0 0 20px;font-size:15px;color:#444444;line-height:1.7;">Votre accès <strong>TrackSmart</strong> a été temporairement suspendu. Pour renouveler votre abonnement et retrouver l'accès à vos données, veuillez nous contacter.</p>
-           <p style="margin:0;font-size:14px;color:#444444;">📧 <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;">support@tracksmart.com</a></p>`
+           <p style="margin:0;font-size:14px;color:#444444;">📧 <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;">support@tracksmart.com</a></p>`,
+          u.id
         );
 
     await base44.integrations.Core.SendEmail({
@@ -136,7 +149,8 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
        <div style="background:#f9f9f7;border-left:4px solid #C9A64C;border-radius:4px;padding:16px 20px;margin:0 0 20px;">
          <p style="margin:0;font-size:15px;color:#333333;line-height:1.7;white-space:pre-wrap;">${emailMsg.replace(/</g, '&lt;')}</p>
        </div>
-       <p style="margin:0;font-size:13px;color:#999999;">Pour toute question, répondez directement à cet email ou contactez support@tracksmart.com.</p>`
+       <p style="margin:0;font-size:13px;color:#999999;">Pour toute question, répondez directement à cet email ou contactez support@tracksmart.com.</p>`,
+      u.id
     );
     await base44.integrations.Core.SendEmail({
       to: u.email,
@@ -259,6 +273,11 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
                     <span className="flex items-center gap-1"><Package className="w-3 h-3" />{userProducts.length}</span>
                     {expired.length > 0 && <span className="flex items-center gap-1 text-red-400"><AlertTriangle className="w-3 h-3" />{expired.length}</span>}
                   </div>
+                  {u.email_unsubscribed && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/15 text-orange-400" title="Ne reçoit plus les emails">
+                      📵 Emails off
+                    </span>
+                  )}
                   <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
                     {isActive ? 'Actif' : 'Inactif'}
                   </span>

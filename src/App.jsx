@@ -18,6 +18,7 @@ import Analytics from '@/pages/Analytics';
 import Orders from '@/pages/Orders';
 import AdminPortal from '@/pages/AdminPortal';
 import Reports from '@/pages/Reports';
+import EmailPreferences from '@/pages/EmailPreferences';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
@@ -76,6 +77,7 @@ const AuthenticatedApp = () => {
       {/* Admin-only routes */}
       <Route path="/admin-portal" element={<ClientGuard><AdminPortal /></ClientGuard>} />
       <Route path="/support-view" element={<ClientSupportView />} />
+      <Route path="/email-preferences" element={<EmailPreferences />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>

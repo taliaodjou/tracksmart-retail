@@ -10,7 +10,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Badge } from '@/components/ui/badge';
 import { format, addMonths } from 'date-fns';
 import { getNextRenewalDate } from '@/lib/schedulerUtils';
-import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, BellOff, Bell } from 'lucide-react';
 import AccountingSettings from '@/components/profile/AccountingSettings';
 
 export default function Profile() {
@@ -111,6 +111,37 @@ export default function Profile() {
               WhatsApp <ExternalLink className="w-3 h-3 text-muted-foreground" />
             </a>
           </div>
+        </div>
+
+        {/* Email preferences */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40 mb-6">
+          <h2 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+            {user?.email_unsubscribed ? <BellOff className="w-4 h-4 text-orange-500" /> : <Bell className="w-4 h-4 text-primary" />}
+            {lang === 'fr' ? 'Notifications email' : 'Email notifications'}
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            {user?.email_unsubscribed
+              ? (lang === 'fr' ? 'Vous ne recevez plus les emails de notification TrackSmart.' : 'You are no longer receiving TrackSmart notification emails.')
+              : (lang === 'fr' ? 'Vous recevez les emails de notification TrackSmart.' : 'You are receiving TrackSmart notification emails.')
+            }
+          </p>
+          <button
+            onClick={async () => {
+              const newVal = !user.email_unsubscribed;
+              await base44.auth.updateMe({ email_unsubscribed: newVal });
+              await checkUserAuth();
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${
+              user?.email_unsubscribed
+                ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+                : 'border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100'
+            }`}
+          >
+            {user?.email_unsubscribed
+              ? <><Bell className="w-4 h-4" /> {lang === 'fr' ? 'Se réabonner aux emails' : 'Re-subscribe to emails'}</>
+              : <><BellOff className="w-4 h-4" /> {lang === 'fr' ? 'Se désabonner des emails' : 'Unsubscribe from emails'}</>
+            }
+          </button>
         </div>
 
         {/* Accounting settings */}

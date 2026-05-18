@@ -53,6 +53,11 @@
     "onboarding_complete": {
       "type": "boolean",
       "default": false
+    },
+    "email_unsubscribed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if user unsubscribed from emails"
     }
   },
   "required": [
