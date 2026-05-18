@@ -10,7 +10,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Badge } from '@/components/ui/badge';
 import { format, addMonths } from 'date-fns';
 import { getNextRenewalDate } from '@/lib/schedulerUtils';
-import { User, Phone, Mail, MessageSquare } from 'lucide-react';
+import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink } from 'lucide-react';
 
 export default function Profile() {
   const { t, lang } = useLanguage();
@@ -74,6 +74,37 @@ export default function Profile() {
                 {nextRenewal ? format(nextRenewal, 'dd/MM/yyyy') : '—'}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Support card */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40 mb-6">
+          <h2 className="font-semibold text-foreground mb-1 flex items-center gap-2">
+            <HeadphonesIcon className="w-4 h-4 text-primary" />
+            {lang === 'fr' ? 'Service client' : 'Customer support'}
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            {lang === 'fr'
+              ? 'Une question, un problème ou une demande ? Notre équipe est disponible pour vous aider.'
+              : 'A question, issue or request? Our team is available to help.'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href="mailto:support@tracksmart.com"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+            >
+              <Mail className="w-4 h-4 text-primary" />
+              support@tracksmart.com
+            </a>
+            <a
+              href="https://wa.me/41772229764"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors"
+            >
+              <MessageSquare className="w-4 h-4 text-primary" />
+              WhatsApp <ExternalLink className="w-3 h-3 text-muted-foreground" />
+            </a>
           </div>
         </div>
 
