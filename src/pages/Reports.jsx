@@ -33,7 +33,7 @@ function StatCard({ label, value, sub, accent = false, icon: Icon }) {
       )}
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground font-medium truncate mb-0.5">{label}</p>
-        <p className={`text-base font-bold truncate ${accent ? 'text-[#C9A646]' : 'text-foreground'}`}>{value}</p>
+        <p className={`text-sm font-bold break-all leading-tight ${accent ? 'text-[#C9A646]' : 'text-foreground'}`}>{value}</p>
         {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
       </div>
     </div>
