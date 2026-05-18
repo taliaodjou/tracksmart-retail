@@ -34,7 +34,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex flex-col overflow-hidden relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex flex-col relative">
 
       {/* Floating background orbs */}
       {floatingOrbs.map((orb, i) => (
@@ -74,7 +74,7 @@ export default function Landing() {
       </motion.div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 sm:py-12 relative z-10">
 
         {/* Logo mark */}
         <motion.div
