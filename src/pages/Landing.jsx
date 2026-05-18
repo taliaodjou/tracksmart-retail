@@ -102,7 +102,7 @@ export default function Landing() {
         >
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-3 leading-tight">
             Bienvenue sur{' '}
-            <span className="text-primary">TrackSmart</span> 👋
+            <span className="text-primary">TrackSmart</span>
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg max-w-lg leading-relaxed">
             Votre plateforme intelligente de gestion des produits et DLC
@@ -130,7 +130,7 @@ export default function Landing() {
               <Store className="w-8 h-8 text-primary" />
             </motion.div>
             <div>
-              <div className="text-base font-bold text-foreground mb-1.5">🏪 Je suis une boutique</div>
+              <div className="text-base font-bold text-foreground mb-1.5">Je suis une boutique</div>
               <div className="text-muted-foreground text-xs leading-relaxed">
                 Accédez à votre espace de gestion des produits et des pertes.
               </div>
@@ -164,7 +164,7 @@ export default function Landing() {
               <Shield className="w-8 h-8 text-muted-foreground" />
             </motion.div>
             <div>
-              <div className="text-base font-bold text-foreground mb-1.5">⚙️ Je suis administrateur</div>
+              <div className="text-base font-bold text-foreground mb-1.5">Je suis administrateur</div>
               <div className="text-muted-foreground text-xs leading-relaxed">
                 Espace privé de gestion TrackSmart.
               </div>
