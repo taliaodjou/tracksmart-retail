@@ -25,16 +25,16 @@ const MONTH_NAMES_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juille
 
 function StatCard({ label, value, sub, accent = false, icon: Icon }) {
   return (
-    <div className={`bg-white rounded-2xl p-5 border shadow-sm flex items-start gap-4 ${accent ? 'border-[#C9A646]/40 bg-gradient-to-br from-[#fdf9ee] to-white' : 'border-border/40'}`}>
+    <div className={`bg-white rounded-xl p-3 border shadow-sm flex items-center gap-3 ${accent ? 'border-[#C9A646]/40 bg-gradient-to-br from-[#fdf9ee] to-white' : 'border-border/40'}`}>
       {Icon && (
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${accent ? 'bg-[#C9A646]/10' : 'bg-secondary'}`}>
-          <Icon className={`w-5 h-5 ${accent ? 'text-[#C9A646]' : 'text-muted-foreground'}`} />
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${accent ? 'bg-[#C9A646]/10' : 'bg-secondary'}`}>
+          <Icon className={`w-4 h-4 ${accent ? 'text-[#C9A646]' : 'text-muted-foreground'}`} />
         </div>
       )}
-      <div>
-        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">{label}</p>
-        <p className={`text-2xl font-bold ${accent ? 'text-[#C9A646]' : 'text-foreground'}`}>{value}</p>
-        {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+      <div className="min-w-0">
+        <p className="text-xs text-muted-foreground font-medium truncate mb-0.5">{label}</p>
+        <p className={`text-base font-bold truncate ${accent ? 'text-[#C9A646]' : 'text-foreground'}`}>{value}</p>
+        {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
       </div>
     </div>
   );
