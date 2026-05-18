@@ -104,7 +104,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
         <h3 className="text-white/70 text-xs font-semibold mb-3 flex items-center gap-2">
           <Mail className="w-4 h-4 text-primary" /> Inviter un nouveau client
         </h3>
-        <form onSubmit={handleInvite} className="flex gap-3">
+        <form onSubmit={handleInvite} className="flex gap-3 items-center">
           <input
             value={inviteEmail}
             onChange={e => setInviteEmail(e.target.value)}
