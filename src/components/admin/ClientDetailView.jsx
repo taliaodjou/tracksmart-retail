@@ -66,18 +66,18 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             <button
               onClick={() => onToggle(client)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20'}`}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${isActive ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20'}`}
             >
-              {isActive ? <><UserX className="w-4 h-4" /> Désactiver</> : <><UserCheck className="w-4 h-4" /> Activer</>}
+              {isActive ? <><UserX className="w-3 h-3" /> Désactiver</> : <><UserCheck className="w-3 h-3" /> Activer</>}
             </button>
             <button
               onClick={handlePaymentReminder}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
             >
-              <Mail className="w-4 h-4" /> Rappel paiement
+              <Mail className="w-3 h-3" /> Rappel paiement
             </button>
           </div>
         </div>
