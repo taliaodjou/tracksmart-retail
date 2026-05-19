@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { getProductStatus } from '@/lib/productUtils';
 import { toast } from 'sonner';
-import { Search, UserCheck, UserX, Mail, Send, ChevronRight, Package, AlertTriangle, Eye } from 'lucide-react';
+import { Search, UserCheck, UserX, Mail, Send, ChevronRight, Package, AlertTriangle, Eye, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSupportMode } from '@/lib/SupportModeContext';
 import ClientDetailView from './ClientDetailView';
@@ -35,6 +35,10 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
 
   // Exclure les comptes admin de la liste clients
   const clients = users.filter(u => u.role !== 'admin' && u.email !== 'talia.odjou@gmail.com');
+
+  // Compter les employés par boutique (manager + employee liés à un owner)
+  const getEmployeeCount = (ownerEmail) =>
+    users.filter(u => u.store_owner_email === ownerEmail && (u.role === 'employee' || u.role === 'manager')).length;
 
   const filtered = clients.filter(u => {
     const q = search.toLowerCase();
@@ -252,6 +256,8 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
           const userProducts = products.filter(p => p.created_by === u.email);
           const expired = userProducts.filter(p => getProductStatus(p.expiration_date) === 'expired');
           const isActive = u.subscription_status === 'active';
+          const employeeCount = getEmployeeCount(u.email);
+          const planTier = employeeCount === 0 ? null : employeeCount <= 2 ? { label: 'Classic', color: 'text-amber-400', bg: 'bg-amber-500/10' } : employeeCount <= 9 ? { label: 'Premium', color: 'text-blue-400', bg: 'bg-blue-500/10' } : { label: 'Business', color: 'text-purple-400', bg: 'bg-purple-500/10' };
 
           return (
             <div key={u.id} className="bg-[#1a1a1a] rounded-2xl border border-white/5 overflow-hidden">
@@ -272,6 +278,10 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
                   <div className="hidden sm:flex gap-3 text-xs text-white/30">
                     <span className="flex items-center gap-1"><Package className="w-3 h-3" />{userProducts.length}</span>
                     {expired.length > 0 && <span className="flex items-center gap-1 text-red-400"><AlertTriangle className="w-3 h-3" />{expired.length}</span>}
+                    <span className="flex items-center gap-1 text-white/40"><Users className="w-3 h-3" />{employeeCount + 1} utilisateur{employeeCount + 1 !== 1 ? 's' : ''}</span>
+                    {planTier && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${planTier.bg} ${planTier.color}`}>{planTier.label}</span>
+                    )}
                   </div>
                   {u.email_unsubscribed && (
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/15 text-orange-400" title="Ne reçoit plus les emails">
