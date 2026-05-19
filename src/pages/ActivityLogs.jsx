@@ -148,23 +148,23 @@ export default function ActivityLogs() {
                           <LogIcon className={`w-4 h-4 ${cfg.color}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-foreground">{log.description}</p>
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
-                            <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
+                          <p className="text-xs text-foreground">{log.description}</p>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span className={`text-[10px] font-medium ${cfg.color}`}>{cfg.label}</span>
                             {log.user_role && (
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[10px] text-muted-foreground">
                                 · {ROLE_LABELS[log.user_role] || log.user_role}
                               </span>
                             )}
                             {log.entity_name && (
-                              <span className="text-xs text-muted-foreground truncate">
+                              <span className="text-[10px] text-muted-foreground truncate">
                                 · {log.entity_name}
                               </span>
                             )}
                           </div>
                         </div>
                         {time && (
-                          <span className="text-xs text-muted-foreground flex-shrink-0">{time}</span>
+                          <span className="text-[10px] text-muted-foreground flex-shrink-0">{time}</span>
                         )}
                       </div>
                     );
