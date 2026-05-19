@@ -263,35 +263,36 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
             <div key={u.id} className="bg-[#1a1a1a] rounded-2xl border border-white/5 overflow-hidden">
               <div
                 onClick={() => onSelectClient(u.id)}
-                className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/3 transition-all"
+                className="flex items-center justify-between p-3 cursor-pointer hover:bg-white/3 transition-all gap-2"
               >
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${isActive ? 'bg-primary/20 text-primary' : 'bg-white/5 text-white/30'}`}>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${isActive ? 'bg-primary/20 text-primary' : 'bg-white/5 text-white/30'}`}>
                     {(u.shop_name || u.full_name || u.email || '?')[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-white font-medium text-sm truncate">{u.shop_name || u.full_name || u.email}</div>
-                    <div className="text-white/40 text-xs truncate">{u.email}</div>
+                    <div className="text-white font-medium text-xs truncate">{u.shop_name || u.full_name || u.email}</div>
+                    <div className="text-white/40 text-[10px] truncate">{u.email}</div>
+                    {/* Mobile: show employee count below email */}
+                    <div className="flex items-center gap-1.5 mt-0.5 sm:hidden">
+                      <span className="flex items-center gap-1 text-[10px] text-white/40"><Users className="w-2.5 h-2.5" />{employeeCount + 1} util.</span>
+                      {planTier && <span className={`px-1.5 py-0 rounded-full text-[10px] font-semibold ${planTier.bg} ${planTier.color}`}>{planTier.label}</span>}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <div className="hidden sm:flex gap-3 text-xs text-white/30">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="hidden sm:flex gap-2 text-xs text-white/30">
                     <span className="flex items-center gap-1"><Package className="w-3 h-3" />{userProducts.length}</span>
                     {expired.length > 0 && <span className="flex items-center gap-1 text-red-400"><AlertTriangle className="w-3 h-3" />{expired.length}</span>}
-                    <span className="flex items-center gap-1 text-white/40"><Users className="w-3 h-3" />{employeeCount + 1} utilisateur{employeeCount + 1 !== 1 ? 's' : ''}</span>
-                    {planTier && (
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${planTier.bg} ${planTier.color}`}>{planTier.label}</span>
-                    )}
+                    <span className="flex items-center gap-1 text-white/40"><Users className="w-3 h-3" />{employeeCount + 1} util.</span>
+                    {planTier && <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${planTier.bg} ${planTier.color}`}>{planTier.label}</span>}
                   </div>
                   {u.email_unsubscribed && (
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/15 text-orange-400" title="Ne reçoit plus les emails">
-                      📵 Emails off
-                    </span>
+                    <span className="hidden sm:inline px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500/15 text-orange-400" title="Ne reçoit plus les emails">📵</span>
                   )}
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
                     {isActive ? 'Actif' : 'Inactif'}
                   </span>
-                  <ChevronRight className="w-4 h-4 text-white/20" />
+                  <ChevronRight className="w-3.5 h-3.5 text-white/20" />
                 </div>
               </div>
 
