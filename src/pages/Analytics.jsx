@@ -145,7 +145,7 @@ export default function Analytics() {
   return (
     <div className="min-h-screen bg-secondary/30">
       <DashboardHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 space-y-8">
 
         {/* Title */}
         <div className="flex items-center gap-3">

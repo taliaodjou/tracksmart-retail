@@ -93,7 +93,7 @@ export default function Documents() {
     <div className="min-h-screen bg-secondary/30">
       <DashboardHeader />
 
-      <main className="pt-14 sm:pt-16 max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <main className="pt-20 sm:pt-24 max-w-5xl mx-auto px-4 sm:px-6 pb-6">
 
         {/* Page header */}
         <div className="flex items-center justify-between mb-6">
