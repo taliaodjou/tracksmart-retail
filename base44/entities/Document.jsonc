@@ -1,0 +1,123 @@
+{
+  "name": "Document",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom du document"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL du fichier upload\u00e9"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type du fichier"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "Taille en bytes"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "facture",
+        "bon_livraison",
+        "contrat",
+        "rapport",
+        "tva",
+        "fiduciaire",
+        "fournisseur",
+        "produit",
+        "autre"
+      ],
+      "default": "autre",
+      "description": "Type de document"
+    },
+    "folder_id": {
+      "type": "string",
+      "description": "ID du dossier parent"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email du propri\u00e9taire"
+    },
+    "supplier_name": {
+      "type": "string",
+      "description": "Nom du fournisseur"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Montant d\u00e9tect\u00e9 (CHF)"
+    },
+    "document_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date du document"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notes"
+    },
+    "is_deleted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Soft delete (corbeille)"
+    }
+  },
+  "required": [
+    "name",
+    "file_url",
+    "user_email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

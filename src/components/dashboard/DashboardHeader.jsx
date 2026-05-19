@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, BarChart2, ShoppingCart, Menu, X, FileText } from 'lucide-react';
+import { LogOut, User, BarChart2, ShoppingCart, Menu, X, FileText, Folder } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function DashboardHeader() {
@@ -20,6 +20,7 @@ export default function DashboardHeader() {
     { to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> },
     { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
     { to: '/reports', label: 'Rapports', icon: <FileText className="w-3.5 h-3.5" /> },
+    { to: '/documents', label: 'Documents', icon: <Folder className="w-3.5 h-3.5" /> },
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
   ];
 

@@ -19,6 +19,7 @@ import Orders from '@/pages/Orders';
 import AdminPortal from '@/pages/AdminPortal';
 import Reports from '@/pages/Reports';
 import EmailPreferences from '@/pages/EmailPreferences';
+import Documents from '@/pages/Documents';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/orders" element={<Orders />} />
       <Route path="/reports" element={<Reports />} />
+      <Route path="/documents" element={<Documents />} />
       <Route path="/admin" element={<Admin />} />
 
       {/* Admin-only routes */}
