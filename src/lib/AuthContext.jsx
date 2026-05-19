@@ -5,6 +5,8 @@ import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 
 const AuthContext = createContext();
 
+const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; // 10 minutes
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -14,8 +16,27 @@ export const AuthProvider = ({ children }) => {
   const [authChecked, setAuthChecked] = useState(false);
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
+  // Track when the page was last hidden (tab/app went to background)
+  const hiddenAtRef = React.useRef(null);
+
   useEffect(() => {
     checkAppState();
+
+    // When the tab becomes hidden, record the time
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAtRef.current = Date.now();
+      } else if (document.visibilityState === 'visible') {
+        // Only re-check auth if away for more than 10 minutes
+        if (hiddenAtRef.current && Date.now() - hiddenAtRef.current >= INACTIVITY_LIMIT_MS) {
+          checkAppState();
+        }
+        hiddenAtRef.current = null;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const checkAppState = async () => {
