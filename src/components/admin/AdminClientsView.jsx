@@ -297,25 +297,25 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
               </div>
 
               {/* Quick actions */}
-              <div className="border-t border-white/5 px-4 py-2 flex gap-2 flex-wrap">
+              <div className="border-t border-white/5 px-3 py-1.5 flex gap-1.5 flex-wrap">
                 <button
                   onClick={() => handleToggle(u)}
-                  className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all ${isActive ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
+                  className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg transition-all ${isActive ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
                 >
-                  {isActive ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
+                  {isActive ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
                   {isActive ? 'Désactiver' : 'Activer'}
                 </button>
                 <button
                   onClick={() => setShowEmailFor(showEmailFor === u.id ? null : u.id)}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-all"
+                  className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg text-blue-400 hover:bg-blue-500/10 transition-all"
                 >
-                  <Mail className="w-3.5 h-3.5" /> Envoyer email
+                  <Mail className="w-3 h-3" /> Email
                 </button>
                 <button
                   onClick={() => { enterSupportMode(u); navigate('/support-view'); }}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-amber-400 hover:bg-amber-500/10 transition-all ml-auto"
+                  className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg text-amber-400 hover:bg-amber-500/10 transition-all ml-auto"
                 >
-                  <Eye className="w-3.5 h-3.5" /> 👁️ Voir boutique
+                  <Eye className="w-3 h-3" /> Voir boutique
                 </button>
               </div>
 
