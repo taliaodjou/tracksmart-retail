@@ -245,17 +245,18 @@ export default function Orders() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="rounded-full gap-2" onClick={handlePrint} disabled={selectedIds.size === 0}>
-              <Download className="w-4 h-4" />
-              {t('orders_pdf')}
+            <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs" onClick={handlePrint} disabled={selectedIds.size === 0}>
+              <Download className="w-3.5 h-3.5" />
+              PDF
             </Button>
             <Button
-              className="rounded-full gap-2"
+              size="sm"
+              className="rounded-full gap-1.5 text-xs"
               onClick={handleSendEmail}
               disabled={selectedIds.size === 0 || sending}
             >
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : sent ? <CheckCircle2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-              {sent ? t('orders_sent') : t('orders_send_email')}
+              {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : sent ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
+              {sent ? 'Envoyé !' : 'Envoyer par email'}
             </Button>
           </div>
         </div>
@@ -519,20 +520,22 @@ export default function Orders() {
             <div className="flex flex-col gap-2">
               <Button
                 variant="outline"
-                className="rounded-full gap-2 w-full"
+                size="sm"
+                className="rounded-full gap-1.5 w-full text-xs"
                 onClick={handlePrint}
                 disabled={selectedIds.size === 0}
               >
-                <Download className="w-4 h-4" />
-                {t('orders_download')}
+                <Download className="w-3.5 h-3.5" />
+                Imprimer / PDF
               </Button>
               <Button
-                className="rounded-full gap-2 w-full"
+                size="sm"
+                className="rounded-full gap-1.5 w-full text-xs"
                 onClick={handleSendEmail}
                 disabled={selectedIds.size === 0 || sending}
               >
-                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : sent ? <CheckCircle2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-                {sent ? t('orders_sent') : t('orders_send_supplier')}
+                {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : sent ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
+                {sent ? 'Envoyé !' : 'Envoyer au fournisseur'}
               </Button>
             </div>
           </div>
