@@ -57,12 +57,10 @@ export default function AdminAnalyticsView() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 max-w-xs">
         {[
           { label: 'Clients actifs', value: activeClients.length, sub: `sur ${clients.length} total` },
-          { label: 'Produits total', value: products.length, sub: 'tous clients confondus' },
-          { label: 'Produits expirés', value: statusCount.expired, sub: 'nécessitent action' },
-          { label: 'Pertes estimées', value: `CHF ${totalLoss.toFixed(0)}`, sub: 'tous clients' },
+          { label: 'Clients inactifs', value: clients.length - activeClients.length, sub: 'abonnement suspendu' },
         ].map((k, i) => (
           <div key={i} className="bg-[#1a1a1a] rounded-2xl p-5 border border-white/5">
             <div className="text-2xl font-bold text-primary">{k.value}</div>
