@@ -59,6 +59,14 @@
       ],
       "description": "Rayon / Section"
     },
+    "store_owner_email": {
+      "type": "string",
+      "description": "Email of the store owner \u2014 used to scope product to the entire store team"
+    },
+    "added_by_name": {
+      "type": "string",
+      "description": "Full name of the user who added this product"
+    },
     "reception_date": {
       "type": "string",
       "format": "date",

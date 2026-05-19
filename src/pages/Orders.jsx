@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getProductStatus, getDaysRemaining, categoryKeys, rayonKeys, hasActiveSubscription } from '@/lib/productUtils';
+import { logActivity } from '@/lib/activityLogger';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import {
@@ -198,6 +199,7 @@ export default function Orders() {
     if (orderItems.length === 0) { toast.error(t('orders_select_product')); return; }
     if (!supplier.email) { toast.error(t('orders_fill_email')); return; }
     setSending(true);
+    logActivity(user, 'order_created', `${user.full_name || user.email} a créé un bon de commande #${orderNumber} (${orderItems.length} produits) pour ${supplier.name || supplier.email}`);
     const lines = orderItems.map(it =>
       `• ${it.name}${it.marque ? ' (' + it.marque + ')' : ''} — Qté : ${it.quantity}${it.note ? ' — ' + it.note : ''}`
     ).join('\n');

@@ -261,7 +261,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
         <table className="w-full text-sm">
           <thead className="bg-secondary/40">
             <tr>
-              {[t('col_product'), t('col_brand'), t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), ''].map((h, i) => (
+              {[t('col_product'), t('col_brand'), t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', ''].map((h, i) => (
                 <th key={i} className="text-left px-4 py-3 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
               ))}
             </tr>
@@ -313,6 +313,9 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                   </td>
                   <td className="px-4 py-3 font-medium text-red-700">
                     {isExpired && total > 0 ? `${total.toFixed(2)}` : '—'}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {p.added_by_name || '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">

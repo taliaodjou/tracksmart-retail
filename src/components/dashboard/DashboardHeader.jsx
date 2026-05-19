@@ -5,11 +5,13 @@ import { useAuth } from '@/lib/AuthContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, BarChart2, ShoppingCart, Menu, X, FileText, Folder } from 'lucide-react';
+import { LogOut, User, BarChart2, ShoppingCart, Menu, X, FileText, Folder, Users, Activity } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { canAccessAnalytics, canManageTeam } from '@/lib/productUtils';
 
 export default function DashboardHeader() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -17,10 +19,12 @@ export default function DashboardHeader() {
 
   const navItems = [
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
-    { to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> },
+    ...(canAccessAnalytics(user) ? [{ to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> }] : []),
     { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
     { to: '/reports', label: 'Rapports', icon: <FileText className="w-3.5 h-3.5" /> },
     { to: '/documents', label: 'Documents', icon: <Folder className="w-3.5 h-3.5" /> },
+    ...(canManageTeam(user) ? [{ to: '/team', label: 'Équipe', icon: <Users className="w-3.5 h-3.5" /> }] : []),
+    { to: '/activity', label: 'Activité', icon: <Activity className="w-3.5 h-3.5" /> },
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
   ];
 

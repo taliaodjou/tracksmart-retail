@@ -6,9 +6,17 @@
       "type": "string",
       "enum": [
         "admin",
+        "owner",
+        "manager",
+        "employee",
         "user"
       ],
-      "default": "user"
+      "default": "user",
+      "description": "Platform role. 'admin'=TrackSmart admin, 'owner'=store owner, 'manager'=store manager, 'employee'=store employee, 'user'=legacy"
+    },
+    "store_owner_email": {
+      "type": "string",
+      "description": "Email of the store owner this user belongs to. Null for owners themselves."
     },
     "shop_name": {
       "type": "string",
@@ -62,6 +70,33 @@
     "stripe_customer_id": {
       "type": "string",
       "description": "Stripe customer ID"
+    },
+    "accounting_cycle": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly"
+      ],
+      "default": "quarterly"
+    },
+    "accounting_delivery": {
+      "type": "string",
+      "enum": [
+        "email",
+        "whatsapp"
+      ],
+      "default": "email"
+    },
+    "accounting_email": {
+      "type": "string"
+    },
+    "accounting_whatsapp": {
+      "type": "string"
+    },
+    "accounting_auto_send": {
+      "type": "boolean",
+      "default": false
     }
-  }
+  },
+  "required": []
 }

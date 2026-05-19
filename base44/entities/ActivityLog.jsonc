@@ -1,0 +1,60 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "properties": {
+    "store_owner_email": {
+      "type": "string",
+      "description": "Email of the store owner (for grouping all team activity)"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user who performed the action"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Full name of the user"
+    },
+    "user_role": {
+      "type": "string",
+      "description": "Role of the user at time of action"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "product_added",
+        "product_edited",
+        "product_deleted",
+        "product_status_changed",
+        "product_thrown",
+        "barcode_scanned",
+        "excel_imported",
+        "order_created",
+        "report_generated",
+        "team_member_invited"
+      ],
+      "description": "Type of action performed"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the action"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the entity affected (product id, etc.)"
+    },
+    "entity_name": {
+      "type": "string",
+      "description": "Name of the entity affected (product name, etc.)"
+    },
+    "metadata": {
+      "type": "string",
+      "description": "JSON string with additional data"
+    }
+  },
+  "required": [
+    "store_owner_email",
+    "user_email",
+    "action_type",
+    "description"
+  ]
+}

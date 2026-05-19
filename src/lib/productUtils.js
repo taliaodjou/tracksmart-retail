@@ -59,6 +59,41 @@ export function isAdmin(user) {
   return user?.role === 'admin' || user?.email === 'talia.odjou@gmail.com';
 }
 
+export function isStoreOwner(user) {
+  return user?.role === 'owner' || user?.role === 'user' || (!user?.store_owner_email && !isAdmin(user));
+}
+
+export function isManager(user) {
+  return user?.role === 'manager';
+}
+
+export function isEmployee(user) {
+  return user?.role === 'employee';
+}
+
+export function canAccessAnalytics(user) {
+  return isAdmin(user) || isStoreOwner(user) || isManager(user);
+}
+
+export function canManageTeam(user) {
+  return isAdmin(user) || isStoreOwner(user);
+}
+
+export function canManageBilling(user) {
+  return isAdmin(user) || isStoreOwner(user);
+}
+
+/**
+ * Returns the "store owner" email for any user.
+ * This is the key used to scope all store data.
+ */
+export function getStoreOwnerEmail(user) {
+  if (!user) return null;
+  if (isAdmin(user)) return user.email;
+  if (user.store_owner_email) return user.store_owner_email;
+  return user.email; // owner = their own store
+}
+
 export function hasActiveSubscription(user) {
   if (!user) return false;
   if (isAdmin(user)) return true;

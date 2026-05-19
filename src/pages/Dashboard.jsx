@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, FileSpreadsheet, ScanLine, X, LayoutList, Layers } from 'lucide-react';
-import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys } from '@/lib/productUtils';
+import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
+import { logActivity } from '@/lib/activityLogger';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
@@ -45,9 +46,27 @@ export default function Dashboard() {
   const needsOnboarding = canAccess && user && !user.onboarding_complete;
   const [onboardingDone, setOnboardingDone] = useState(false);
 
+  // For store owners: see ALL products (created by any team member)
+  // For team members: only their own products (or later expanded if owner grants)
+  const storeOwnerEmail = getStoreOwnerEmail(user);
+  const isOwnerOrManager = user?.role === 'owner' || user?.role === 'user' || user?.role === 'manager';
+
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => base44.entities.Product.filter({ created_by: user.email }, '-created_date'),
+    queryKey: ['products', storeOwnerEmail, isOwnerOrManager],
+    queryFn: async () => {
+      if (isOwnerOrManager) {
+        // Fetch all products — filter client-side by store owner email or created_by
+        const all = await base44.entities.Product.list('-created_date', 2000);
+        // For owners: show their own + any team member's products (store_owner_email matches)
+        return all.filter(p =>
+          p.created_by === user.email ||
+          p.store_owner_email === storeOwnerEmail ||
+          p.created_by === storeOwnerEmail
+        );
+      }
+      // Employees only see their own products
+      return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
+    },
     enabled: canAccess && !!user?.email,
   });
 
@@ -66,7 +85,18 @@ export default function Dashboard() {
   }, [user, products.length]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Product.create(data),
+    mutationFn: async (data) => {
+      const product = await base44.entities.Product.create({
+        ...data,
+        store_owner_email: storeOwnerEmail,
+        added_by_name: user.full_name || user.email,
+      });
+      logActivity(user, 'product_added', `${user.full_name || user.email} a ajouté le produit "${data.name}"`, {
+        entity_id: product.id,
+        entity_name: data.name,
+      });
+      return product;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setShowForm(false);
@@ -76,7 +106,17 @@ export default function Dashboard() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Product.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const product = await base44.entities.Product.update(id, data);
+      const actionType = data.action === 'jeter' ? 'product_thrown'
+        : data.action ? 'product_status_changed'
+        : 'product_edited';
+      logActivity(user, actionType, `${user.full_name || user.email} a modifié "${data.name || 'un produit'}"`, {
+        entity_id: id,
+        entity_name: data.name,
+      });
+      return product;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setShowForm(false);
@@ -85,7 +125,14 @@ export default function Dashboard() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Product.delete(id),
+    mutationFn: async (id) => {
+      const prod = products.find(p => p.id === id);
+      await base44.entities.Product.delete(id);
+      logActivity(user, 'product_deleted', `${user.full_name || user.email} a supprimé "${prod?.name || 'un produit'}"`, {
+        entity_id: id,
+        entity_name: prod?.name,
+      });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   });
 
@@ -130,6 +177,9 @@ export default function Dashboard() {
   // ── Barcode scan flow ────────────────────────────────────
   const handleBarcodeDetected = async (code) => {
     setShowScanner(false);
+    logActivity(user, 'barcode_scanned', `${user.full_name || user.email} a scanné le code-barres ${code}`, {
+      entity_name: code,
+    });
 
     // 1. Search local DB first
     const match = barcodeDB.find(b => b.barcode === code);
@@ -386,8 +436,9 @@ export default function Dashboard() {
       {showImport && (
         <ImportModal
           onClose={() => setShowImport(false)}
-          onImported={() => {
+          onImported={(count) => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
+            logActivity(user, 'excel_imported', `${user.full_name || user.email} a importé un fichier Excel${count ? ` (${count} produits)` : ''}`);
           }}
         />
       )}
