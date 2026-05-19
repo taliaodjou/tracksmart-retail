@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, FileSpreadsheet, ScanLine, X } from 'lucide-react';
+import { Plus, Search, FileSpreadsheet, ScanLine, X, LayoutList, Layers } from 'lucide-react';
 import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 
@@ -16,6 +16,7 @@ import StatsCards from '@/components/dashboard/StatsCards';
 import WeeklyAlert from '@/components/dashboard/WeeklyAlert';
 import ProductForm from '@/components/dashboard/ProductForm';
 import ProductTable from '@/components/dashboard/ProductTable';
+import RayonGroupedTable from '@/components/dashboard/RayonGroupedTable';
 import ExportActions from '@/components/dashboard/ExportActions';
 import ImportModal from '@/components/dashboard/ImportModal';
 import OnboardingModal from '@/components/dashboard/OnboardingModal';
@@ -38,6 +39,7 @@ export default function Dashboard() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [rayonFilter, setRayonFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [groupByRayon, setGroupByRayon] = useState(true);
 
   const canAccess = hasActiveSubscription(user);
   const needsOnboarding = canAccess && user && !user.onboarding_complete;
@@ -326,12 +328,37 @@ export default function Dashboard() {
               )}
             </div>
 
-            <ProductTable
-              products={filteredProducts}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onInlineSave={(id, data) => updateMutation.mutate({ id, data })}
-            />
+            {/* View toggle */}
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => setGroupByRayon(false)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}
+              >
+                <LayoutList className="w-3.5 h-3.5" /> Liste
+              </button>
+              <button
+                onClick={() => setGroupByRayon(true)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}
+              >
+                <Layers className="w-3.5 h-3.5" /> Par rayon
+              </button>
+            </div>
+
+            {groupByRayon ? (
+              <RayonGroupedTable
+                products={filteredProducts}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onInlineSave={(id, data) => updateMutation.mutate({ id, data })}
+              />
+            ) : (
+              <ProductTable
+                products={filteredProducts}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onInlineSave={(id, data) => updateMutation.mutate({ id, data })}
+              />
+            )}
           </div>
         )}
       </main>
