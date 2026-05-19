@@ -292,34 +292,34 @@ export default function Orders() {
                 <div className="flex flex-wrap gap-2 items-center">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="h-8 text-xs rounded-full w-32">
+                    <SelectTrigger className="h-8 text-xs rounded-full w-36">
                       <SelectValue placeholder="Statut" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tous statuts</SelectItem>
-                      <SelectItem value="expired">Expirés</SelectItem>
-                      <SelectItem value="urgent">Urgents</SelectItem>
-                      <SelectItem value="soon">Bientôt</SelectItem>
-                      <SelectItem value="a_recommander">À recommander</SelectItem>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      <SelectItem value="expired">{t('status_expired')}</SelectItem>
+                      <SelectItem value="urgent">{t('status_urgent')}</SelectItem>
+                      <SelectItem value="soon">{t('status_soon')}</SelectItem>
+                      <SelectItem value="a_recommander">{t('orders_to_recommend')}</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="h-8 text-xs rounded-full w-32">
+                    <SelectTrigger className="h-8 text-xs rounded-full w-36">
                       <SelectValue placeholder="Catégorie" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Toutes</SelectItem>
+                      <SelectItem value="all">Toutes catégories</SelectItem>
                       {Object.entries(categoryKeys).map(([v, k]) => (
                         <SelectItem key={v} value={v}>{t(k)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <Select value={rayonFilter} onValueChange={setRayonFilter}>
-                    <SelectTrigger className="h-8 text-xs rounded-full w-28">
+                    <SelectTrigger className="h-8 text-xs rounded-full w-32">
                       <SelectValue placeholder="Rayon" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Tous</SelectItem>
+                      <SelectItem value="all">Tous les rayons</SelectItem>
                       {Object.keys(rayonKeys).map(r => (
                         <SelectItem key={r} value={r}>Rayon {r}</SelectItem>
                       ))}
