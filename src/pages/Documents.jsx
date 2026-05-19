@@ -103,10 +103,10 @@ export default function Documents() {
                 <ChevronLeft className="w-4 h-4 text-muted-foreground" />
               </button>
             )}
-            <div>
+            <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentSectionLabel}</h1>
               {section === 'all' && (
-                <p className="text-xs text-muted-foreground mt-0.5">Stockez et organisez vos factures, bons de livraison, contrats et autres documents importants.</p>
+                <p className="text-xs text-muted-foreground">Stockez et organisez vos factures, bons de livraison, contrats et autres documents.</p>
               )}
             </div>
           </div>
