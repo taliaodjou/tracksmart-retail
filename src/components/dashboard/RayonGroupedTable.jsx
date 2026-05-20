@@ -164,12 +164,12 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
         }, 0);
         if (grandTotal <= 0) return null;
         return (
-          <div className="mt-4 flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-2xl px-6 py-4">
+          <div className="mt-4 flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-2xl px-4 py-3">
             <div className="flex items-center gap-2">
-              <TrendingDown className="w-5 h-5 text-red-600" />
-              <span className="font-bold text-red-800 text-sm">Total pertes — tous rayons confondus</span>
+              <TrendingDown className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span className="font-semibold text-red-800 text-xs">Total pertes — tous rayons</span>
             </div>
-            <span className="text-2xl font-bold text-red-700">CHF {grandTotal.toFixed(2)}</span>
+            <span className="text-base font-bold text-red-700">CHF {grandTotal.toFixed(2)}</span>
           </div>
         );
       })()}
