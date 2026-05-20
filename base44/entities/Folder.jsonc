@@ -19,6 +19,11 @@
       "type": "boolean",
       "default": false,
       "description": "Dossier syst\u00e8me non supprimable"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description optionnelle du dossier",
+      "maxLength": 1000
     }
   },
   "required": [

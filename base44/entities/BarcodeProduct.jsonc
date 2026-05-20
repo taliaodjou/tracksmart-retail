@@ -41,6 +41,11 @@
     "default_price_chf": {
       "type": "number",
       "description": "Default unit price in CHF"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional product description",
+      "maxLength": 1000
     }
   },
   "required": [

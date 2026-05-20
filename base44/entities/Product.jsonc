@@ -109,6 +109,11 @@
         "recu"
       ],
       "description": "Statut commande"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description optionnelle du produit",
+      "maxLength": 1000
     }
   },
   "required": [
