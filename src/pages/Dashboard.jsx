@@ -174,6 +174,16 @@ export default function Dashboard() {
     return '';
   };
 
+  // ── Find duplicate by name + brand ──────────────────────
+  const findExistingProduct = (name, brand) => {
+    if (!name) return null;
+    const normalize = s => (s || '').toLowerCase().trim();
+    return products.find(p =>
+      normalize(p.name) === normalize(name) &&
+      normalize(p.marque) === normalize(brand)
+    ) || null;
+  };
+
   // ── Barcode scan flow ────────────────────────────────────
   const handleBarcodeDetected = async (code) => {
     setShowScanner(false);
@@ -184,7 +194,8 @@ export default function Dashboard() {
     // 1. Search local DB first
     const match = barcodeDB.find(b => b.barcode === code);
     if (match) {
-      setQuickAdd({ barcode: code, prefill: match });
+      const existing = findExistingProduct(match.name, match.brand || match.marque);
+      setQuickAdd({ barcode: code, prefill: match, existingProduct: existing });
       return;
     }
 
@@ -195,21 +206,20 @@ export default function Dashboard() {
       if (data.status === 1 && data.product) {
         const p = data.product;
         const category = matchCategory(p.categories_tags || []);
+        const name = p.product_name_fr || p.product_name || p.generic_name || '';
+        const brand = p.brands || '';
+        const existing = findExistingProduct(name, brand);
         setQuickAdd({
           barcode: code,
-          prefill: {
-            name: p.product_name_fr || p.product_name || p.generic_name || '',
-            brand: p.brands || '',
-            category,
-            image_url: p.image_front_url || p.image_url || '',
-          },
+          prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
+          existingProduct: existing,
         });
         return;
       }
     } catch (_) {}
 
     // 3. Not found — manual entry (null prefill → QuickAddModal shows manual form)
-    setQuickAdd({ barcode: code, prefill: null });
+    setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
   const filteredProducts = useMemo(() => products.filter(p => {
@@ -455,9 +465,11 @@ export default function Dashboard() {
         <QuickAddModal
           barcode={quickAdd.barcode}
           prefill={quickAdd.prefill}
+          existingProduct={quickAdd.existingProduct}
           onSave={(data) => createMutation.mutate(data)}
+          onUpdate={(id, data) => updateMutation.mutate({ id, data })}
           onClose={() => setQuickAdd(null)}
-          saving={createMutation.isPending}
+          saving={createMutation.isPending || updateMutation.isPending}
         />
       )}
 

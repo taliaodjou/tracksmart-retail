@@ -2,17 +2,20 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X, CheckCircle2, Loader2, Package, Tag, Layers } from 'lucide-react';
+import { X, CheckCircle2, Loader2, Package, Tag, Layers, AlertTriangle, RefreshCw } from 'lucide-react';
 import { rayonKeys, categoryKeys } from '@/lib/productUtils';
 import { useLanguage } from '@/lib/LanguageContext';
 
 /**
  * QuickAddModal — shown after barcode scan + product lookup
  * Pre-filled with product info. User adds DLC + rayon then saves.
+ * If existingProduct is passed, offers to update DLC instead of creating a duplicate.
  */
-export default function QuickAddModal({ prefill, barcode, onSave, onClose, saving }) {
+export default function QuickAddModal({ prefill, barcode, existingProduct, onSave, onUpdate, onClose, saving }) {
   const { t, lang } = useLanguage();
   const isFr = lang === 'fr';
+  // If there's an existing product, default to update mode
+  const [mode, setMode] = useState(existingProduct ? 'update' : 'create');
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -203,24 +206,68 @@ export default function QuickAddModal({ prefill, barcode, onSave, onClose, savin
           </div>
         </div>
 
+        {/* Duplicate warning banner */}
+        {existingProduct && (
+          <div className="mx-5 mt-3 flex-shrink-0">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-amber-800">
+                    {isFr ? 'Ce produit existe déjà dans votre stock' : 'This product already exists in your stock'}
+                  </p>
+                  <p className="text-xs text-amber-600 mt-0.5">
+                    {isFr ? 'Ancienne DLC :' : 'Current expiry:'}{' '}
+                    <strong>{existingProduct.expiration_date || (isFr ? 'non définie' : 'not set')}</strong>
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMode('update')}
+                  className={`flex-1 text-xs py-1.5 px-3 rounded-lg font-semibold transition-colors border ${mode === 'update' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-amber-700 border-amber-300 hover:bg-amber-50'}`}
+                >
+                  <RefreshCw className="w-3 h-3 inline mr-1" />
+                  {isFr ? 'Mettre à jour la DLC' : 'Update expiry'}
+                </button>
+                <button
+                  onClick={() => setMode('create')}
+                  className={`flex-1 text-xs py-1.5 px-3 rounded-lg font-semibold transition-colors border ${mode === 'create' ? 'bg-foreground text-white border-foreground' : 'bg-white text-muted-foreground border-border hover:bg-secondary'}`}
+                >
+                  {isFr ? 'Ajouter quand même' : 'Add anyway'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Save */}
         <div className="px-5 py-4 border-t border-border/30 bg-white flex-shrink-0">
           <Button
-            className="w-full h-14 text-base font-bold rounded-xl gap-2"
+            className={`w-full h-14 text-base font-bold rounded-xl gap-2 ${mode === 'update' ? 'bg-amber-500 hover:bg-amber-600 text-white' : ''}`}
             disabled={!canSave || saving}
-            onClick={() => onSave({
-              name: form.name,
-              marque: form.marque || undefined,
-              category: form.category || undefined,
-              rayon: form.rayon || undefined,
-              expiration_date: form.expiration_date,
-              reception_date: form.reception_date,
-              price_chf: form.price_chf ? Number(form.price_chf) : undefined,
-            })}
+            onClick={() => {
+              const data = {
+                name: form.name,
+                marque: form.marque || undefined,
+                category: form.category || undefined,
+                rayon: form.rayon || undefined,
+                expiration_date: form.expiration_date,
+                reception_date: form.reception_date,
+                price_chf: form.price_chf ? Number(form.price_chf) : undefined,
+              };
+              if (mode === 'update' && existingProduct) {
+                onUpdate(existingProduct.id, data);
+              } else {
+                onSave(data);
+              }
+            }}
           >
             {saving
               ? <><Loader2 className="w-5 h-5 animate-spin" /> {isFr ? 'Enregistrement…' : 'Saving…'}</>
-              : <><CheckCircle2 className="w-5 h-5" /> {isFr ? 'Enregistrer le produit' : 'Save product'}</>
+              : mode === 'update'
+                ? <><RefreshCw className="w-5 h-5" /> {isFr ? 'Mettre à jour la DLC' : 'Update expiry date'}</>
+                : <><CheckCircle2 className="w-5 h-5" /> {isFr ? 'Enregistrer le produit' : 'Save product'}</>
             }
           </Button>
         </div>
