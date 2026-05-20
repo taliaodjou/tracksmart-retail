@@ -122,7 +122,7 @@
           "data.store_owner_email": "{{user.email}}"
         },
         {
-          "data.store_owner_email": "{{user.data.store_owner_email}}"
+          "data.store_owner_email": "{{user.store_owner_email}}"
         },
         {
           "user_condition": {
@@ -137,7 +137,7 @@
           "data.store_owner_email": "{{user.email}}"
         },
         {
-          "data.store_owner_email": "{{user.data.store_owner_email}}"
+          "data.store_owner_email": "{{user.store_owner_email}}"
         },
         {
           "user_condition": {
@@ -149,10 +149,49 @@
     "update": {
       "$or": [
         {
-          "data.store_owner_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
         },
         {
-          "data.store_owner_email": "{{user.data.store_owner_email}}"
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "owner"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.store_owner_email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "owner"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "user_condition": {
@@ -164,7 +203,49 @@
     "delete": {
       "$or": [
         {
-          "data.store_owner_email": "{{user.email}}"
+          "created_by": "{{user.email}}"
+        },
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "owner"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.store_owner_email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "owner"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "user_condition": {
