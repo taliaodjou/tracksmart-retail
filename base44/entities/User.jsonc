@@ -98,5 +98,79 @@
       "default": false
     }
   },
-  "required": []
+  "required": [],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "owner"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.email}}"
+            },
+            {
+              "user_condition": {
+                "role": "owner"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
 }
