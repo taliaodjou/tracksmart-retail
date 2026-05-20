@@ -18,15 +18,24 @@ export default function DashboardHeader() {
 
   const handleLogout = () => base44.auth.logout('/');
 
-  const navItems = [
+  // Primary nav items shown inline
+  const primaryNavItems = [
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
     ...(canAccessAnalytics(user) ? [{ to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> }] : []),
     { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
+  ];
+
+  // Secondary nav items in "Plus" dropdown
+  const secondaryNavItems = [
     { to: '/documents', label: 'Documents', icon: <Folder className="w-3.5 h-3.5" /> },
     ...(canManageTeam(user) ? [{ to: '/team', label: 'Équipe', icon: <Users className="w-3.5 h-3.5" /> }] : []),
     { to: '/activity', label: 'Activité', icon: <Activity className="w-3.5 h-3.5" /> },
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
+    { to: '/reports', label: 'Rapports', icon: <FileText className="w-3.5 h-3.5" /> },
   ];
+
+  // Keep navItems for mobile menu (all items)
+  const navItems = [...primaryNavItems, ...secondaryNavItems];
 
   const navLink = (to, label, icon) => {
     const active = location.pathname === to;
@@ -61,21 +70,23 @@ export default function DashboardHeader() {
 
           {/* Desktop Nav */}
           <nav className="hidden sm:flex items-center gap-0.5">
-            {navItems.map(item => navLink(item.to, item.label, item.icon))}
+            {primaryNavItems.map(item => navLink(item.to, item.label, item.icon))}
             {/* More dropdown */}
             <div className="relative">
               <button
                 onClick={() => setMoreOpen(o => !o)}
-                className="flex items-center gap-1 text-sm px-3 py-1.5 rounded-full transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary"
+                className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded-full transition-colors ${secondaryNavItems.some(i => location.pathname === i.to) ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
               >
-                <span className="hidden sm:inline">Autre</span>
+                <span>Plus</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
               {moreOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-border/50 rounded-xl shadow-lg py-1 z-50 min-w-[160px]" onMouseLeave={() => setMoreOpen(false)}>
-                  <Link to="/reports" onClick={() => setMoreOpen(false)} className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${location.pathname === '/reports' ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}>
-                    <FileText className="w-3.5 h-3.5" /> Rapports trimestriels
-                  </Link>
+                <div className="absolute right-0 top-full mt-1 bg-white border border-border/50 rounded-xl shadow-lg py-1 z-50 min-w-[180px]" onMouseLeave={() => setMoreOpen(false)}>
+                  {secondaryNavItems.map(item => (
+                    <Link key={item.to} to={item.to} onClick={() => setMoreOpen(false)} className={`flex items-center gap-2 px-4 py-2 text-sm transition-colors ${location.pathname === item.to ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'}`}>
+                      {item.icon} {item.label}
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
@@ -121,16 +132,7 @@ export default function DashboardHeader() {
                 </Link>
               );
             })}
-            <div className="border-t border-border/30 pt-2 mt-1">
-              <p className="px-4 py-1 text-xs text-muted-foreground/60 font-medium uppercase tracking-wide">Autre</p>
-              <Link
-                to="/reports"
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${location.pathname === '/reports' ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-secondary'}`}
-              >
-                <FileText className="w-4 h-4" /> Rapports trimestriels
-              </Link>
-            </div>
+
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 w-full transition-colors"
