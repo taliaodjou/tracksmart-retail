@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
-const ADMIN_PIN = 'Tracksmart2002!1972';
 const STORAGE_KEY = 'tracksmart_admin_pin_ok';
 
 export default function AdminPinGate({ userEmail, children }) {
@@ -9,9 +9,9 @@ export default function AdminPinGate({ userEmail, children }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
   const [showPin, setShowPin] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check session storage so they don't re-enter on page navigation
     if (sessionStorage.getItem(STORAGE_KEY) === 'true') {
       setUnlocked(true);
     }
@@ -21,22 +21,29 @@ export default function AdminPinGate({ userEmail, children }) {
     return children;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (pin === ADMIN_PIN) {
-      sessionStorage.setItem(STORAGE_KEY, 'true');
-      setUnlocked(true);
-      setError(false);
-    } else {
+    setLoading(true);
+    setError(false);
+    try {
+      const response = await base44.functions.invoke('verifyAdminPin', { pin });
+      if (response.data?.success) {
+        sessionStorage.setItem(STORAGE_KEY, 'true');
+        setUnlocked(true);
+      } else {
+        setError(true);
+        setPin('');
+      }
+    } catch {
       setError(true);
       setPin('');
     }
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
             <Lock className="w-7 h-7 text-primary" />
@@ -55,7 +62,6 @@ export default function AdminPinGate({ userEmail, children }) {
               value={pin}
               onChange={(e) => { setPin(e.target.value); setError(false); }}
               placeholder="Code PIN"
-              maxLength={8}
               autoFocus
               className={`w-full bg-[#1a1a1a] border rounded-2xl px-5 py-4 text-white text-center text-2xl font-bold tracking-widest placeholder:text-white/20 focus:outline-none transition-all pr-12 ${
                 error ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-primary/50'
@@ -76,10 +82,10 @@ export default function AdminPinGate({ userEmail, children }) {
 
           <button
             type="submit"
-            disabled={!pin}
+            disabled={!pin || loading}
             className="w-full bg-primary text-black font-bold py-4 rounded-2xl text-base hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Accéder au portail
+            {loading ? 'Vérification...' : 'Accéder au portail'}
           </button>
         </form>
 
