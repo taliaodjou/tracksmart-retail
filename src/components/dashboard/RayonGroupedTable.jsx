@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, TrendingDown } from 'lucide-react';
 import ProductTable from './ProductTable';
 import { getProductStatus } from '@/lib/productUtils';
 
@@ -153,6 +153,26 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
           )}
         </div>
       ))}
+
+      {/* Grand total losses across all rayons */}
+      {(() => {
+        const grandTotal = products.reduce((sum, p) => {
+          if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
+            return sum + (p.quantity_thrown * p.price_chf);
+          }
+          return sum;
+        }, 0);
+        if (grandTotal <= 0) return null;
+        return (
+          <div className="mt-4 flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-2xl px-6 py-4">
+            <div className="flex items-center gap-2">
+              <TrendingDown className="w-5 h-5 text-red-600" />
+              <span className="font-bold text-red-800 text-sm">Total pertes — tous rayons confondus</span>
+            </div>
+            <span className="text-2xl font-bold text-red-700">CHF {grandTotal.toFixed(2)}</span>
+          </div>
+        );
+      })()}
     </div>
   );
 }
