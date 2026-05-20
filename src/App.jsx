@@ -1,13 +1,17 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { SupportModeProvider } from '@/lib/SupportModeContext';
 import { isAdmin } from '@/lib/productUtils';
+import BottomTabBar from '@/components/mobile/BottomTabBar';
+import PageTransition from '@/components/mobile/PageTransition';
+import { useEffect } from 'react';
 import Landing from '@/pages/Landing';
 import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
@@ -25,6 +29,16 @@ import ActivityLogs from '@/pages/ActivityLogs';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  // Apply dark mode based on system preference
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = (e) => document.documentElement.classList.toggle('dark', e.matches);
+    apply(mq);
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -64,29 +78,36 @@ const AuthenticatedApp = () => {
     return children;
   };
 
+  const showBottomBar = isAuthenticated && user && !isAdmin(user);
+
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
+    <>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
 
-      {/* Client-facing routes (accessible by all authenticated users) */}
-      <Route path="/welcome" element={<Welcome />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/analytics" element={<Analytics />} />
-      <Route path="/orders" element={<Orders />} />
-      <Route path="/reports" element={<Reports />} />
-      <Route path="/documents" element={<Documents />} />
-      <Route path="/team" element={<TeamManagement />} />
-      <Route path="/activity" element={<ActivityLogs />} />
-      <Route path="/admin" element={<Admin />} />
+          {/* Client-facing routes */}
+          <Route path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />
+          <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+          <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+          <Route path="/analytics" element={<PageTransition><Analytics /></PageTransition>} />
+          <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
+          <Route path="/reports" element={<PageTransition><Reports /></PageTransition>} />
+          <Route path="/documents" element={<PageTransition><Documents /></PageTransition>} />
+          <Route path="/team" element={<PageTransition><TeamManagement /></PageTransition>} />
+          <Route path="/activity" element={<PageTransition><ActivityLogs /></PageTransition>} />
+          <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
 
-      {/* Admin-only routes */}
-      <Route path="/admin-portal" element={<ClientGuard><AdminPortal /></ClientGuard>} />
-      <Route path="/support-view" element={<ClientSupportView />} />
-      <Route path="/email-preferences" element={<EmailPreferences />} />
+          {/* Admin-only routes */}
+          <Route path="/admin-portal" element={<PageTransition><ClientGuard><AdminPortal /></ClientGuard></PageTransition>} />
+          <Route path="/support-view" element={<PageTransition><ClientSupportView /></PageTransition>} />
+          <Route path="/email-preferences" element={<PageTransition><EmailPreferences /></PageTransition>} />
 
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+          <Route path="*" element={<PageTransition><PageNotFound /></PageTransition>} />
+        </Routes>
+      </AnimatePresence>
+      {showBottomBar && <BottomTabBar />}
+    </>
   );
 };
 

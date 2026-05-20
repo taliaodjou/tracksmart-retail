@@ -235,15 +235,15 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button
                   onClick={() => handleMobileEdit(p)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+                  className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
                 >
-                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+                  <Pencil className="w-4 h-4 text-muted-foreground" />
                 </button>
                 <button
                   onClick={() => onDelete(p)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors"
+                  className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors"
                 >
-                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                  <Trash2 className="w-4 h-4 text-red-400" />
                 </button>
               </div>
             </div>

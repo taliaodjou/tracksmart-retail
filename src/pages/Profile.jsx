@@ -10,7 +10,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { Badge } from '@/components/ui/badge';
 import { format, addMonths } from 'date-fns';
 import { getNextRenewalDate } from '@/lib/schedulerUtils';
-import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, BellOff, Bell } from 'lucide-react';
+import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, BellOff, Bell, Trash2 } from 'lucide-react';
 import AccountingSettings from '@/components/profile/AccountingSettings';
 import SubscriptionPlans from '@/components/profile/SubscriptionPlans';
 
@@ -21,6 +21,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [prefOpen, setPrefOpen] = useState(false);
   const [savedBanner, setSavedBanner] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -205,6 +206,51 @@ export default function Profile() {
                   </Button>
                 </div>
               </form>
+            </div>
+          )}
+        </div>
+        {/* Delete account */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-100 mt-6">
+          <h2 className="font-semibold text-red-600 mb-1 flex items-center gap-2">
+            <Trash2 className="w-4 h-4" />
+            {lang === 'fr' ? 'Supprimer le compte' : 'Delete account'}
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4">
+            {lang === 'fr'
+              ? 'Cette action est irréversible. Toutes vos données seront définitivement supprimées.'
+              : 'This action is irreversible. All your data will be permanently deleted.'}
+          </p>
+          {!deleteConfirm ? (
+            <button
+              onClick={() => setDeleteConfirm(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              {lang === 'fr' ? 'Supprimer mon compte' : 'Delete my account'}
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-red-600">
+                {lang === 'fr' ? 'Êtes-vous sûr(e) ? Cette action est définitive.' : 'Are you sure? This cannot be undone.'}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    await base44.auth.updateMe({ account_deletion_requested: true });
+                    toast.success(lang === 'fr' ? 'Demande envoyée. Notre équipe vous contactera.' : 'Request sent. Our team will contact you.');
+                    setDeleteConfirm(false);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
+                >
+                  {lang === 'fr' ? 'Confirmer la suppression' : 'Confirm deletion'}
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(false)}
+                  className="px-4 py-2 rounded-xl text-sm font-medium border border-border text-muted-foreground hover:bg-secondary transition-colors"
+                >
+                  {lang === 'fr' ? 'Annuler' : 'Cancel'}
+                </button>
+              </div>
             </div>
           )}
         </div>
