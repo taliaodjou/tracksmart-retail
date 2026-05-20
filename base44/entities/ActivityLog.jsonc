@@ -59,9 +59,7 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "isAuthenticated": true
-      }
+      "created_by": "{{user.email}}"
     },
     "read": {
       "$or": [
@@ -69,7 +67,7 @@
           "data.store_owner_email": "{{user.email}}"
         },
         {
-          "data.store_owner_email": "{{user.data.store_owner_email}}"
+          "data.store_owner_email": "{{user.store_owner_email}}"
         },
         {
           "user_condition": {
