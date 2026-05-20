@@ -229,7 +229,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                     </span>
                   )}
                   {p.rayon && <span>Rayon {p.rayon}</span>}
-                  {isExpired && total > 0 && <span className="text-red-600 font-medium">CHF {total.toFixed(2)}</span>}
+                  {isExpired && total > 0 && <span className="text-red-600 font-medium text-xs">CHF {total.toFixed(2)}</span>}
                 </div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
