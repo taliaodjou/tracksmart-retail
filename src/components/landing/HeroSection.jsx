@@ -24,7 +24,7 @@ export default function HeroSection() {
         >
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-8">
             <ShieldCheck className="w-4 h-4" />
-            TrackSmart
+            TrackSmart Retail
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight max-w-4xl mx-auto">

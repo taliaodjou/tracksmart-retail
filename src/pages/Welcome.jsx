@@ -109,7 +109,7 @@ export default function Welcome() {
           <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-sm">
             <Clock className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart</span>
+          <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart Retail</span>
         </div>
         <div className="text-xs text-muted-foreground">{capitalizedDate}</div>
       </motion.div>
@@ -152,7 +152,7 @@ export default function Welcome() {
             {user?.shop_name ? (
               <span className="text-primary">{user.shop_name}</span>
             ) : (
-              <span className="text-primary">TrackSmart</span>
+              <span className="text-primary">TrackSmart Retail</span>
             )}
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base max-w-md mb-8">
@@ -219,7 +219,7 @@ export default function Welcome() {
         transition={{ delay: 1 }}
         className="text-center py-5 px-4 text-xs text-muted-foreground/50 relative z-10"
       >
-        TrackSmart · TNO Studio · support@tracksmart.com · +41 77 222 97 64
+        TrackSmart Retail · TNO Studio · support@tracksmart.com · +41 77 222 97 64
       </motion.footer>
     </div>
   );

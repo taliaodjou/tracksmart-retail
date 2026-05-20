@@ -16,7 +16,7 @@ export default function Navbar() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">TS</span>
             </div>
-            <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart</span>
+            <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart Retail</span>
           </Link>
 
           {/* Desktop */}

@@ -9,7 +9,7 @@ export default function DashboardFooter() {
             <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xs">TS</span>
             </div>
-            <span className="font-medium text-foreground">Powered by TrackSmart</span>
+            <span className="font-medium text-foreground">Powered by TrackSmart Retail</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
             <a href="mailto:support@tracksmart.com" className="hover:text-foreground transition-colors">

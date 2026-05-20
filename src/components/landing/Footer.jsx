@@ -12,10 +12,10 @@ export default function Footer() {
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xs">TS</span>
             </div>
-            <span className="font-bold text-foreground">TrackSmart</span>
+            <span className="font-bold text-foreground">TrackSmart Retail</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} TrackSmart. {t('footer_rights')}
+            © {new Date().getFullYear()} TrackSmart Retail. {t('footer_rights')}
           </p>
         </div>
       </div>
