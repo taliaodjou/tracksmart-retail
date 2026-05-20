@@ -1,15 +1,190 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getProductStatus, getDaysRemaining, statusConfig } from '@/lib/productUtils';
-import { AlertTriangle, X, ChevronRight } from 'lucide-react';
+import { AlertTriangle, X, ChevronRight, Trash2, CalendarClock, Loader2, Check } from 'lucide-react';
 import { format } from 'date-fns';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 const PREVIEW_COUNT = 10;
 
-export default function WeeklyAlert({ products }) {
+// Action panel for a single product inside the modal
+function ProductActionPanel({ product, onUpdate, lang }) {
+  const isFr = lang === 'fr';
+  const [tab, setTab] = useState('info'); // info | jeter | dlc
+  const [qty, setQty] = useState('');
+  const [price, setPrice] = useState(product.price_chf ? String(product.price_chf) : '');
+  const [newDlc, setNewDlc] = useState(product.expiration_date || '');
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const loss = (parseFloat(qty) || 0) * (parseFloat(price) || 0);
+  const status = getProductStatus(product.expiration_date);
+  const days = getDaysRemaining(product.expiration_date);
+  const cfg = statusConfig[status];
+
+  const handleJeter = async () => {
+    if (!qty || !price) return;
+    setSaving(true);
+    await onUpdate(product.id, {
+      action: 'jeter',
+      quantity_thrown: Number(qty),
+      price_chf: Number(price),
+    });
+    setSaving(false);
+    setDone(true);
+  };
+
+  const handleDlc = async () => {
+    if (!newDlc) return;
+    setSaving(true);
+    await onUpdate(product.id, { expiration_date: newDlc });
+    setSaving(false);
+    setDone(true);
+  };
+
+  if (done) {
+    return (
+      <div className="flex flex-col items-center justify-center py-6 gap-2 text-green-600">
+        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+          <Check className="w-5 h-5" />
+        </div>
+        <p className="text-sm font-semibold">{isFr ? 'Mis à jour !' : 'Updated!'}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Product header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="font-semibold text-foreground text-sm">{product.name}</p>
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            {product.marque && <span className="text-xs text-muted-foreground">{product.marque}</span>}
+            {product.rayon && <span className="text-xs text-muted-foreground">• Rayon {product.rayon}</span>}
+            <span className={`inline-flex items-center gap-1 px-2 py-0 rounded-full text-xs font-medium border ${cfg.color}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+              {product.expiration_date ? format(new Date(product.expiration_date), 'dd/MM/yy') : '—'} ({days}j)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 bg-secondary/50 p-1 rounded-xl">
+        <button
+          onClick={() => setTab('info')}
+          className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors ${tab === 'info' ? 'bg-white shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+        >
+          {isFr ? 'Infos' : 'Info'}
+        </button>
+        <button
+          onClick={() => setTab('jeter')}
+          className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-1 ${tab === 'jeter' ? 'bg-red-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+        >
+          <Trash2 className="w-3 h-3" /> {isFr ? 'Jeter' : 'Discard'}
+        </button>
+        <button
+          onClick={() => setTab('dlc')}
+          className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-1 ${tab === 'dlc' ? 'bg-blue-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+        >
+          <CalendarClock className="w-3 h-3" /> {isFr ? 'Modifier DLC' : 'Update Expiry'}
+        </button>
+      </div>
+
+      {/* Info tab */}
+      {tab === 'info' && (
+        <div className="text-xs text-muted-foreground space-y-1 px-1">
+          {product.category && <p><span className="font-medium text-foreground">{isFr ? 'Catégorie' : 'Category'}:</span> {product.category}</p>}
+          {product.rayon && <p><span className="font-medium text-foreground">Rayon:</span> {product.rayon}</p>}
+          {product.expiration_date && <p><span className="font-medium text-foreground">DLC:</span> {format(new Date(product.expiration_date), 'dd/MM/yyyy')}</p>}
+          {product.price_chf && <p><span className="font-medium text-foreground">Prix:</span> CHF {product.price_chf}</p>}
+          {product.added_by_name && <p><span className="font-medium text-foreground">{isFr ? 'Ajouté par' : 'Added by'}:</span> {product.added_by_name}</p>}
+        </div>
+      )}
+
+      {/* Jeter tab */}
+      {tab === 'jeter' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-semibold text-foreground mb-1 block">{isFr ? 'Quantité jetée' : 'Qty discarded'}</label>
+              <Input
+                type="number"
+                min="0"
+                value={qty}
+                onChange={e => setQty(e.target.value)}
+                placeholder="0"
+                className="h-10 text-sm rounded-xl"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground mb-1 block">{isFr ? 'Prix vente CHF' : 'Sale price CHF'}</label>
+              <Input
+                type="number"
+                min="0"
+                step="0.05"
+                value={price}
+                onChange={e => setPrice(e.target.value)}
+                placeholder="0.00"
+                className="h-10 text-sm rounded-xl"
+              />
+            </div>
+          </div>
+          {loss > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 flex items-center justify-between">
+              <span className="text-xs font-semibold text-red-700">{isFr ? 'Perte estimée' : 'Estimated loss'}</span>
+              <span className="text-base font-bold text-red-700">CHF {loss.toFixed(2)}</span>
+            </div>
+          )}
+          <Button
+            className="w-full bg-red-500 hover:bg-red-600 text-white rounded-xl"
+            disabled={!qty || !price || saving}
+            onClick={handleJeter}
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Trash2 className="w-4 h-4" /> {isFr ? 'Confirmer le jet' : 'Confirm discard'}</>}
+          </Button>
+        </div>
+      )}
+
+      {/* DLC tab */}
+      {tab === 'dlc' && (
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-foreground mb-1 block">
+              {isFr ? 'Ancienne DLC :' : 'Current expiry:'}{' '}
+              <span className="text-red-600">{product.expiration_date ? format(new Date(product.expiration_date), 'dd/MM/yyyy') : '—'}</span>
+            </label>
+            <label className="text-xs font-semibold text-foreground mb-1 block mt-2">{isFr ? 'Nouvelle DLC' : 'New expiry date'}</label>
+            <Input
+              type="date"
+              value={newDlc}
+              onChange={e => setNewDlc(e.target.value)}
+              className="h-12 text-base font-medium rounded-xl border-2 border-blue-300 focus:border-blue-500"
+              autoFocus
+            />
+          </div>
+          <Button
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl"
+            disabled={!newDlc || newDlc === product.expiration_date || saving}
+            onClick={handleDlc}
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CalendarClock className="w-4 h-4" /> {isFr ? 'Mettre à jour la DLC' : 'Update expiry'}</>}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function WeeklyAlert({ products, onUpdate }) {
   const { t, lang } = useLanguage();
-  const [popup, setPopup] = useState(null); // single product popup
-  const [showAll, setShowAll] = useState(false); // full list modal
+  const [popup, setPopup] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+  const [activeProduct, setActiveProduct] = useState(null); // product shown in action panel
+  const isFr = lang === 'fr';
 
   const watchProducts = products.filter(p => {
     const status = getProductStatus(p.expiration_date);
@@ -20,6 +195,11 @@ export default function WeeklyAlert({ products }) {
 
   const extra = watchProducts.length - PREVIEW_COUNT;
   const visible = watchProducts.slice(0, PREVIEW_COUNT);
+
+  const handleProductClick = (p) => {
+    setShowAll(true);
+    setActiveProduct(p);
+  };
 
   return (
     <>
@@ -35,7 +215,7 @@ export default function WeeklyAlert({ products }) {
             return (
               <button
                 key={p.id}
-                onClick={() => setPopup(p)}
+                onClick={() => handleProductClick(p)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer hover:opacity-80 transition-opacity ${statusConfig[status].color}`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[status].dot}`} />
@@ -53,7 +233,7 @@ export default function WeeklyAlert({ products }) {
           )}
         </div>
 
-        {/* Single product mini popup */}
+        {/* Simple info popup (kept for quick glance without opening full modal) */}
         {popup && (
           <div className="absolute left-4 right-4 top-full mt-2 z-50 bg-white border border-border shadow-lg rounded-xl p-4 text-sm">
             <div className="flex items-center justify-between mb-2">
@@ -63,20 +243,20 @@ export default function WeeklyAlert({ products }) {
               </button>
             </div>
             <div className="space-y-1 text-xs text-muted-foreground">
-              {popup.marque && <p><span className="font-medium text-foreground">{lang === 'fr' ? 'Marque' : 'Brand'} :</span> {popup.marque}</p>}
-              {popup.rayon && <p><span className="font-medium text-foreground">{lang === 'fr' ? 'Rayon' : 'Shelf'} :</span> {popup.rayon}</p>}
+              {popup.marque && <p><span className="font-medium text-foreground">{isFr ? 'Marque' : 'Brand'} :</span> {popup.marque}</p>}
+              {popup.rayon && <p><span className="font-medium text-foreground">{isFr ? 'Rayon' : 'Shelf'} :</span> {popup.rayon}</p>}
               {popup.expiration_date && <p><span className="font-medium text-foreground">DLC :</span> {format(new Date(popup.expiration_date), 'dd/MM/yyyy')}</p>}
             </div>
           </div>
         )}
       </div>
 
-      {/* Full list bottom sheet modal */}
+      {/* Full modal with tabs */}
       {showAll && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center" onClick={() => setShowAll(false)}>
+        <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center" onClick={() => { setShowAll(false); setActiveProduct(null); }}>
           <div className="absolute inset-0 bg-black/40" />
           <div
-            className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[80vh] flex flex-col shadow-2xl"
+            className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] flex flex-col shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
             {/* Handle bar (mobile) */}
@@ -85,43 +265,72 @@ export default function WeeklyAlert({ products }) {
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/40 flex-shrink-0">
               <div className="flex items-center gap-2">
+                {activeProduct && (
+                  <button
+                    onClick={() => setActiveProduct(null)}
+                    className="text-muted-foreground hover:text-foreground mr-1"
+                  >
+                    <ChevronRight className="w-4 h-4 rotate-180" />
+                  </button>
+                )}
                 <AlertTriangle className="w-4 h-4 text-orange-600" />
                 <h2 className="font-semibold text-foreground text-sm">
-                  {lang === 'fr' ? 'Produits à surveiller' : 'Products to watch'} ({watchProducts.length})
+                  {activeProduct
+                    ? (isFr ? 'Action rapide' : 'Quick action')
+                    : `${isFr ? 'Produits à surveiller' : 'Products to watch'} (${watchProducts.length})`
+                  }
                 </h2>
               </div>
-              <button onClick={() => setShowAll(false)} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setShowAll(false); setActiveProduct(null); }} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* List */}
-            <div className="overflow-y-auto flex-1 px-4 py-3 space-y-2">
-              {watchProducts.map(p => {
-                const status = getProductStatus(p.expiration_date);
-                const days = getDaysRemaining(p.expiration_date);
-                const cfg = statusConfig[status];
-                return (
-                  <div
-                    key={p.id}
-                    className={`flex items-center justify-between px-4 py-3 rounded-xl border text-sm ${cfg.color}`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
-                      <div className="min-w-0">
-                        <p className="font-medium truncate">{p.name}</p>
-                        {p.marque && <p className="text-xs opacity-70 truncate">{p.marque}</p>}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end flex-shrink-0 ml-3 text-xs">
-                      <span className="font-semibold">{days}j</span>
-                      {p.rayon && <span className="opacity-60">R{p.rayon}</span>}
-                    </div>
-                  </div>
-                );
-              })}
+            {/* Content */}
+            <div className="overflow-y-auto flex-1 px-4 py-3">
+              {activeProduct ? (
+                <ProductActionPanel
+                  key={activeProduct.id}
+                  product={activeProduct}
+                  onUpdate={async (id, data) => {
+                    if (onUpdate) await onUpdate(id, data);
+                    setActiveProduct(null);
+                  }}
+                  lang={lang}
+                />
+              ) : (
+                <div className="space-y-2">
+                  {watchProducts.map(p => {
+                    const status = getProductStatus(p.expiration_date);
+                    const days = getDaysRemaining(p.expiration_date);
+                    const cfg = statusConfig[status];
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => setActiveProduct(p)}
+                        className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm hover:opacity-90 transition-opacity text-left ${cfg.color}`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{p.name}</p>
+                            {p.marque && <p className="text-xs opacity-70 truncate">{p.marque}</p>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+                          <div className="flex flex-col items-end text-xs">
+                            <span className="font-semibold">{days}j</span>
+                            {p.rayon && <span className="opacity-60">R{p.rayon}</span>}
+                          </div>
+                          <ChevronRight className="w-4 h-4 opacity-50" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

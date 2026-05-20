@@ -337,6 +337,29 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
               );
             })}
           </tbody>
+          {/* Total losses footer */}
+          {(() => {
+            const totalLoss = products.reduce((sum, p) => {
+              if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
+                return sum + (p.quantity_thrown * p.price_chf);
+              }
+              return sum;
+            }, 0);
+            if (totalLoss <= 0) return null;
+            return (
+              <tfoot>
+                <tr className="border-t-2 border-red-200 bg-red-50/60">
+                  <td colSpan={9} className="px-4 py-3 text-xs font-semibold text-red-700 text-right">
+                    Total pertes enregistrées
+                  </td>
+                  <td className="px-4 py-3 font-bold text-red-700 text-base whitespace-nowrap">
+                    CHF {totalLoss.toFixed(2)}
+                  </td>
+                  <td colSpan={2} />
+                </tr>
+              </tfoot>
+            );
+          })()}
         </table>
         </div>
       </div>

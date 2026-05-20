@@ -311,7 +311,7 @@ export default function Dashboard() {
               />
             )}
 
-            <WeeklyAlert products={products} />
+            <WeeklyAlert products={products} onUpdate={(id, data) => updateMutation.mutate({ id, data })} />
 
             {/* Filters */}
             <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-border/40 space-y-3">
