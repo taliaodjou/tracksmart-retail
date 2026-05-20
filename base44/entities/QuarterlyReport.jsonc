@@ -78,6 +78,9 @@
           "data.user_email": "{{user.email}}"
         },
         {
+          "data.user_email": "{{user.store_owner_email}}"
+        },
+        {
           "user_condition": {
             "role": "admin"
           }
@@ -90,6 +93,19 @@
           "data.user_email": "{{user.email}}"
         },
         {
+          "data.user_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "manager"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
+        },
+        {
           "user_condition": {
             "role": "admin"
           }
@@ -100,6 +116,11 @@
       "$or": [
         {
           "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "owner"
+          }
         },
         {
           "user_condition": {
