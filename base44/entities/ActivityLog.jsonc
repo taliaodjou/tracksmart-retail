@@ -56,5 +56,37 @@
     "user_email",
     "action_type",
     "description"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "isAuthenticated": true
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.data.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
