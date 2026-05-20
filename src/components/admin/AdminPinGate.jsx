@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 
-const ADMIN_PIN = '1217';
+const ADMIN_PIN = 'Tracksmart2002!1972';
 const STORAGE_KEY = 'tracksmart_admin_pin_ok';
 
 export default function AdminPinGate({ userEmail, children }) {
