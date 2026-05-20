@@ -211,39 +211,33 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
         const isExpired = status === 'expired';
 
         return (
-          <div key={p.id} className={`bg-white rounded-xl border px-4 py-3 shadow-sm ${isExpired ? 'border-red-200 bg-red-50/30' : status === 'urgent' ? 'border-orange-200 bg-orange-50/20' : 'border-border/40'}`}>
-            <div className="flex items-start justify-between gap-2">
+          <div key={p.id} className={`bg-white rounded-xl border px-3 py-2.5 shadow-sm ${isExpired ? 'border-red-200 bg-red-50/30' : status === 'urgent' ? 'border-orange-200 bg-orange-50/20' : 'border-border/40'}`}>
+            <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-semibold text-sm text-foreground">{p.name}</span>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                  <span className={`inline-flex items-center gap-1 px-1.5 py-0 rounded-full text-[10px] font-medium border ${cfg.color}`}>
+                    <span className={`w-1 h-1 rounded-full ${cfg.dot}`} />
                     {t('status_' + status)}
                   </span>
                 </div>
-                {p.marque && <p className="text-xs text-muted-foreground mt-0.5">{p.marque}</p>}
-                <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground flex-wrap">
+                <div className="flex gap-2 mt-0.5 text-[11px] text-muted-foreground flex-wrap">
+                  {p.marque && <span>{p.marque}</span>}
                   {p.expiration_date && (
                     <span className={`font-medium ${isExpired ? 'text-red-600' : days < 3 ? 'text-orange-600' : days < 14 ? 'text-yellow-600' : 'text-green-600'}`}>
-                      📅 {format(new Date(p.expiration_date), 'dd/MM/yy')} ({days}j)
+                      {format(new Date(p.expiration_date), 'dd/MM/yy')} ({days}j)
                     </span>
                   )}
-                  {p.rayon && <span>Rayon {p.rayon}</span>}
-                  {isExpired && total > 0 && <span className="text-red-600 font-medium text-xs">CHF {total.toFixed(2)}</span>}
+                  {p.rayon && <span>R{p.rayon}</span>}
+                  {isExpired && total > 0 && <span className="text-red-600 font-semibold">CHF {total.toFixed(2)}</span>}
                 </div>
               </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <button
-                  onClick={() => handleMobileEdit(p)}
-                  className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
-                >
-                  <Pencil className="w-4 h-4 text-muted-foreground" />
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                <button onClick={() => handleMobileEdit(p)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors">
+                  <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
-                <button
-                  onClick={() => onDelete(p)}
-                  className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 text-red-400" />
+                <button onClick={() => onDelete(p)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
                 </button>
               </div>
             </div>
