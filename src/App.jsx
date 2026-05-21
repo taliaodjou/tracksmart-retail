@@ -78,7 +78,7 @@ const AuthenticatedApp = () => {
     return children;
   };
 
-  const showBottomBar = isAuthenticated && user && !isAdmin(user);
+  const showBottomBar = isAuthenticated && user && !isAdmin(user) && location.pathname !== '/';
 
   return (
     <>
