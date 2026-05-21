@@ -49,7 +49,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-secondary/30">
       <DashboardHeader />
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-20 sm:pt-10 pb-24 sm:pb-10">
         <h1 className="text-2xl font-bold text-foreground mb-8">{t('profile_title')}</h1>
 
         {/* Subscription plans */}

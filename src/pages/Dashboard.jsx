@@ -423,24 +423,7 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* ── Mobile sticky FAB ── */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur border-t border-border/40 px-4 py-3 flex gap-2.5">
-        <Button
-          variant="outline"
-          className="flex-1 rounded-full h-12 gap-2 text-sm font-semibold"
-          onClick={() => setShowScanner(true)}
-        >
-          <ScanLine className="w-5 h-5 text-primary" />
-          {t('btn_scanner')}
-        </Button>
-        <Button
-          className="flex-1 rounded-full h-12 gap-2 text-sm font-semibold"
-          onClick={() => { setEditProduct(null); setShowForm(true); }}
-        >
-          <Plus className="w-5 h-5" />
-          {t('btn_add')}
-        </Button>
-      </div>
+
 
       {/* Modals */}
       {showImport && (
