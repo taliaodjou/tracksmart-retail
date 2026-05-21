@@ -55,14 +55,19 @@ export default function Dashboard() {
     queryKey: ['products', storeOwnerEmail, isOwnerOrManager],
     queryFn: async () => {
       if (isOwnerOrManager) {
-        // Fetch all products — filter client-side by store owner email or created_by
-        const all = await base44.entities.Product.list('-created_date', 2000);
-        // For owners: show their own + any team member's products (store_owner_email matches)
-        return all.filter(p =>
-          p.created_by === user.email ||
-          p.store_owner_email === storeOwnerEmail ||
-          p.created_by === storeOwnerEmail
-        );
+        // Fetch products scoped to this store (by store_owner_email OR created_by)
+        // Two separate queries merged to handle both products with and without store_owner_email
+        const [byStoreOwner, byCreator] = await Promise.all([
+          base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 2000),
+          base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000),
+        ]);
+        // Deduplicate by id
+        const seen = new Set();
+        return [...byStoreOwner, ...byCreator].filter(p => {
+          if (seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        });
       }
       // Employees only see their own products
       return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
