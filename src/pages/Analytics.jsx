@@ -128,7 +128,7 @@ export default function Analytics() {
   if (!canAccess) {
     const hasSubscription = user?.subscription_status === 'active';
     return (
-      <div className="min-h-screen bg-secondary/30 flex flex-col">
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
         <DashboardHeader />
         {hasSubscription
           ? <PremiumGate featureName="les analytiques" />
@@ -143,7 +143,7 @@ export default function Analytics() {
   const totalThrown = products.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       <DashboardHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 space-y-8">
 

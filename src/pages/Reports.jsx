@@ -177,7 +177,7 @@ export default function Reports() {
   const lastLabel = formatQuarterLabel(lastPeriod.start, lastPeriod.end);
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       <DashboardHeader />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-12">
 

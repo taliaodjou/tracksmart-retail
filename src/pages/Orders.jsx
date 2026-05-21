@@ -153,7 +153,7 @@ export default function Orders() {
 
   if (!canAccess) {
     return (
-      <div className="min-h-screen bg-secondary/30 flex flex-col">
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
         <DashboardHeader />
         <PremiumGate featureName={t('orders_feature')} />
         <DashboardFooter />
@@ -229,7 +229,7 @@ export default function Orders() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       <DashboardHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8">
 

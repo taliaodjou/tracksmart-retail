@@ -85,9 +85,17 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    color-scheme: light !important;
   }
 
-  html, body, #root {
+  html {
+    background-color: #ffffff !important;
+    color: #1a1a1a !important;
+    color-scheme: light only !important;
+    forced-color-adjust: none;
+  }
+
+  body, #root {
     background-color: #ffffff !important;
     color: #1a1a1a !important;
     color-scheme: light only !important;
@@ -100,6 +108,11 @@
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+
+  /* Force all surfaces to light — prevents OS dark mode bleeding in */
+  div, main, section, article, aside, header, footer, nav {
+    color-scheme: light !important;
   }
 
   input, textarea, select {

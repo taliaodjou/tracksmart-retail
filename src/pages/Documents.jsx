@@ -90,7 +90,7 @@ export default function Documents() {
     : currentFolder?.name || '';
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       <DashboardHeader />
 
       <main className="pt-20 sm:pt-24 max-w-5xl mx-auto px-4 sm:px-6 pb-6">

@@ -47,7 +47,7 @@ export default function Profile() {
   const nextRenewal = user?.subscription_start_date ? getNextRenewalDate(user.subscription_start_date) : null;
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       <DashboardHeader />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-20 sm:pt-10 pb-24 sm:pb-10">
         <h1 className="text-2xl font-bold text-foreground mb-8">{t('profile_title')}</h1>

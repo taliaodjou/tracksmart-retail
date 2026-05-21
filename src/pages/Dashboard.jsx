@@ -254,7 +254,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-secondary/30 pb-20 sm:pb-0 pt-16 sm:pt-20">
+    <div className="min-h-screen pb-20 sm:pb-0 pt-16 sm:pt-20" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       {needsOnboarding && !onboardingDone && (
         <OnboardingModal user={user} onComplete={() => setOnboardingDone(true)} />
       )}
