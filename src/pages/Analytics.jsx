@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
-import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin } from '@/lib/productUtils';
 import { format, startOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -34,9 +34,26 @@ export default function Analytics() {
   const { user } = useAuth();
   const canAccess = hasActiveSubscription(user);
 
+  const storeOwnerEmail = getStoreOwnerEmail(user);
+  const isOwnerOrManager = user?.role === 'owner' || user?.role === 'user' || user?.role === 'manager';
+
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => base44.entities.Product.filter({ created_by: user.email }, '-created_date'),
+    queryKey: ['products', storeOwnerEmail, isOwnerOrManager],
+    queryFn: async () => {
+      if (isOwnerOrManager) {
+        const [byStoreOwner, byCreator] = await Promise.all([
+          base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 2000),
+          base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000),
+        ]);
+        const seen = new Set();
+        return [...byStoreOwner, ...byCreator].filter(p => {
+          if (seen.has(p.id)) return false;
+          seen.add(p.id);
+          return true;
+        });
+      }
+      return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
+    },
     enabled: canAccess && !!user?.email,
   });
 
