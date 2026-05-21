@@ -204,15 +204,36 @@ export default function Dashboard() {
       return;
     }
 
-    // 2. Try Open Food Facts
+    // 2. Try Open Food Facts + Open Beauty Facts in parallel
     try {
-      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
-      const data = await res.json();
-      if (data.status === 1 && data.product) {
-        const p = data.product;
+      const [foodRes, beautyRes] = await Promise.allSettled([
+        fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then(r => r.json()),
+        fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then(r => r.json()),
+      ]);
+
+      // Check Food Facts first
+      if (foodRes.status === 'fulfilled' && foodRes.value?.status === 1 && foodRes.value?.product) {
+        const p = foodRes.value.product;
         const category = matchCategory(p.categories_tags || []);
         const name = p.product_name_fr || p.product_name || p.generic_name || '';
         const brand = p.brands || '';
+        const existing = findExistingProduct(name, brand);
+        setQuickAdd({
+          barcode: code,
+          prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
+          existingProduct: existing,
+        });
+        return;
+      }
+
+      // Then check Beauty Facts (cosmétiques, huiles, soins...)
+      if (beautyRes.status === 'fulfilled' && beautyRes.value?.status === 1 && beautyRes.value?.product) {
+        const p = beautyRes.value.product;
+        const name = p.product_name_fr || p.product_name || p.generic_name || '';
+        const brand = p.brands || '';
+        // Beauty products → hygiene_beaute by default, refine with tags
+        const rawCategory = matchCategory(p.categories_tags || []);
+        const category = rawCategory || 'hygiene_beaute';
         const existing = findExistingProduct(name, brand);
         setQuickAdd({
           barcode: code,
