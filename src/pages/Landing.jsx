@@ -34,7 +34,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex flex-col relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex flex-col relative" style={{ colorScheme: 'light', color: '#1a1a1a' }}>
 
       {/* Floating background orbs */}
       {floatingOrbs.map((orb, i) => (
@@ -70,7 +70,7 @@ export default function Landing() {
           </motion.div>
           <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart</span>
         </div>
-        <div className="text-xs text-muted-foreground/60 hidden sm:block">by TNO Studio</div>
+        <div className="text-xs text-gray-400 hidden sm:block">by TNO Studio</div>
       </motion.div>
 
       {/* Main content */}
@@ -104,7 +104,7 @@ export default function Landing() {
             Bienvenue sur{' '}
             <span className="text-primary">TrackSmart</span>
           </h1>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-lg leading-relaxed">
+          <p className="text-gray-600 text-base sm:text-lg max-w-lg leading-relaxed">
             Votre plateforme intelligente de gestion des produits et DLC
           </p>
         </motion.div>
@@ -131,7 +131,7 @@ export default function Landing() {
             </motion.div>
             <div>
               <div className="text-base font-bold text-foreground mb-1.5">Je suis une boutique</div>
-              <div className="text-muted-foreground text-xs leading-relaxed">
+              <div className="text-gray-500 text-xs leading-relaxed">
                 Accédez à votre espace de gestion des produits et des pertes.
               </div>
             </div>
@@ -165,11 +165,11 @@ export default function Landing() {
             </motion.div>
             <div>
               <div className="text-base font-bold text-foreground mb-1.5">Je suis administrateur</div>
-              <div className="text-muted-foreground text-xs leading-relaxed">
+              <div className="text-gray-500 text-xs leading-relaxed">
                 Espace privé de gestion TrackSmart.
               </div>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground text-sm font-semibold mt-auto group-hover:text-foreground transition-colors">
+            <div className="flex items-center gap-2 text-gray-500 text-sm font-semibold mt-auto group-hover:text-gray-900 transition-colors">
               Portail administrateur
               <motion.span
                 animate={{ x: [0, 4, 0] }}
@@ -188,7 +188,7 @@ export default function Landing() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="text-center py-5 px-4 text-xs text-muted-foreground/50 relative z-10"
+        className="text-center py-5 px-4 text-xs text-gray-400 relative z-10"
       >
         TrackSmart · TNO Studio · support@tracksmart.com
       </motion.footer>
