@@ -34,7 +34,7 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex flex-col relative" style={{ colorScheme: 'light', color: '#1a1a1a' }}>
+    <div className="min-h-screen flex flex-col relative" style={{ colorScheme: 'light', backgroundColor: '#fafaf8', color: '#1a1a1a', backgroundImage: 'linear-gradient(135deg, #fafaf8 0%, #ffffff 50%, #f5f0e8 100%)' }}>
 
       {/* Floating background orbs */}
       {floatingOrbs.map((orb, i) => (
@@ -68,7 +68,7 @@ export default function Landing() {
           >
             <Clock className="w-5 h-5 text-white" />
           </motion.div>
-          <span className="font-bold text-lg text-foreground tracking-tight">TrackSmart</span>
+          <span className="font-bold text-lg tracking-tight" style={{ color: '#1a1a1a' }}>TrackSmart</span>
         </div>
         <div className="text-xs text-gray-400 hidden sm:block">by TNO Studio</div>
       </motion.div>
@@ -100,7 +100,7 @@ export default function Landing() {
           transition={{ duration: 0.5, delay: 0.25 }}
           className="text-center mb-12"
         >
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-3 leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 leading-tight" style={{ color: '#1a1a1a' }}>
             Bienvenue sur{' '}
             <span className="text-primary">TrackSmart</span>
           </h1>
@@ -120,7 +120,7 @@ export default function Landing() {
             whileHover={{ scale: 1.03, y: -6 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleBoutique}
-            className="group flex-1 bg-white border border-border/50 hover:border-primary/40 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/10 flex flex-col items-center gap-5"
+            className="group flex-1 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col items-center gap-5" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}
           >
             <motion.div
               className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center"
@@ -130,7 +130,7 @@ export default function Landing() {
               <Store className="w-8 h-8 text-primary" />
             </motion.div>
             <div>
-              <div className="text-base font-bold text-foreground mb-1.5">Je suis une boutique</div>
+              <div className="text-base font-bold mb-1.5" style={{ color: '#1a1a1a' }}>Je suis une boutique</div>
               <div className="text-gray-500 text-xs leading-relaxed">
                 Accédez à votre espace de gestion des produits et des pertes.
               </div>
@@ -154,7 +154,7 @@ export default function Landing() {
             whileHover={{ scale: 1.03, y: -6 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleAdmin}
-            className="group flex-1 bg-white border border-border/50 hover:border-foreground/20 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col items-center gap-5"
+            className="group flex-1 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col items-center gap-5" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}
           >
             <motion.div
               className="w-16 h-16 rounded-2xl bg-secondary border border-border flex items-center justify-center"
@@ -164,7 +164,7 @@ export default function Landing() {
               <Shield className="w-8 h-8 text-muted-foreground" />
             </motion.div>
             <div>
-              <div className="text-base font-bold text-foreground mb-1.5">Je suis administrateur</div>
+              <div className="text-base font-bold mb-1.5" style={{ color: '#1a1a1a' }}>Je suis administrateur</div>
               <div className="text-gray-500 text-xs leading-relaxed">
                 Espace privé de gestion TrackSmart.
               </div>
