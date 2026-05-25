@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { format } from 'date-fns';
 import {
   ShoppingCart, FileText, Send, Download,
-  Package, Mail, Building2, Phone, Loader2, CheckCircle2, Search, SlidersHorizontal, X
+  Package, Mail, Building2, Phone, Loader2, CheckCircle2, Search, SlidersHorizontal, X, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -108,6 +108,69 @@ function generateOrderPDFContent(supplier, items, user, orderNumber) {
 </html>`;
 }
 
+// ── ProductOrderRow ───────────────────────────────────────
+function ProductOrderRow({ p, selectedIds, toggle, quantities, setQuantities, notes, setNotes, statusBadge, t, categoryKeys }) {
+  const isSelected = selectedIds.has(p.id);
+  const days = getDaysRemaining(p.expiration_date);
+  return (
+    <div
+      className={`px-5 py-4 flex flex-col gap-2 transition-colors cursor-pointer hover:bg-secondary/20 ${isSelected ? 'bg-primary/5' : ''}`}
+      onClick={() => toggle(p.id)}
+    >
+      <div className="flex items-start gap-4">
+        <Checkbox
+          checked={isSelected}
+          onCheckedChange={() => toggle(p.id)}
+          className="mt-1 flex-shrink-0"
+          onClick={e => e.stopPropagation()}
+        />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="font-medium text-foreground text-sm">{p.name}</span>
+            {p.marque && <span className="text-xs text-muted-foreground">({p.marque})</span>}
+            {statusBadge(p)}
+            {p.action === 'a_recommander' && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
+                {t('orders_to_recommend')}
+              </span>
+            )}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1 flex flex-row flex-nowrap gap-2 overflow-x-auto">
+            {p.category && <span className="whitespace-nowrap">{t(categoryKeys[p.category] || p.category)}</span>}
+            {p.category && (p.rayon || p.expiration_date) && <span>·</span>}
+            {p.rayon && <span className="whitespace-nowrap">Rayon {p.rayon}</span>}
+            {p.rayon && p.expiration_date && <span>·</span>}
+            {p.expiration_date && <span className="whitespace-nowrap">{t('orders_dlc')} : {format(new Date(p.expiration_date), 'dd/MM/yyyy')} ({days}j)</span>}
+          </div>
+        </div>
+      </div>
+      {isSelected && (
+        <div className="flex items-center gap-3 pl-8" onClick={e => e.stopPropagation()}>
+          <div>
+            <label className="text-xs text-muted-foreground block mb-1">{t('orders_qty_label')}</label>
+            <Input
+              type="number"
+              min="1"
+              value={quantities[p.id] || 1}
+              onChange={e => setQuantities(q => ({ ...q, [p.id]: parseInt(e.target.value) || 1 }))}
+              className="h-7 w-16 text-xs text-center"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-xs text-muted-foreground block mb-1">{t('orders_note_label')}</label>
+            <Input
+              value={notes[p.id] || ''}
+              onChange={e => setNotes(n => ({ ...n, [p.id]: e.target.value }))}
+              className="h-7 w-full text-xs"
+              placeholder={t('orders_note_placeholder')}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── main page ─────────────────────────────────────────────
 export default function Orders() {
   const { user } = useAuth();
@@ -120,11 +183,25 @@ export default function Orders() {
     enabled: canAccess && !!user?.email,
   });
 
-  // Products eligible for re-order
-  const eligibleProducts = useMemo(() => products.filter(p => {
+  // Sort by expiration date ascending (most urgent first)
+  const sortByUrgency = (list) => [...list].sort((a, b) => {
+    const da = a.expiration_date ? new Date(a.expiration_date).getTime() : Infinity;
+    const db = b.expiration_date ? new Date(b.expiration_date).getTime() : Infinity;
+    return da - db;
+  });
+
+  // Products eligible for re-order — split into 2 groups
+  const expiredUrgentProducts = useMemo(() => sortByUrgency(products.filter(p => {
     const status = getProductStatus(p.expiration_date);
-    return p.action === 'a_recommander' || p.order_status === 'a_commander' || status === 'expired' || status === 'urgent';
-  }), [products]);
+    return status === 'expired' || status === 'urgent';
+  })), [products]);
+
+  const toReorderProducts = useMemo(() => sortByUrgency(products.filter(p => {
+    const status = getProductStatus(p.expiration_date);
+    return (p.action === 'a_recommander' || p.order_status === 'a_commander') && status !== 'expired' && status !== 'urgent';
+  })), [products]);
+
+  const eligibleProducts = useMemo(() => sortByUrgency([...expiredUrgentProducts, ...toReorderProducts.filter(p => !expiredUrgentProducts.find(ep => ep.id === p.id))]), [expiredUrgentProducts, toReorderProducts]);
 
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [quantities, setQuantities] = useState({});
@@ -348,69 +425,35 @@ export default function Orders() {
                 </div>
               ) : (
                 <div className="divide-y divide-border/30">
-                  {filteredProducts.map(p => {
-                    const isSelected = selectedIds.has(p.id);
-                    const days = getDaysRemaining(p.expiration_date);
-                    return (
-                      <div
-                        key={p.id}
-                        className={`px-5 py-4 flex flex-col gap-2 transition-colors cursor-pointer hover:bg-secondary/20 ${isSelected ? 'bg-primary/5' : ''}`}
-                        onClick={() => toggle(p.id)}
-                      >
-                        <div className="flex items-start gap-4">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={() => toggle(p.id)}
-                            className="mt-1 flex-shrink-0"
-                            onClick={e => e.stopPropagation()}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-medium text-foreground text-sm">{p.name}</span>
-                              {p.marque && <span className="text-xs text-muted-foreground">({p.marque})</span>}
-                              {statusBadge(p)}
-                              {p.action === 'a_recommander' && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
-                                  {t('orders_to_recommend')}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1 flex flex-row flex-nowrap gap-2 overflow-x-auto">
-                              {p.category && <span className="whitespace-nowrap">{t(categoryKeys[p.category] || p.category)}</span>}
-                              {p.category && (p.rayon || p.expiration_date) && <span>·</span>}
-                              {p.rayon && <span className="whitespace-nowrap">Rayon {p.rayon}</span>}
-                              {p.rayon && p.expiration_date && <span>·</span>}
-                              {p.expiration_date && <span className="whitespace-nowrap">{t('orders_dlc')} : {format(new Date(p.expiration_date), 'dd/MM/yyyy')} ({days}j)</span>}
-                            </div>
-                          </div>
-                        </div>
+                  {/* Group header: Expirés & Urgents */}
+                  {expiredUrgentProducts.length > 0 && (
+                    <div className="px-5 py-2 bg-red-50 border-b border-red-100 flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+                      <span className="text-xs font-semibold text-red-700">Expirés & Urgents ({expiredUrgentProducts.length})</span>
+                    </div>
+                  )}
+                  {expiredUrgentProducts.filter(p => {
+                    if (search.trim() && !p.name?.toLowerCase().includes(search.toLowerCase()) && !p.marque?.toLowerCase().includes(search.toLowerCase())) return false;
+                    if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
+                    if (rayonFilter !== 'all' && p.rayon !== rayonFilter) return false;
+                    if (statusFilter !== 'all' && statusFilter !== 'expired' && statusFilter !== 'urgent') return false;
+                    return true;
+                  }).map(p => <ProductOrderRow key={p.id} p={p} selectedIds={selectedIds} toggle={toggle} quantities={quantities} setQuantities={setQuantities} notes={notes} setNotes={setNotes} statusBadge={statusBadge} t={t} categoryKeys={categoryKeys} />)}
 
-                        {isSelected && (
-                          <div className="flex items-center gap-3 pl-8" onClick={e => e.stopPropagation()}>
-                            <div>
-                              <label className="text-xs text-muted-foreground block mb-1">{t('orders_qty_label')}</label>
-                              <Input
-                                type="number"
-                                min="1"
-                                value={quantities[p.id] || 1}
-                                onChange={e => setQuantities(q => ({ ...q, [p.id]: parseInt(e.target.value) || 1 }))}
-                                className="h-7 w-16 text-xs text-center"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <label className="text-xs text-muted-foreground block mb-1">{t('orders_note_label')}</label>
-                              <Input
-                                value={notes[p.id] || ''}
-                                onChange={e => setNotes(n => ({ ...n, [p.id]: e.target.value }))}
-                                className="h-7 w-full text-xs"
-                                placeholder={t('orders_note_placeholder')}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {/* Group header: À recommander */}
+                  {toReorderProducts.length > 0 && (
+                    <div className="px-5 py-2 bg-primary/5 border-b border-primary/10 flex items-center gap-2">
+                      <Package className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-xs font-semibold text-primary">À recommander ({toReorderProducts.length})</span>
+                    </div>
+                  )}
+                  {toReorderProducts.filter(p => {
+                    if (search.trim() && !p.name?.toLowerCase().includes(search.toLowerCase()) && !p.marque?.toLowerCase().includes(search.toLowerCase())) return false;
+                    if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
+                    if (rayonFilter !== 'all' && p.rayon !== rayonFilter) return false;
+                    if (statusFilter === 'expired' || statusFilter === 'urgent') return false;
+                    return true;
+                  }).map(p => <ProductOrderRow key={p.id} p={p} selectedIds={selectedIds} toggle={toggle} quantities={quantities} setQuantities={setQuantities} notes={notes} setNotes={setNotes} statusBadge={statusBadge} t={t} categoryKeys={categoryKeys} />)}
                 </div>
               )}
             </div>

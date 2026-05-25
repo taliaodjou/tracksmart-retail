@@ -179,99 +179,138 @@ function ProductActionPanel({ product, onUpdate, lang }) {
   );
 }
 
+// Sort by expiration date ascending (most urgent first = oldest date)
+function sortByUrgency(list) {
+  return [...list].sort((a, b) => {
+    const da = a.expiration_date ? new Date(a.expiration_date).getTime() : Infinity;
+    const db = b.expiration_date ? new Date(b.expiration_date).getTime() : Infinity;
+    return da - db;
+  });
+}
+
+function ProductPill({ p, onClick }) {
+  const days = getDaysRemaining(p.expiration_date);
+  const status = getProductStatus(p.expiration_date);
+  return (
+    <button
+      onClick={() => onClick(p)}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer hover:opacity-80 transition-opacity ${statusConfig[status].color}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[status].dot}`} />
+      {p.name} ({days}j)
+    </button>
+  );
+}
+
+function WatchBox({ title, products, icon, borderColor, bgColor, titleColor, onProductClick, isFr }) {
+  const [showAll, setShowAll] = useState(false);
+  const LIMIT = 6;
+  const visible = showAll ? products : products.slice(0, LIMIT);
+  const extra = products.length - LIMIT;
+
+  if (products.length === 0) return null;
+
+  return (
+    <div className={`${bgColor} border ${borderColor} rounded-2xl p-4`}>
+      <div className="flex items-center gap-2 mb-3">
+        {icon}
+        <h3 className={`font-semibold text-sm ${titleColor}`}>{title}</h3>
+        <span className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full ${bgColor} ${titleColor} border ${borderColor}`}>{products.length}</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {visible.map(p => (
+          <ProductPill key={p.id} p={p} onClick={onProductClick} />
+        ))}
+        {!showAll && extra > 0 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border ${borderColor} ${bgColor} ${titleColor} hover:opacity-80 transition-colors`}
+          >
+            +{extra} <ChevronRight className="w-3 h-3" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function WeeklyAlert({ products, onUpdate }) {
   const { t, lang } = useLanguage();
-  const [popup, setPopup] = useState(null);
-  const [showAll, setShowAll] = useState(false);
-  const [activeProduct, setActiveProduct] = useState(null); // product shown in action panel
+  const [showModal, setShowModal] = useState(false);
+  const [activeProduct, setActiveProduct] = useState(null);
+  const [modalFilter, setModalFilter] = useState('all'); // 'all' | 'expired' | 'soon'
   const isFr = lang === 'fr';
 
-  const watchProducts = products.filter(p => {
-    const status = getProductStatus(p.expiration_date);
-    return status === 'expired' || status === 'urgent' || status === 'soon';
-  });
+  // Split by status, sorted by most urgent first
+  const expiredProducts = sortByUrgency(products.filter(p => {
+    const s = getProductStatus(p.expiration_date);
+    return s === 'expired' || s === 'urgent';
+  }));
 
-  if (watchProducts.length === 0) return null;
+  const soonProducts = sortByUrgency(products.filter(p => {
+    const s = getProductStatus(p.expiration_date);
+    return s === 'soon';
+  }));
 
-  const extra = watchProducts.length - PREVIEW_COUNT;
-  const visible = watchProducts.slice(0, PREVIEW_COUNT);
+  const allWatchProducts = sortByUrgency(products.filter(p => {
+    const s = getProductStatus(p.expiration_date);
+    return s === 'expired' || s === 'urgent' || s === 'soon';
+  }));
+
+  if (allWatchProducts.length === 0) return null;
 
   const handleProductClick = (p) => {
-    setShowAll(true);
     setActiveProduct(p);
+    setShowModal(true);
   };
+
+  const modalProducts = modalFilter === 'expired' ? expiredProducts
+    : modalFilter === 'soon' ? soonProducts
+    : allWatchProducts;
 
   return (
     <>
-      <div className="bg-orange-50 border border-orange-200 rounded-2xl p-5 relative">
-        <div className="flex items-center gap-2 mb-3">
-          <AlertTriangle className="w-5 h-5 text-orange-600" />
-          <h3 className="font-semibold text-orange-900">{t('dash_weekly_summary')}</h3>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {visible.map(p => {
-            const days = getDaysRemaining(p.expiration_date);
-            const status = getProductStatus(p.expiration_date);
-            return (
-              <button
-                key={p.id}
-                onClick={() => handleProductClick(p)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer hover:opacity-80 transition-opacity ${statusConfig[status].color}`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[status].dot}`} />
-                {p.name} ({days}j)
-              </button>
-            );
-          })}
-          {extra > 0 && (
-            <button
-              onClick={() => setShowAll(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border border-orange-300 bg-orange-100 text-orange-700 hover:bg-orange-200 transition-colors"
-            >
-              +{extra} <ChevronRight className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-
-        {/* Simple info popup (kept for quick glance without opening full modal) */}
-        {popup && (
-          <div className="absolute left-4 right-4 top-full mt-2 z-50 bg-white border border-border shadow-lg rounded-xl p-4 text-sm">
-            <div className="flex items-center justify-between mb-2">
-              <p className="font-semibold text-foreground truncate">{popup.name}</p>
-              <button onClick={() => setPopup(null)} className="text-muted-foreground hover:text-foreground ml-2 flex-shrink-0">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="space-y-1 text-xs text-muted-foreground">
-              {popup.marque && <p><span className="font-medium text-foreground">{isFr ? 'Marque' : 'Brand'} :</span> {popup.marque}</p>}
-              {popup.rayon && <p><span className="font-medium text-foreground">{isFr ? 'Rayon' : 'Shelf'} :</span> {popup.rayon}</p>}
-              {popup.expiration_date && <p><span className="font-medium text-foreground">DLC :</span> {format(new Date(popup.expiration_date), 'dd/MM/yyyy')}</p>}
-            </div>
-          </div>
-        )}
+      <div className="space-y-3">
+        {/* Box 1 — Expirés & Urgents */}
+        <WatchBox
+          title={isFr ? 'Expirés & Urgents' : 'Expired & Urgent'}
+          products={expiredProducts}
+          icon={<AlertTriangle className="w-4 h-4 text-red-600" />}
+          borderColor="border-red-200"
+          bgColor="bg-red-50"
+          titleColor="text-red-800"
+          onProductClick={handleProductClick}
+          isFr={isFr}
+        />
+        {/* Box 2 — Bientôt */}
+        <WatchBox
+          title={isFr ? 'Arrivent bientôt à expiration' : 'Expiring soon'}
+          products={soonProducts}
+          icon={<AlertTriangle className="w-4 h-4 text-orange-500" />}
+          borderColor="border-orange-200"
+          bgColor="bg-orange-50"
+          titleColor="text-orange-800"
+          onProductClick={handleProductClick}
+          isFr={isFr}
+        />
       </div>
 
-      {/* Full modal with tabs */}
-      {showAll && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center" onClick={() => { setShowAll(false); setActiveProduct(null); }}>
+      {/* Full modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center" onClick={() => { setShowModal(false); setActiveProduct(null); }}>
           <div className="absolute inset-0 bg-black/40" />
           <div
             className="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] flex flex-col shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            {/* Handle bar (mobile) */}
             <div className="flex justify-center pt-3 pb-1 sm:hidden">
               <div className="w-10 h-1 rounded-full bg-border" />
             </div>
 
-            {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border/40 flex-shrink-0">
               <div className="flex items-center gap-2">
                 {activeProduct && (
-                  <button
-                    onClick={() => setActiveProduct(null)}
-                    className="text-muted-foreground hover:text-foreground mr-1"
-                  >
+                  <button onClick={() => setActiveProduct(null)} className="text-muted-foreground hover:text-foreground mr-1">
                     <ChevronRight className="w-4 h-4 rotate-180" />
                   </button>
                 )}
@@ -279,16 +318,34 @@ export default function WeeklyAlert({ products, onUpdate }) {
                 <h2 className="font-semibold text-foreground text-sm">
                   {activeProduct
                     ? (isFr ? 'Action rapide' : 'Quick action')
-                    : `${isFr ? 'Produits à surveiller' : 'Products to watch'} (${watchProducts.length})`
+                    : `${isFr ? 'Produits à surveiller' : 'Products to watch'} (${allWatchProducts.length})`
                   }
                 </h2>
               </div>
-              <button onClick={() => { setShowAll(false); setActiveProduct(null); }} className="text-muted-foreground hover:text-foreground">
+              <button onClick={() => { setShowModal(false); setActiveProduct(null); }} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Content */}
+            {/* Filter tabs in modal */}
+            {!activeProduct && (
+              <div className="flex gap-1 px-4 py-2 border-b border-border/30 flex-shrink-0">
+                {[
+                  { key: 'all', label: isFr ? `Tous (${allWatchProducts.length})` : `All (${allWatchProducts.length})` },
+                  { key: 'expired', label: isFr ? `Expirés (${expiredProducts.length})` : `Expired (${expiredProducts.length})` },
+                  { key: 'soon', label: isFr ? `Bientôt (${soonProducts.length})` : `Soon (${soonProducts.length})` },
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setModalFilter(tab.key)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${modalFilter === tab.key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'}`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="overflow-y-auto flex-1 px-4 py-3">
               {activeProduct ? (
                 <ProductActionPanel
@@ -302,7 +359,7 @@ export default function WeeklyAlert({ products, onUpdate }) {
                 />
               ) : (
                 <div className="space-y-2">
-                  {watchProducts.map(p => {
+                  {modalProducts.map(p => {
                     const status = getProductStatus(p.expiration_date);
                     const days = getDaysRemaining(p.expiration_date);
                     const cfg = statusConfig[status];
