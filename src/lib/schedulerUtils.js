@@ -271,10 +271,73 @@ export async function checkAndSendReminders(user, products) {
       sent_at: new Date().toISOString(),
     });
 
+    const expiringRows = expiring.slice(0, 10).map(p => {
+      const d = getDaysRemaining(p.expiration_date);
+      const urgentColor = d <= 3 ? '#dc2626' : d <= 7 ? '#d97706' : '#b45309';
+      return `
+        <tr>
+          <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
+            <div style="font-size:13px;font-weight:600;color:#111111;">${p.name}${p.marque ? ` <span style="font-weight:400;color:#888888;">(${p.marque})</span>` : ''}</div>
+            ${p.rayon ? `<div style="font-size:11px;color:#aaaaaa;margin-top:2px;">Rayon ${p.rayon}</div>` : ''}
+          </td>
+          <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;text-align:right;white-space:nowrap;">
+            <span style="background:${d <= 3 ? '#fef2f2' : '#fffbeb'};color:${urgentColor};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;">
+              ${d === 0 ? "Aujourd'hui" : d < 0 ? 'Expiré' : `${d}j`}
+            </span>
+          </td>
+        </tr>`;
+    }).join('');
+
+    const expiryHtmlBody = buildEmailHtml({
+      title: `Alerte DLC — ${threshold.label}`,
+      accentColor: threshold.days <= 3 ? '#ef4444' : '#f59e0b',
+      userId: user.id,
+      bodyContent: `
+        <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:${threshold.days <= 3 ? '#ef4444' : '#C9A64C'};letter-spacing:0.5px;text-transform:uppercase;">Alerte DLC</p>
+        <h1 style="margin:0 0 20px;font-size:24px;font-weight:800;color:#111111;line-height:1.2;">
+          ${expiring.length} produit${expiring.length > 1 ? 's' : ''} expire${expiring.length > 1 ? 'nt' : ''} dans moins de ${threshold.label}
+        </h1>
+        <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
+          Bonjour <strong>${user.shop_name || user.full_name || 'votre boutique'}</strong>, voici les produits qui nécessitent votre attention immédiate.
+        </p>
+
+        <!-- Product count badge -->
+        <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+          <tr>
+            <td style="background:${threshold.days <= 3 ? '#fef2f2' : '#fffbeb'};border:1px solid ${threshold.days <= 3 ? '#fecaca' : '#fde68a'};border-radius:12px;padding:16px 24px;text-align:center;">
+              <div style="font-size:40px;font-weight:800;color:${threshold.days <= 3 ? '#dc2626' : '#b45309'};line-height:1;">${expiring.length}</div>
+              <div style="font-size:12px;color:${threshold.days <= 3 ? '#dc2626' : '#b45309'};font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">produit${expiring.length > 1 ? 's' : ''} à traiter</div>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Product list -->
+        <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 28px;">
+          ${expiringRows}
+          ${expiring.length > 10 ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#aaaaaa;">…et ${expiring.length - 10} autre(s) produit(s)</span></td></tr>` : ''}
+        </table>
+
+        <!-- CTA -->
+        <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+          <tr>
+            <td style="background:#111111;border-radius:12px;padding:14px 32px;">
+              <a href="https://tracksmart.base44.app/dashboard" style="color:#C9A64C;font-weight:700;font-size:14px;text-decoration:none;letter-spacing:0.3px;">Gérer mes produits →</a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:0;font-size:13px;color:#aaaaaa;line-height:1.6;">
+          Une question ? <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;text-decoration:none;">support@tracksmart.com</a>
+        </p>
+      `
+    });
+
     await base44.integrations.Core.SendEmail({
       to: user.email,
-      subject: `TrackSmart — Produits expirant dans ${threshold.label}`,
-      body: message,
+      subject: threshold.days <= 3
+        ? `⚠️ TrackSmart — ${expiring.length} produit${expiring.length > 1 ? 's expirent' : ' expire'} dans ${threshold.label}`
+        : `TrackSmart — Alerte DLC : ${expiring.length} produit${expiring.length > 1 ? 's' : ''} dans ${threshold.label}`,
+      body: expiryHtmlBody,
     });
 
     sentToday[threshold.type] = true;

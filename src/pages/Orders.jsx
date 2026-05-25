@@ -277,16 +277,120 @@ export default function Orders() {
     if (!supplier.email) { toast.error(t('orders_fill_email')); return; }
     setSending(true);
     logActivity(user, 'order_created', `${user.full_name || user.email} a créé un bon de commande #${orderNumber} (${orderItems.length} produits) pour ${supplier.name || supplier.email}`);
-    const lines = orderItems.map(it =>
-      `• ${it.name}${it.marque ? ' (' + it.marque + ')' : ''} — Qté : ${it.quantity}${it.note ? ' — ' + it.note : ''}`
-    ).join('\n');
+    const today = format(new Date(), 'dd/MM/yyyy');
+    const shopName = user?.shop_name || user?.full_name || 'TrackSmart';
+    const totalQty = orderItems.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0);
 
-    const body = `Bonjour,\n\nVeuillez trouver ci-dessous notre bon de commande #${orderNumber} du ${format(new Date(), 'dd/MM/yyyy')}.\n\nBoutique : ${user?.shop_name || user?.full_name || ''}\n\n--- ARTICLES ---\n${lines}\n\nTotal articles : ${orderItems.length} | Quantité totale : ${orderItems.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0)}\n\nCordialement,\n${user?.shop_name || user?.full_name || 'TrackSmart'}`;
+    const productRows = orderItems.map(it => `
+      <tr>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;">
+          <div style="font-size:13px;font-weight:600;color:#111111;">${it.name}</div>
+          ${it.marque ? `<div style="font-size:11px;color:#aaaaaa;margin-top:2px;">${it.marque}</div>` : ''}
+        </td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;color:#777777;font-size:12px;">${it.category || '—'}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">
+          <span style="background:#f5f5f5;color:#333333;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;">×${it.quantity}</span>
+        </td>
+        <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;color:#aaaaaa;font-size:12px;">${it.note || ''}</td>
+      </tr>`).join('');
+
+    const emailHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Bon de commande #${orderNumber}</title>
+</head>
+<body style="margin:0;padding:0;background:#f0efeb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0efeb;padding:40px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.10);max-width:600px;">
+        <!-- Header -->
+        <tr>
+          <td style="background:#111111;padding:28px 40px;">
+            <table cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td>
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="background:#C9A64C;border-radius:10px;padding:8px 16px;">
+                        <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart</span>
+                        <span style="color:rgba(0,0,0,0.35);font-size:11px;font-weight:500;margin-left:6px;">Retail</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td style="text-align:right;">
+                  <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;">Bon de commande</div>
+                  <div style="font-size:18px;font-weight:800;color:#C9A64C;margin-top:2px;">#${orderNumber}</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">${today}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <!-- Gold bar -->
+        <tr><td style="height:3px;background:linear-gradient(90deg,#C9A64C,#C9A64Caa);"></td></tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:36px 40px 0;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#C9A64C;letter-spacing:0.5px;text-transform:uppercase;">Commande fournisseur</p>
+            <h1 style="margin:0 0 24px;font-size:22px;font-weight:800;color:#111111;">Bonjour${supplier.name ? ' ' + supplier.name : ''},</h1>
+
+            <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
+              Veuillez trouver ci-dessous notre bon de commande du <strong>${today}</strong>.
+            </p>
+
+            <!-- Sender / Summary -->
+            <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 32px;">
+              <tr>
+                <td width="48%" style="background:#f9f9f7;border-radius:12px;padding:18px 20px;vertical-align:top;">
+                  <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#C9A64C;text-transform:uppercase;letter-spacing:0.5px;">Expéditeur</p>
+                  <p style="margin:0;font-size:14px;font-weight:700;color:#111111;">${shopName}</p>
+                  ${user?.email ? `<p style="margin:4px 0 0;font-size:12px;color:#888888;">${user.email}</p>` : ''}
+                </td>
+                <td width="4%"></td>
+                <td width="48%" style="background:#f9f9f7;border-radius:12px;padding:18px 20px;vertical-align:top;">
+                  <p style="margin:0 0 8px;font-size:11px;font-weight:700;color:#C9A64C;text-transform:uppercase;letter-spacing:0.5px;">Résumé</p>
+                  <p style="margin:0;font-size:14px;font-weight:700;color:#111111;">${orderItems.length} article${orderItems.length > 1 ? 's' : ''}</p>
+                  <p style="margin:4px 0 0;font-size:12px;color:#888888;">${totalQty} unité${totalQty > 1 ? 's' : ''} au total</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Products table -->
+            <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#333333;">Articles commandés</p>
+            <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 32px;">
+              <thead>
+                <tr style="background:#111111;">
+                  <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:#ffffff;border-radius:8px 0 0 0;">Produit</th>
+                  <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:#ffffff;">Catégorie</th>
+                  <th style="padding:10px 12px;text-align:center;font-size:11px;font-weight:600;color:#ffffff;">Qté</th>
+                  <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:600;color:#ffffff;border-radius:0 8px 0 0;">Note</th>
+                </tr>
+              </thead>
+              <tbody>${productRows}</tbody>
+            </table>
+
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="padding:24px 40px;background:#f9f9f7;border-top:1px solid #eeeeee;text-align:center;">
+            <p style="margin:0;font-size:12px;color:#aaaaaa;">© ${new Date().getFullYear()} TNO Studio · TrackSmart Retail</p>
+            <p style="margin:6px 0 0;font-size:12px;color:#cccccc;">support@tracksmart.com</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
     await base44.integrations.Core.SendEmail({
       to: supplier.email,
-      subject: `Bon de commande #${orderNumber} — ${user?.shop_name || 'TrackSmart'}`,
-      body,
+      subject: `Bon de commande #${orderNumber} — ${shopName}`,
+      body: emailHtml,
     });
     setSending(false);
     setSent(true);
