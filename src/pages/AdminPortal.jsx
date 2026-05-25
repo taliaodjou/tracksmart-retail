@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { isAdmin } from '@/lib/productUtils';
@@ -10,12 +10,41 @@ import AdminSubscriptionsView from '@/components/admin/AdminSubscriptionsView';
 import AdminSupportView from '@/components/admin/AdminSupportView';
 import AdminSettingsView from '@/components/admin/AdminSettingsView';
 import AdminPinGate from '@/components/admin/AdminPinGate';
+import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 export default function AdminPortal() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState(null);
+  const [approvalState, setApprovalState] = useState(null); // 'loading' | 'done' | null
+
+  // Handle approve/reject links from email
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    const uid = params.get('uid');
+    if ((action === 'approve' || action === 'reject') && uid && user && isAdmin(user)) {
+      setApprovalState('loading');
+      base44.functions.invoke('handleUserApproval', { userId: uid, action })
+        .then(() => {
+          setApprovalState('done');
+          if (action === 'approve') {
+            toast.success('✓ Accès accordé — l\'utilisateur a été notifié par email.');
+          } else {
+            toast.error('Accès refusé — l\'utilisateur a été notifié.');
+          }
+          // Clean URL params
+          window.history.replaceState({}, '', '/admin-portal');
+        })
+        .catch(err => {
+          setApprovalState(null);
+          toast.error('Erreur : ' + err.message);
+        });
+    }
+  }, [user]);
 
   if (user && !isAdmin(user)) {
     navigate('/dashboard');

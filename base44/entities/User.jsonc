@@ -38,7 +38,8 @@
       "type": "string",
       "enum": [
         "active",
-        "inactive"
+        "inactive",
+        "blocked"
       ],
       "default": "inactive"
     },
@@ -96,6 +97,16 @@
     "accounting_auto_send": {
       "type": "boolean",
       "default": false
+    },
+    "admin_notified": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once admin has been notified of this user's first login"
+    },
+    "access_approved": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if admin explicitly approved access"
     }
   },
   "required": [],

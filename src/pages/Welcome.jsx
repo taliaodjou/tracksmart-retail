@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -24,6 +24,13 @@ export default function Welcome() {
   const navigate = useNavigate();
   const canAccess = hasActiveSubscription(user);
   const userIsAdmin = isAdmin(user);
+
+  // Notify admin on first login
+  useEffect(() => {
+    if (user && !user.admin_notified && user.role !== 'admin') {
+      base44.functions.invoke('notifyNewUser', {}).catch(() => {});
+    }
+  }, [user?.id]);
 
   const { data: products = [] } = useQuery({
     queryKey: ['products'],
