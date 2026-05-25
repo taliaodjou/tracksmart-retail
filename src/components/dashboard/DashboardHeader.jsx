@@ -61,7 +61,7 @@ export default function DashboardHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Brand */}
-          <Link to="/dashboard" className="flex items-center gap-2 flex-shrink-0">
+          <Link to="/dashboard" className="flex items-center gap-2 flex-shrink-0" title="Tableau de bord">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">TS</span>
             </div>
