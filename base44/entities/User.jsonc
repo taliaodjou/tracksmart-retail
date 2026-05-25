@@ -107,6 +107,46 @@
       "type": "boolean",
       "default": false,
       "description": "True if admin explicitly approved access"
+    },
+    "business_type": {
+      "type": "string",
+      "enum": [
+        "supermarche",
+        "epicerie",
+        "boulangerie",
+        "boucherie",
+        "pharmacie",
+        "restaurant",
+        "cafe_bar",
+        "autre"
+      ],
+      "description": "Type de commerce"
+    },
+    "user_position": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "manager",
+        "employee"
+      ],
+      "description": "Position dans le commerce"
+    },
+    "city": {
+      "type": "string",
+      "description": "Ville du commerce"
+    },
+    "country": {
+      "type": "string",
+      "description": "Pays du commerce"
+    },
+    "preferred_lang": {
+      "type": "string",
+      "enum": [
+        "fr",
+        "en"
+      ],
+      "default": "fr",
+      "description": "Langue pr\u00e9f\u00e9r\u00e9e de l'utilisateur"
     }
   },
   "required": [],

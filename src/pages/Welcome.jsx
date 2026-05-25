@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ArrowRight, PackageX, AlertTriangle, TrendingDown, Clock, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import OnboardingProfileModal from '@/components/onboarding/OnboardingProfileModal';
 
 const floatingOrbs = [
   { size: 300, x: '10%', y: '15%', color: '#C9A646', delay: 0, duration: 8 },
@@ -20,17 +21,35 @@ const floatingOrbs = [
 
 export default function Welcome() {
   const { user } = useAuth();
-  const { lang } = useLanguage();
+  const { lang, setLang } = useLanguage();
   const navigate = useNavigate();
   const canAccess = hasActiveSubscription(user);
   const userIsAdmin = isAdmin(user);
 
-  // Notify admin on first login
+  // Show onboarding modal if profile not complete
+  const showOnboarding = user && !userIsAdmin && !user.onboarding_complete;
+
+  const handleOnboardingComplete = (chosenLang) => {
+    setLang(chosenLang);
+    // Trigger admin notification after onboarding
+    if (!user.admin_notified) {
+      base44.functions.invoke('notifyNewUser', {}).catch(() => {});
+    }
+  };
+
+  // Notify admin on first login (for users who already passed onboarding)
   useEffect(() => {
-    if (user && !user.admin_notified && user.role !== 'admin') {
+    if (user && !user.admin_notified && user.role !== 'admin' && user.onboarding_complete) {
       base44.functions.invoke('notifyNewUser', {}).catch(() => {});
     }
   }, [user?.id]);
+
+  // Apply saved preferred_lang if set
+  useEffect(() => {
+    if (user?.preferred_lang && user.preferred_lang !== lang) {
+      setLang(user.preferred_lang);
+    }
+  }, [user?.preferred_lang]);
 
   const { data: products = [] } = useQuery({
     queryKey: ['products'],
@@ -87,6 +106,7 @@ export default function Welcome() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex flex-col overflow-hidden relative">
+      {showOnboarding && <OnboardingProfileModal onComplete={handleOnboardingComplete} />}
 
       {/* Floating background orbs */}
       {floatingOrbs.map((orb, i) => (
