@@ -144,10 +144,63 @@ Deno.serve(async (req) => {
 </body>
 </html>`;
 
+    // 1. Notify admin
     await base44.integrations.Core.SendEmail({
       to: ADMIN_EMAIL,
       subject: `🔔 TrackSmart — Nouvelle demande d'accès : ${user.full_name || user.email}`,
       body: emailHtml,
+    });
+
+    // 2. Send "pending" confirmation to the user
+    const pendingHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"/><title>Demande en cours</title></head>
+<body style="margin:0;padding:0;background:#f0efeb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0efeb;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.10);max-width:560px;">
+        <tr><td style="background:#111111;padding:28px 40px;">
+          <table cellpadding="0" cellspacing="0"><tr>
+            <td style="background:#C9A64C;border-radius:10px;padding:8px 16px;">
+              <span style="color:#000000;font-weight:800;font-size:15px;">TrackSmart</span>
+              <span style="color:rgba(0,0,0,0.35);font-size:11px;margin-left:6px;">Retail</span>
+            </td>
+          </tr></table>
+        </td></tr>
+        <tr><td style="height:3px;background:linear-gradient(90deg,#f59e0b,#f59e0baa);"></td></tr>
+        <tr><td style="padding:36px 40px 0;">
+          <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#f59e0b;letter-spacing:0.5px;text-transform:uppercase;">⏳ Demande reçue</p>
+          <h1 style="margin:0 0 20px;font-size:24px;font-weight:800;color:#111111;">Votre demande est en cours de traitement</h1>
+          <p style="margin:0 0 24px;font-size:15px;color:#555555;line-height:1.7;">
+            Bonjour <strong>${user.full_name || user.email}</strong>,<br/><br/>
+            Nous avons bien reçu votre demande d'accès à <strong>TrackSmart Retail</strong>. Elle est actuellement en cours d'examen par notre équipe.
+          </p>
+          <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 28px;">
+            <tr>
+              <td style="background:#fefce8;border-radius:14px;padding:20px 24px;border-left:4px solid #f59e0b;">
+                <p style="margin:0;font-size:14px;color:#92400e;line-height:1.6;">
+                  🕐 <strong>Vous recevrez un email de confirmation dans les 10 prochaines minutes</strong> vous donnant accès à votre espace TrackSmart.
+                </p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:0 0 32px;font-size:14px;color:#888888;line-height:1.6;">
+            Si vous n'avez pas reçu de réponse passé ce délai, n'hésitez pas à contacter notre support.
+          </p>
+        </td></tr>
+        <tr><td style="background:#f9f9f7;border-top:1px solid #eeeeee;padding:22px 40px;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#aaaaaa;">© ${new Date().getFullYear()} TNO Studio · TrackSmart Retail</p>
+          <p style="margin:6px 0 0;font-size:12px;color:#cccccc;">support@tracksmart.com</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
+
+    await base44.integrations.Core.SendEmail({
+      to: user.email,
+      subject: '⏳ TrackSmart — Votre demande d\'accès est en cours de traitement',
+      body: pendingHtml,
     });
 
     // Mark user so we don't notify twice
