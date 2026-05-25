@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-const ADMIN_EMAIL = 'admin@tracksmart.com';
+const ADMIN_EMAIL = 'talia.odjou@gmail.com';
 
 Deno.serve(async (req) => {
   try {
