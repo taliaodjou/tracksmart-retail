@@ -1,14 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /dashboard
-Disallow: /admin
-Disallow: /admin-portal
-Disallow: /analytics
-Disallow: /orders
-Disallow: /documents
-Disallow: /team
-Disallow: /activity
-Disallow: /profile
-Disallow: /reports
 
 Sitemap: https://tracksmartretail.com/sitemap.xml
