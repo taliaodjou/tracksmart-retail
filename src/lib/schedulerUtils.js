@@ -358,6 +358,12 @@ export async function checkAndSendWeeklyReport(user, products) {
   const today = format(new Date(), 'yyyy-MM-dd');
   const lastReport = user.last_weekly_report || '';
 
+  // Don't send weekly report until account is at least 7 days old
+  if (user.created_date) {
+    const accountAgeDays = differenceInDays(new Date(), new Date(user.created_date));
+    if (accountAgeDays < 7) return;
+  }
+
   // Only send if not sent this week (compare year-week)
   const thisWeek = getWeekKey(new Date());
   if (lastReport && getWeekKey(new Date(lastReport)) === thisWeek) return;
