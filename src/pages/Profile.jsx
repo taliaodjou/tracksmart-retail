@@ -49,7 +49,19 @@ export default function Profile() {
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       <DashboardHeader />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-20 sm:pt-10 pb-24 sm:pb-10">
-        <h1 className="text-2xl font-bold text-foreground mb-8">{t('profile_title')}</h1>
+        {/* User identity card */}
+        <div className="flex items-center gap-4 mb-8 bg-white rounded-2xl p-5 shadow-sm border border-border/40">
+          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <User className="w-7 h-7 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-bold text-foreground text-lg leading-tight truncate">{user?.full_name || user?.email}</p>
+            {user?.shop_name && (
+              <p className="text-sm text-muted-foreground truncate mt-0.5">{user.shop_name}</p>
+            )}
+            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+          </div>
+        </div>
 
         {/* Support card */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40 mb-6">
