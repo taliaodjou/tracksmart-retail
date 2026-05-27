@@ -6,7 +6,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, FileSpreadsheet, ScanLine, X, LayoutList, Layers } from 'lucide-react';
+import { Plus, Search, ScanLine, X, LayoutList, Layers } from 'lucide-react';
+
+const XlsIcon = ({ className = "w-4 h-4" }) => (
+  <span className={`inline-flex items-center justify-center rounded text-[9px] font-bold bg-green-600 text-white px-1 leading-none ${className}`} style={{height:'1.1em', fontSize:'9px', padding:'2px 3px'}}>XLS</span>
+);
 import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 import { logActivity } from '@/lib/activityLogger';
@@ -294,7 +298,7 @@ export default function Dashboard() {
           <div className="flex flex-wrap items-center gap-2">
             <ExportActions products={filteredProducts} />
             <Button variant="outline" onClick={() => setShowImport(true)} className="rounded-full gap-2">
-              <FileSpreadsheet className="w-4 h-4" />
+              <XlsIcon />
               {lang === 'fr' ? 'Importer Excel' : 'Import Excel'}
             </Button>
             <Button variant="outline" onClick={() => setShowScanner(true)} className="rounded-full gap-2">
@@ -313,7 +317,7 @@ export default function Dashboard() {
           <h1 className="text-xl font-bold text-foreground">{t('dash_title')}</h1>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="rounded-full h-9 px-3 gap-1.5 text-xs">
-              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <XlsIcon />
               <span>Excel</span>
             </Button>
             <Button size="sm" onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
