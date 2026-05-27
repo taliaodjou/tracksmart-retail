@@ -138,7 +138,7 @@ export default function Documents() {
                 className="flex items-center gap-2 px-4 py-3 rounded-2xl border-2 border-dashed border-border text-sm text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
               >
                 <FolderPlus className="w-4 h-4" />
-                Créer votre premier dossier
+                <span className="text-xs">Créer votre premier dossier</span>
               </button>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -202,7 +202,6 @@ export default function Documents() {
               onClick={() => setSection('trash')}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
             >
-              <Trash2 className="w-3 h-3" />
               Corbeille
               {trashCount > 0 && (
                 <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-xs">{trashCount}</span>
@@ -230,7 +229,7 @@ export default function Documents() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher un document..."
-              className="pl-9 bg-white"
+              className="pl-9 bg-white text-xs h-8"
             />
           </div>
           <select
