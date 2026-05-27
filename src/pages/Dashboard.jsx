@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, ScanLine, X, LayoutList, Layers } from 'lucide-react';
 
-const XlsIcon = () => (
-  <span className="text-[10px] font-bold">XLS</span>
-);
+const XlsIcon = () =>
+<span className="text-[10px] font-bold hidden">XLS</span>;
+
 import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 import { logActivity } from '@/lib/activityLogger';
@@ -62,12 +62,12 @@ export default function Dashboard() {
         // Fetch products scoped to this store (by store_owner_email OR created_by)
         // Two separate queries merged to handle both products with and without store_owner_email
         const [byStoreOwner, byCreator] = await Promise.all([
-          base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 2000),
-          base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000),
-        ]);
+        base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 2000),
+        base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000)]
+        );
         // Deduplicate by id
         const seen = new Set();
-        return [...byStoreOwner, ...byCreator].filter(p => {
+        return [...byStoreOwner, ...byCreator].filter((p) => {
           if (seen.has(p.id)) return false;
           seen.add(p.id);
           return true;
@@ -76,14 +76,14 @@ export default function Dashboard() {
       // Employees only see their own products
       return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
     },
-    enabled: canAccess && !!user?.email,
+    enabled: canAccess && !!user?.email
   });
 
   // Barcode DB — loaded once, used for local lookup
   const { data: barcodeDB = [] } = useQuery({
     queryKey: ['barcodes'],
     queryFn: () => base44.entities.BarcodeProduct.list('barcode', 1000),
-    enabled: canAccess,
+    enabled: canAccess
   });
 
   useEffect(() => {
@@ -98,11 +98,11 @@ export default function Dashboard() {
       const product = await base44.entities.Product.create({
         ...data,
         store_owner_email: storeOwnerEmail,
-        added_by_name: user.full_name || user.email,
+        added_by_name: user.full_name || user.email
       });
       logActivity(user, 'product_added', `${user.full_name || user.email} a ajouté le produit "${data.name}"`, {
         entity_id: product.id,
-        entity_name: data.name,
+        entity_name: data.name
       });
       return product;
     },
@@ -111,18 +111,18 @@ export default function Dashboard() {
       setShowForm(false);
       setEditProduct(null);
       setQuickAdd(null);
-    },
+    }
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
       const product = await base44.entities.Product.update(id, data);
-      const actionType = data.action === 'jeter' ? 'product_thrown'
-        : data.action ? 'product_status_changed'
-        : 'product_edited';
+      const actionType = data.action === 'jeter' ? 'product_thrown' :
+      data.action ? 'product_status_changed' :
+      'product_edited';
       logActivity(user, actionType, `${user.full_name || user.email} a modifié "${data.name || 'un produit'}"`, {
         entity_id: id,
-        entity_name: data.name,
+        entity_name: data.name
       });
       return product;
     },
@@ -130,27 +130,27 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setShowForm(false);
       setEditProduct(null);
-    },
+    }
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const prod = products.find(p => p.id === id);
+      const prod = products.find((p) => p.id === id);
       await base44.entities.Product.delete(id);
       logActivity(user, 'product_deleted', `${user.full_name || user.email} a supprimé "${prod?.name || 'un produit'}"`, {
         entity_id: id,
-        entity_name: prod?.name,
+        entity_name: prod?.name
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] })
   });
 
   const handleSave = (data) => {
-    if (editProduct) updateMutation.mutate({ id: editProduct.id, data });
-    else createMutation.mutate(data);
+    if (editProduct) updateMutation.mutate({ id: editProduct.id, data });else
+    createMutation.mutate(data);
   };
 
-  const handleEdit = (product) => { setEditProduct(product); setShowForm(true); };
+  const handleEdit = (product) => {setEditProduct(product);setShowForm(true);};
   const handleDelete = (product) => {
     if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product.id);
   };
@@ -170,7 +170,7 @@ export default function Dashboard() {
     baby: 'bebe', infant: 'bebe',
     pet: 'animaux', dog: 'animaux', cat: 'animaux',
     alcohol: 'alcool', wine: 'alcool', beer: 'alcool', spirit: 'alcool',
-    tobacco: 'tabac', cigarette: 'tabac',
+    tobacco: 'tabac', cigarette: 'tabac'
   };
 
   const matchCategory = (tags = []) => {
@@ -186,10 +186,10 @@ export default function Dashboard() {
   // ── Find duplicate by name + brand ──────────────────────
   const findExistingProduct = (name, brand) => {
     if (!name) return null;
-    const normalize = s => (s || '').toLowerCase().trim();
-    return products.find(p =>
-      normalize(p.name) === normalize(name) &&
-      normalize(p.marque) === normalize(brand)
+    const normalize = (s) => (s || '').toLowerCase().trim();
+    return products.find((p) =>
+    normalize(p.name) === normalize(name) &&
+    normalize(p.marque) === normalize(brand)
     ) || null;
   };
 
@@ -197,11 +197,11 @@ export default function Dashboard() {
   const handleBarcodeDetected = async (code) => {
     setShowScanner(false);
     logActivity(user, 'barcode_scanned', `${user.full_name || user.email} a scanné le code-barres ${code}`, {
-      entity_name: code,
+      entity_name: code
     });
 
     // 1. Search local DB first
-    const match = barcodeDB.find(b => b.barcode === code);
+    const match = barcodeDB.find((b) => b.barcode === code);
     if (match) {
       const existing = findExistingProduct(match.name, match.brand || match.marque);
       setQuickAdd({ barcode: code, prefill: match, existingProduct: existing });
@@ -211,9 +211,9 @@ export default function Dashboard() {
     // 2. Try Open Food Facts + Open Beauty Facts in parallel
     try {
       const [foodRes, beautyRes] = await Promise.allSettled([
-        fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then(r => r.json()),
-        fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then(r => r.json()),
-      ]);
+      fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then((r) => r.json()),
+      fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then((r) => r.json())]
+      );
 
       // Check Food Facts first
       if (foodRes.status === 'fulfilled' && foodRes.value?.status === 1 && foodRes.value?.product) {
@@ -225,7 +225,7 @@ export default function Dashboard() {
         setQuickAdd({
           barcode: code,
           prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
-          existingProduct: existing,
+          existingProduct: existing
         });
         return;
       }
@@ -242,7 +242,7 @@ export default function Dashboard() {
         setQuickAdd({
           barcode: code,
           prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
-          existingProduct: existing,
+          existingProduct: existing
         });
         return;
       }
@@ -252,7 +252,7 @@ export default function Dashboard() {
     setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
-  const filteredProducts = useMemo(() => products.filter(p => {
+  const filteredProducts = useMemo(() => products.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (statusFilter !== 'all' && getProductStatus(p.expiration_date) !== statusFilter) return false;
     if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
@@ -261,33 +261,33 @@ export default function Dashboard() {
   }), [products, search, statusFilter, categoryFilter, rayonFilter]);
 
   const activeFilterCount = [
-    statusFilter !== 'all',
-    categoryFilter !== 'all',
-    rayonFilter !== 'all',
-  ].filter(Boolean).length;
+  statusFilter !== 'all',
+  categoryFilter !== 'all',
+  rayonFilter !== 'all'].
+  filter(Boolean).length;
 
   if (!canAccess) {
     return (
       <div className="min-h-screen bg-secondary/30">
         <DashboardHeader />
         <SubscriptionGate />
-      </div>
-    );
+      </div>);
+
   }
 
   const statusFilters = [
-    { key: 'all', label: t('dash_filter_all') },
-    { key: 'expired', label: t('dash_filter_expired') },
-    { key: 'urgent', label: t('dash_filter_urgent') },
-    { key: 'soon', label: t('dash_filter_soon') },
-    { key: 'ok', label: t('dash_filter_ok') },
-  ];
+  { key: 'all', label: t('dash_filter_all') },
+  { key: 'expired', label: t('dash_filter_expired') },
+  { key: 'urgent', label: t('dash_filter_urgent') },
+  { key: 'soon', label: t('dash_filter_soon') },
+  { key: 'ok', label: t('dash_filter_ok') }];
+
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0 pt-16 sm:pt-20" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
-      {needsOnboarding && !onboardingDone && (
-        <OnboardingModal user={user} onComplete={() => setOnboardingDone(true)} />
-      )}
+      {needsOnboarding && !onboardingDone &&
+      <OnboardingModal user={user} onComplete={() => setOnboardingDone(true)} />
+      }
       <DashboardHeader />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 pb-6 sm:pt-10 sm:pb-8">
@@ -305,7 +305,7 @@ export default function Dashboard() {
               <ScanLine className="w-4 h-4" />
               {t('btn_scanner')}
             </Button>
-            <Button onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full gap-2">
+            <Button onClick={() => {setEditProduct(null);setShowForm(true);}} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
             </Button>
@@ -320,27 +320,27 @@ export default function Dashboard() {
               <XlsIcon />
               <span>Importer</span>
             </Button>
-            <Button size="sm" onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
+            <Button size="sm" onClick={() => {setEditProduct(null);setShowForm(true);}} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Ajouter un produit
             </Button>
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
+        {isLoading ?
+        <div className="flex items-center justify-center py-20">
             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="space-y-4 sm:space-y-6">
+          </div> :
+
+        <div className="space-y-4 sm:space-y-6">
             <StatsCards products={products} />
 
-            {showForm && (
-              <ProductForm
-                onSave={handleSave}
-                onCancel={() => { setShowForm(false); setEditProduct(null); }}
-                editProduct={editProduct}
-              />
-            )}
+            {showForm &&
+          <ProductForm
+            onSave={handleSave}
+            onCancel={() => {setShowForm(false);setEditProduct(null);}}
+            editProduct={editProduct} />
+
+          }
 
             <WeeklyAlert products={products} onUpdate={(id, data) => updateMutation.mutate({ id, data })} />
 
@@ -350,50 +350,50 @@ export default function Dashboard() {
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder={t('dash_search')}
-                    className="pl-9 rounded-full h-9 text-xs"
-                  />
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t('dash_search')}
+                  className="pl-9 rounded-full h-9 text-xs" />
+                
                 </div>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  className={`rounded-full whitespace-nowrap gap-1.5 ${activeFilterCount > 0 ? 'border-primary text-primary' : ''}`}
-                  onClick={() => setShowFilters(f => !f)}
-                >
+                variant="outline"
+                size="sm"
+                className={`rounded-full whitespace-nowrap gap-1.5 ${activeFilterCount > 0 ? 'border-primary text-primary' : ''}`}
+                onClick={() => setShowFilters((f) => !f)}>
+                
                   {t('filter_label')} {activeFilterCount > 0 && <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-xs">{activeFilterCount}</span>}
                 </Button>
-                {activeFilterCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-full text-muted-foreground"
-                    onClick={() => { setStatusFilter('all'); setCategoryFilter('all'); setRayonFilter('all'); }}
-                  >
+                {activeFilterCount > 0 &&
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full text-muted-foreground"
+                onClick={() => {setStatusFilter('all');setCategoryFilter('all');setRayonFilter('all');}}>
+                
                     <X className="w-3.5 h-3.5" />
                   </Button>
-                )}
+              }
               </div>
 
               {/* Filter panel */}
-              {showFilters && (
-                <div className="space-y-3 pt-2 border-t border-border/30">
+              {showFilters &&
+            <div className="space-y-3 pt-2 border-t border-border/30">
                   {/* Status filter pills */}
                   <div className="flex flex-wrap gap-1.5">
-                    {statusFilters.map(f => (
-                      <button
-                        key={f.key}
-                        onClick={() => setStatusFilter(f.key)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
-                          statusFilter === f.key
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'border-border text-muted-foreground hover:border-primary/50'
-                        }`}
-                      >
+                    {statusFilters.map((f) =>
+                <button
+                  key={f.key}
+                  onClick={() => setStatusFilter(f.key)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                  statusFilter === f.key ?
+                  'bg-primary text-primary-foreground border-primary' :
+                  'border-border text-muted-foreground hover:border-primary/50'}`
+                  }>
+                  
                         {f.label}
                       </button>
-                    ))}
+                )}
                   </div>
                   <div className="flex gap-2 flex-wrap">
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -411,83 +411,83 @@ export default function Dashboard() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">{t('all')} — {t('dash_filter_rayon')}</SelectItem>
-                        {Object.keys(rayonKeys).map(r => <SelectItem key={r} value={r}>Rayon {r}</SelectItem>)}
+                        {Object.keys(rayonKeys).map((r) => <SelectItem key={r} value={r}>Rayon {r}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-              )}
+            }
             </div>
 
             {/* View toggle */}
             <div className="flex items-center justify-end gap-2">
               <button
-                onClick={() => setGroupByRayon(false)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}
-              >
+              onClick={() => setGroupByRayon(false)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}>
+              
                 <LayoutList className="w-3.5 h-3.5" /> Liste
               </button>
               <button
-                onClick={() => setGroupByRayon(true)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}
-              >
+              onClick={() => setGroupByRayon(true)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}>
+              
                 <Layers className="w-3.5 h-3.5" /> Par rayon
               </button>
             </div>
 
-            {groupByRayon ? (
-              <RayonGroupedTable
-                products={filteredProducts}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onInlineSave={(id, data) => updateMutation.mutate({ id, data })}
-              />
-            ) : (
-              <ProductTable
-                products={filteredProducts}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onInlineSave={(id, data) => updateMutation.mutate({ id, data })}
-              />
-            )}
+            {groupByRayon ?
+          <RayonGroupedTable
+            products={filteredProducts}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onInlineSave={(id, data) => updateMutation.mutate({ id, data })} /> :
+
+
+          <ProductTable
+            products={filteredProducts}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
+
+          }
           </div>
-        )}
+        }
       </main>
 
 
 
       {/* Modals */}
-      {showImport && (
-        <ImportModal
-          onClose={() => setShowImport(false)}
-          onImported={(count) => {
-            queryClient.invalidateQueries({ queryKey: ['products'] });
-            logActivity(user, 'excel_imported', `${user.full_name || user.email} a importé un fichier Excel${count ? ` (${count} produits)` : ''}`);
-          }}
-        />
-      )}
+      {showImport &&
+      <ImportModal
+        onClose={() => setShowImport(false)}
+        onImported={(count) => {
+          queryClient.invalidateQueries({ queryKey: ['products'] });
+          logActivity(user, 'excel_imported', `${user.full_name || user.email} a importé un fichier Excel${count ? ` (${count} produits)` : ''}`);
+        }} />
 
-      {showScanner && (
-        <BarcodeScanner
-          lang={lang}
-          onDetected={handleBarcodeDetected}
-          onClose={() => setShowScanner(false)}
-        />
-      )}
+      }
 
-      {quickAdd && (
-        <QuickAddModal
-          barcode={quickAdd.barcode}
-          prefill={quickAdd.prefill}
-          existingProduct={quickAdd.existingProduct}
-          onSave={(data) => createMutation.mutate(data)}
-          onUpdate={(id, data) => updateMutation.mutate({ id, data })}
-          onClose={() => setQuickAdd(null)}
-          saving={createMutation.isPending || updateMutation.isPending}
-        />
-      )}
+      {showScanner &&
+      <BarcodeScanner
+        lang={lang}
+        onDetected={handleBarcodeDetected}
+        onClose={() => setShowScanner(false)} />
+
+      }
+
+      {quickAdd &&
+      <QuickAddModal
+        barcode={quickAdd.barcode}
+        prefill={quickAdd.prefill}
+        existingProduct={quickAdd.existingProduct}
+        onSave={(data) => createMutation.mutate(data)}
+        onUpdate={(id, data) => updateMutation.mutate({ id, data })}
+        onClose={() => setQuickAdd(null)}
+        saving={createMutation.isPending || updateMutation.isPending} />
+
+      }
 
       <DashboardFooter />
-    </div>
-  );
+    </div>);
+
 }
