@@ -96,37 +96,61 @@ export default function Documents() {
       <main className="pt-20 sm:pt-24 max-w-5xl mx-auto px-4 sm:px-6 pb-6">
 
         {/* Page header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            {inFolder && (
-              <button onClick={() => setSection('all')} className="p-1.5 rounded-lg hover:bg-white border border-border/40 transition-colors">
-                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-              </button>
-            )}
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentSectionLabel}</h1>
-              {section === 'all' && (
-                <p className="text-xs text-muted-foreground">Numérisez, stockez et organisez facilement vos documents professionnels : factures, bons de livraison, contrats et autres fichiers importants, accessibles à tout moment depuis votre espace sécurisé.</p>
-              )}
+        <div className="mb-6">
+          {section === 'all' && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-1">{currentSectionLabel}</h1>
+                <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
+                  Numérisez, stockez et organisez facilement vos documents professionnels : factures, bons de livraison, contrats et autres fichiers importants, accessibles à tout moment depuis votre espace sécurisé.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => { setEditingFolder(null); setShowFolderModal(true); }}
+                >
+                  <FolderPlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Nouveau dossier</span>
+                  <span className="sm:hidden">Dossier</span>
+                </Button>
+                <Button size="sm" className="gap-1.5 text-xs" onClick={() => setShowUpload(true)}>
+                  <Upload className="w-4 h-4" />
+                  <span className="hidden sm:inline">Ajouter un document</span>
+                  <span className="sm:hidden">Ajouter</span>
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-xs"
-              onClick={() => { setEditingFolder(null); setShowFolderModal(true); }}
-            >
-              <FolderPlus className="w-4 h-4" />
-              <span className="hidden sm:inline">Nouveau dossier</span>
-              <span className="sm:hidden">Dossier</span>
-            </Button>
-            <Button size="sm" className="gap-1.5 text-xs" onClick={() => setShowUpload(true)}>
-              <Upload className="w-4 h-4" />
-              <span className="hidden sm:inline">Ajouter un document</span>
-              <span className="sm:hidden">Ajouter</span>
-            </Button>
-          </div>
+          )}
+          {section !== 'all' && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button onClick={() => setSection('all')} className="p-1.5 rounded-lg hover:bg-white border border-border/40 transition-colors">
+                  <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentSectionLabel}</h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-xs"
+                  onClick={() => { setEditingFolder(null); setShowFolderModal(true); }}
+                >
+                  <FolderPlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Nouveau dossier</span>
+                  <span className="sm:hidden">Dossier</span>
+                </Button>
+                <Button size="sm" className="gap-1.5 text-xs" onClick={() => setShowUpload(true)}>
+                  <Upload className="w-4 h-4" />
+                  <span className="hidden sm:inline">Ajouter un document</span>
+                  <span className="sm:hidden">Ajouter</span>
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Folders grid — shown on 'all' view */}
