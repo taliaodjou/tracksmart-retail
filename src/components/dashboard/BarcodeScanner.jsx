@@ -182,9 +182,14 @@ export default function BarcodeScanner({ onDetected, onClose, lang }) {
               style={{ animation: 'scanline 2s ease-in-out infinite' }}
             />
           </div>
-          <p className="relative z-10 mt-6 text-white/80 text-sm text-center px-6 drop-shadow-lg">
-            {isFr ? 'Centrez le code-barres dans le cadre' : 'Center the barcode in the frame'}
-          </p>
+          <div className="relative z-10 mt-6 text-center px-6 space-y-1">
+            <p className="text-white font-semibold text-sm drop-shadow-lg">
+              {isFr ? '📦 Scannez le code-barres de votre produit' : '📦 Scan the barcode of your product'}
+            </p>
+            <p className="text-white/60 text-xs drop-shadow">
+              {isFr ? 'Centrez le code dans le cadre ci-dessus' : 'Center the code in the frame above'}
+            </p>
+          </div>
         </div>
       )}
 
