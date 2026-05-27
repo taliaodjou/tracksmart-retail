@@ -132,15 +132,7 @@ export default function Documents() {
         {/* Folders grid — shown on 'all' view */}
         {section === 'all' && (
           <div className="mb-6">
-            {folders.length === 0 ? (
-              <button
-                onClick={() => { setEditingFolder(null); setShowFolderModal(true); }}
-                className="flex items-center gap-2 px-4 py-3 rounded-2xl border-2 border-dashed border-border text-sm text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors"
-              >
-                <FolderPlus className="w-4 h-4" />
-                <span className="text-xs">Créer votre premier dossier</span>
-              </button>
-            ) : (
+            {folders.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {folders.map(folder => {
                   const count = documents.filter(d => !d.is_deleted && d.folder_id === folder.id).length;
@@ -195,20 +187,8 @@ export default function Documents() {
           </div>
         )}
 
-        {/* Section nav pills (All + Trash) */}
-        {section === 'all' && (
-          <div className="flex gap-2 mb-5 flex-wrap">
-            <button
-              onClick={() => setSection('trash')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground transition-colors"
-            >
-              Corbeille
-              {trashCount > 0 && (
-                <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-xs">{trashCount}</span>
-              )}
-            </button>
-          </div>
-        )}
+
+
 
         {/* Trash back link */}
         {section === 'trash' && (
