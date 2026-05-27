@@ -106,7 +106,7 @@ export default function Documents() {
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground">{currentSectionLabel}</h1>
               {section === 'all' && (
-                <p className="text-xs text-muted-foreground">Scannez et digitalisez vos documents. Stockez et organisez vos factures, bons de livraison, contrats et autres documents.</p>
+                <p className="text-xs text-muted-foreground">Numérisez, stockez et organisez facilement vos documents professionnels : factures, bons de livraison, contrats et autres fichiers importants, accessibles à tout moment depuis votre espace sécurisé.</p>
               )}
             </div>
           </div>
