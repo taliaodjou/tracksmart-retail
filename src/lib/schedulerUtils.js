@@ -224,131 +224,151 @@ export async function checkAndSendReminders(user, products) {
     }
   }
 
-  // ── 2. Product expiry reminders ─────────────────────────────────────────
+  // ── 2. Product expiry reminders — one single email per day ──────────────
   if (!products || products.length === 0) return;
 
   const { getDaysRemaining } = await import('@/lib/productUtils');
 
-  // Track which reminder windows we already notified today (stored as JSON string)
+  // Only send once per day
   let sentToday = {};
   try {
-    const stored = user.last_expiry_reminders_sent || '';
-    const parsed = JSON.parse(stored);
-    // Only use if it's from today
+    const parsed = JSON.parse(user.last_expiry_reminders_sent || '');
     if (parsed.date === today) sentToday = parsed.sent || {};
   } catch (_) {}
 
-  const thresholds = [
-    { days: 3,  type: 'expiry_3d',  label: '3 jours' },
-    { days: 7,  type: 'expiry_7d',  label: '7 jours' },
-    { days: 14, type: 'expiry_14d', label: '14 jours' },
-  ];
+  if (sentToday['daily_digest']) return; // already sent today
 
-  for (const threshold of thresholds) {
-    if (sentToday[threshold.type]) continue; // already sent today
+  // Collect all products per urgency bucket (deduplicated by id)
+  const urgent = []; // <= 3 days
+  const soon = [];   // 4–7 days
+  const later = [];  // 8–14 days
+  const seen = new Set();
 
-    const expiring = products.filter(p => {
-      if (!p.expiration_date) return false;
-      const d = getDaysRemaining(p.expiration_date);
-      return d >= 0 && d <= threshold.days;
-    });
+  for (const p of products) {
+    if (!p.expiration_date || seen.has(p.id)) continue;
+    const d = getDaysRemaining(p.expiration_date);
+    if (d < 0 || d > 14) continue;
+    seen.add(p.id);
+    if (d <= 3) urgent.push(p);
+    else if (d <= 7) soon.push(p);
+    else later.push(p);
+  }
 
-    if (expiring.length === 0) continue;
+  const total = urgent.length + soon.length + later.length;
+  if (total === 0) return;
 
-    const productList = expiring
-      .slice(0, 10)
-      .map(p => `• ${p.name}${p.rayon ? ` (Rayon ${p.rayon})` : ''} — expire le ${format(new Date(p.expiration_date), 'dd/MM/yyyy')}`)
-      .join('\n');
-    const extra = expiring.length > 10 ? `\n…et ${expiring.length - 10} autre(s) produit(s)` : '';
+  // Build notification message (in-app)
+  const allList = [...urgent, ...soon, ...later]
+    .slice(0, 10)
+    .map(p => `• ${p.name} — expire le ${format(new Date(p.expiration_date), 'dd/MM/yyyy')}`)
+    .join('\n');
+  await base44.entities.Notification.create({
+    user_email: user.email,
+    type: urgent.length > 0 ? 'expiry_3d' : soon.length > 0 ? 'expiry_7d' : 'expiry_14d',
+    message: `🔔 ${total} produit(s) à surveiller :\n${allList}${total > 10 ? `\n…et ${total - 10} autre(s)` : ''}`,
+    read: false,
+    sent_at: new Date().toISOString(),
+  });
 
-    const message = `🔔 ${expiring.length} produit(s) expirent dans moins de ${threshold.label} :\n${productList}${extra}`;
+  // Helper to build product rows for email
+  const buildRows = (list) => list.slice(0, 15).map(p => {
+    const d = getDaysRemaining(p.expiration_date);
+    const color = d <= 3 ? '#dc2626' : d <= 7 ? '#d97706' : '#b45309';
+    const bg = d <= 3 ? '#fef2f2' : '#fffbeb';
+    const label = d === 0 ? "Aujourd'hui" : `${d}j`;
+    return `
+      <tr>
+        <td style="padding:10px 0;border-bottom:1px solid #f4f4f4;">
+          <div style="font-size:13px;font-weight:600;color:#111111;">${p.name}${p.marque ? ` <span style="font-weight:400;color:#999999;">(${p.marque})</span>` : ''}</div>
+          ${p.rayon ? `<div style="font-size:11px;color:#bbbbbb;margin-top:2px;">Rayon ${p.rayon}</div>` : ''}
+        </td>
+        <td style="padding:10px 0;border-bottom:1px solid #f4f4f4;text-align:right;white-space:nowrap;">
+          <span style="background:${bg};color:${color};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;">${label}</span>
+        </td>
+      </tr>`;
+  }).join('');
 
-    await base44.entities.Notification.create({
-      user_email: user.email,
-      type: threshold.type,
-      message,
-      read: false,
-      sent_at: new Date().toISOString(),
-    });
+  const shopName = user.shop_name || user.full_name || 'votre boutique';
 
-    const expiringRows = expiring.slice(0, 10).map(p => {
-      const d = getDaysRemaining(p.expiration_date);
-      const urgentColor = d <= 3 ? '#dc2626' : d <= 7 ? '#d97706' : '#b45309';
-      return `
+  // Section block builder
+  const buildSection = (title, list, accentColor, badgeBg, badgeBorder) => {
+    if (list.length === 0) return '';
+    return `
+      <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:${accentColor};text-transform:uppercase;letter-spacing:0.5px;">${title} — ${list.length} produit${list.length > 1 ? 's' : ''}</p>
+      <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 28px;background:${badgeBg};border:1px solid ${badgeBorder};border-radius:12px;padding:0 16px;">
+        ${buildRows(list)}
+        ${list.length > 15 ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#aaaaaa;">…et ${list.length - 15} autre(s) produit(s)</span></td></tr>` : ''}
+      </table>`;
+  };
+
+  const hasUrgent = urgent.length > 0;
+  const expiryHtmlBody = buildEmailHtml({
+    title: 'Alerte DLC — Récapitulatif',
+    accentColor: hasUrgent ? '#ef4444' : '#f59e0b',
+    userId: user.id,
+    bodyContent: `
+      <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:${hasUrgent ? '#ef4444' : '#C9A64C'};letter-spacing:0.5px;text-transform:uppercase;">Alerte DLC</p>
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:800;color:#111111;line-height:1.2;">Récapitulatif des dates de péremption</h1>
+      <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
+        Bonjour <strong>${shopName}</strong>, voici un récapitulatif complet des produits qui nécessitent votre attention.
+      </p>
+
+      <!-- KPI badges -->
+      <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 32px;">
         <tr>
-          <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;">
-            <div style="font-size:13px;font-weight:600;color:#111111;">${p.name}${p.marque ? ` <span style="font-weight:400;color:#888888;">(${p.marque})</span>` : ''}</div>
-            ${p.rayon ? `<div style="font-size:11px;color:#aaaaaa;margin-top:2px;">Rayon ${p.rayon}</div>` : ''}
+          ${urgent.length > 0 ? `<td style="padding-right:6px;" width="33%">
+            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:26px;font-weight:800;color:#dc2626;">${urgent.length}</div>
+              <div style="font-size:10px;color:#dc2626;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">Urgents ≤ 3j</div>
+            </div>
+          </td>` : ''}
+          ${soon.length > 0 ? `<td style="padding-right:6px;" width="33%">
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:26px;font-weight:800;color:#d97706;">${soon.length}</div>
+              <div style="font-size:10px;color:#d97706;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">Bientôt ≤ 7j</div>
+            </div>
+          </td>` : ''}
+          ${later.length > 0 ? `<td width="33%">
+            <div style="background:#fefce8;border:1px solid #fef08a;border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:26px;font-weight:800;color:#b45309;">${later.length}</div>
+              <div style="font-size:10px;color:#b45309;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">À surveiller ≤ 14j</div>
+            </div>
+          </td>` : ''}
+        </tr>
+      </table>
+
+      ${buildSection('🚨 Urgents — expirent dans 3 jours ou moins', urgent, '#dc2626', '#fff8f8', '#fecaca')}
+      ${buildSection('⚠️ Bientôt — expirent dans 4 à 7 jours', soon, '#d97706', '#fffdf5', '#fde68a')}
+      ${buildSection('📋 À surveiller — expirent dans 8 à 14 jours', later, '#b45309', '#fefdf5', '#fef08a')}
+
+      <!-- CTA -->
+      <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+        <tr>
+          <td style="background:#111111;border-radius:12px;padding:14px 32px;">
+            <a href="https://tracksmart.base44.app/dashboard" style="color:#C9A64C;font-weight:700;font-size:14px;text-decoration:none;letter-spacing:0.3px;">Gérer mes produits →</a>
           </td>
-          <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;text-align:right;white-space:nowrap;">
-            <span style="background:${d <= 3 ? '#fef2f2' : '#fffbeb'};color:${urgentColor};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;">
-              ${d === 0 ? "Aujourd'hui" : d < 0 ? 'Expiré' : `${d}j`}
-            </span>
-          </td>
-        </tr>`;
-    }).join('');
+        </tr>
+      </table>
 
-    const expiryHtmlBody = buildEmailHtml({
-      title: `Alerte DLC — ${threshold.label}`,
-      accentColor: threshold.days <= 3 ? '#ef4444' : '#f59e0b',
-      userId: user.id,
-      bodyContent: `
-        <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:${threshold.days <= 3 ? '#ef4444' : '#C9A64C'};letter-spacing:0.5px;text-transform:uppercase;">Alerte DLC</p>
-        <h1 style="margin:0 0 20px;font-size:24px;font-weight:800;color:#111111;line-height:1.2;">
-          ${expiring.length} produit${expiring.length > 1 ? 's' : ''} expire${expiring.length > 1 ? 'nt' : ''} dans moins de ${threshold.label}
-        </h1>
-        <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
-          Bonjour <strong>${user.shop_name || user.full_name || 'votre boutique'}</strong>, voici les produits qui nécessitent votre attention immédiate.
-        </p>
+      <p style="margin:0;font-size:13px;color:#aaaaaa;line-height:1.6;">
+        Une question ? <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;text-decoration:none;">support@tracksmart.com</a>
+      </p>
+    `
+  });
 
-        <!-- Product count badge -->
-        <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
-          <tr>
-            <td style="background:${threshold.days <= 3 ? '#fef2f2' : '#fffbeb'};border:1px solid ${threshold.days <= 3 ? '#fecaca' : '#fde68a'};border-radius:12px;padding:16px 24px;text-align:center;">
-              <div style="font-size:40px;font-weight:800;color:${threshold.days <= 3 ? '#dc2626' : '#b45309'};line-height:1;">${expiring.length}</div>
-              <div style="font-size:12px;color:${threshold.days <= 3 ? '#dc2626' : '#b45309'};font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">produit${expiring.length > 1 ? 's' : ''} à traiter</div>
-            </td>
-          </tr>
-        </table>
+  const urgentCount = urgent.length;
+  await base44.integrations.Core.SendEmail({
+    to: user.email,
+    subject: urgentCount > 0
+      ? `⚠️ TrackSmart — ${urgentCount} produit${urgentCount > 1 ? 's urgents' : ' urgent'} + ${total - urgentCount} à surveiller`
+      : `TrackSmart — Alerte DLC : ${total} produit${total > 1 ? 's' : ''} à surveiller`,
+    body: expiryHtmlBody,
+  });
 
-        <!-- Product list -->
-        <table cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 28px;">
-          ${expiringRows}
-          ${expiring.length > 10 ? `<tr><td style="padding:8px 0;"><span style="font-size:12px;color:#aaaaaa;">…et ${expiring.length - 10} autre(s) produit(s)</span></td></tr>` : ''}
-        </table>
-
-        <!-- CTA -->
-        <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
-          <tr>
-            <td style="background:#111111;border-radius:12px;padding:14px 32px;">
-              <a href="https://tracksmart.base44.app/dashboard" style="color:#C9A64C;font-weight:700;font-size:14px;text-decoration:none;letter-spacing:0.3px;">Gérer mes produits →</a>
-            </td>
-          </tr>
-        </table>
-
-        <p style="margin:0;font-size:13px;color:#aaaaaa;line-height:1.6;">
-          Une question ? <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;text-decoration:none;">support@tracksmart.com</a>
-        </p>
-      `
-    });
-
-    await base44.integrations.Core.SendEmail({
-      to: user.email,
-      subject: threshold.days <= 3
-        ? `⚠️ TrackSmart — ${expiring.length} produit${expiring.length > 1 ? 's expirent' : ' expire'} dans ${threshold.label}`
-        : `TrackSmart — Alerte DLC : ${expiring.length} produit${expiring.length > 1 ? 's' : ''} dans ${threshold.label}`,
-      body: expiryHtmlBody,
-    });
-
-    sentToday[threshold.type] = true;
-  }
-
-  // Persist which reminders were sent today
-  if (Object.keys(sentToday).length > 0) {
-    await base44.auth.updateMe({
-      last_expiry_reminders_sent: JSON.stringify({ date: today, sent: sentToday }),
-    });
-  }
+  sentToday['daily_digest'] = true;
+  await base44.auth.updateMe({
+    last_expiry_reminders_sent: JSON.stringify({ date: today, sent: sentToday }),
+  });
 }
 
 export async function checkAndSendWeeklyReport(user, products) {
