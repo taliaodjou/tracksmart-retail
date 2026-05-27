@@ -101,7 +101,7 @@ export default function Documents() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-1">{currentSectionLabel}</h1>
-                <p className="text-sm text-muted-foreground max-w-xl leading-relaxed">
+                <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
                   Numérisez, stockez et organisez facilement vos documents professionnels : factures, bons de livraison, contrats et autres fichiers importants, accessibles à tout moment depuis votre espace sécurisé.
                 </p>
               </div>
