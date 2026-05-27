@@ -56,7 +56,8 @@ export default function NotificationBell() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-10 z-50 w-80 bg-white rounded-2xl shadow-xl border border-border/50 overflow-hidden">
+          {/* Mobile: full-width bottom sheet; Desktop: dropdown */}
+          <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-auto sm:top-10 bottom-20 sm:bottom-auto z-50 sm:w-80 bg-white rounded-2xl shadow-xl border border-border/50 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
               <span className="font-semibold text-sm text-foreground">{t('nav_notifications')}</span>
               <div className="flex items-center gap-1">
@@ -71,7 +72,7 @@ export default function NotificationBell() {
               </div>
             </div>
 
-            <div className="max-h-80 overflow-y-auto">
+            <div className="max-h-64 sm:max-h-80 overflow-y-auto">
               {notifications.length === 0 ? (
                 <p className="text-center text-sm text-muted-foreground py-8">
                   {lang === 'fr' ? 'Aucune notification' : 'No notifications'}
