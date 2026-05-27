@@ -422,15 +422,15 @@ export default function Orders() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8">
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-2 mb-6">
-          <div>
-            <h1 className="text-xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
-              {t('orders_title')}
-            </h1>
-            <p className="text-muted-foreground text-xs mt-0.5">
-              {eligibleProducts.length} {t('orders_subtitle_plural')}
-            </p>
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <ShoppingCart className="w-5 h-5 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground leading-tight">{t('orders_title')}</h1>
+              <p className="text-muted-foreground text-xs mt-0.5">{eligibleProducts.length} {t('orders_subtitle_plural')}</p>
+            </div>
           </div>
           <div className="flex gap-2 flex-shrink-0">
             <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs h-9 px-3" onClick={handlePrint} disabled={selectedIds.size === 0}>
@@ -439,7 +439,7 @@ export default function Orders() {
             </Button>
             <Button size="sm" className="rounded-full gap-1.5 text-xs h-9 px-3" onClick={handleSendEmail} disabled={selectedIds.size === 0 || sending}>
               {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : sent ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{sent ? 'Envoyé !' : 'Envoyer par email'}</span>
+              <span className="hidden sm:inline">{sent ? 'Envoyé !' : 'Envoyer'}</span>
             </Button>
           </div>
         </div>
