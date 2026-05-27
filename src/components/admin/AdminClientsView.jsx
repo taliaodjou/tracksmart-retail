@@ -221,22 +221,22 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Rechercher un client..."
-            className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-primary/40"
+            className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-white text-xs placeholder:text-white/30 focus:outline-none focus:border-primary/40"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           {['all', 'active', 'inactive'].map(f => (
             <button
               key={f}
               onClick={() => setStatusFilter(f)}
-              className={`px-4 py-2 rounded-xl text-xs font-medium transition-all ${statusFilter === f ? 'bg-primary text-black' : 'bg-[#1a1a1a] text-white/50 border border-white/10 hover:text-white'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${statusFilter === f ? 'bg-primary text-black' : 'bg-[#1a1a1a] text-white/50 border border-white/10 hover:text-white'}`}
             >
               {f === 'all' ? 'Tous' : f === 'active' ? 'Actifs' : 'Inactifs'}
             </button>
