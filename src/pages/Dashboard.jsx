@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, ScanLine, X, LayoutList, Layers } from 'lucide-react';
 
 const XlsIcon = () => (
-  <span className="inline-flex items-center justify-center rounded text-[9px] font-bold border border-current px-1 leading-none" style={{fontSize:'9px', padding:'2px 3px'}}>XLS</span>
+  <span className="text-[10px] font-bold">XLS</span>
 );
 import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
