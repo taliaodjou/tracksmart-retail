@@ -6,7 +6,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { getStoreOwnerEmail } from '@/lib/activityLogger';
-import { hasActiveSubscription } from '@/lib/productUtils';
+import { hasActiveSubscription, canViewActivity } from '@/lib/productUtils';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import {
   Activity, Package, ScanLine, FileSpreadsheet, ShoppingCart,
@@ -65,6 +65,19 @@ export default function ActivityLogs() {
     acc[date].push(log);
     return acc;
   }, {});
+
+  if (!canViewActivity(user)) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
+        <DashboardHeader />
+        <main className="max-w-4xl mx-auto px-4 py-8 pt-20 sm:pt-24 text-center">
+          <Activity className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="font-medium text-foreground">Accès non disponible</p>
+          <p className="text-sm text-muted-foreground mt-1">L'historique d'activité est disponible pour les propriétaires de boutique.</p>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>

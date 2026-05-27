@@ -79,6 +79,10 @@ export function canManageTeam(user) {
   return isAdmin(user) || isStoreOwner(user);
 }
 
+export function canViewActivity(user) {
+  return isAdmin(user) || isStoreOwner(user);
+}
+
 export function canManageBilling(user) {
   return isAdmin(user) || isStoreOwner(user);
 }
