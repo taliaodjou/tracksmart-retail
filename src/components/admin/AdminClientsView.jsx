@@ -201,21 +201,21 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
       </div>
 
       {/* Invite form */}
-      <div className="bg-[#1a1a1a] rounded-2xl p-5 border border-white/5">
-        <h3 className="text-white/70 text-xs font-semibold mb-3 flex items-center gap-2">
-          <Mail className="w-4 h-4 text-primary" /> Inviter un nouveau client
+      <div className="bg-[#1a1a1a] rounded-2xl p-4 border border-white/5">
+        <h3 className="text-white/70 text-xs font-semibold mb-2.5 flex items-center gap-2">
+          <Mail className="w-3.5 h-3.5 text-primary" /> Inviter un nouveau client
         </h3>
-        <form onSubmit={handleInvite} className="flex gap-3 items-center">
+        <form onSubmit={handleInvite} className="flex gap-2 items-center">
           <input
             value={inviteEmail}
             onChange={e => setInviteEmail(e.target.value)}
             type="email"
             placeholder="email@boutique.com"
             required
-            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-xs placeholder:text-white/30 focus:outline-none focus:border-primary/50"
+            className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs placeholder:text-white/30 focus:outline-none focus:border-primary/50"
           />
-          <button type="submit" disabled={inviting} className="px-5 py-2 bg-primary text-black rounded-xl text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2">
-            <Send className="w-4 h-4" /> {inviting ? '...' : 'Inviter'}
+          <button type="submit" disabled={inviting} className="flex-shrink-0 px-3 py-1.5 bg-primary text-black rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5">
+            <Send className="w-3.5 h-3.5" /> {inviting ? '...' : 'Inviter'}
           </button>
         </form>
       </div>
