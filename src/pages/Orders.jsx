@@ -114,20 +114,24 @@ function ProductOrderRow({ p, selectedIds, toggle, quantities, setQuantities, no
   const days = getDaysRemaining(p.expiration_date);
   return (
     <div
-      className={`px-5 py-4 flex flex-col gap-2 transition-colors cursor-pointer hover:bg-secondary/20 ${isSelected ? 'bg-primary/5' : ''}`}
+      className={`px-4 py-3 flex flex-col gap-2 transition-colors cursor-pointer active:bg-secondary/30 ${isSelected ? 'bg-primary/5 border-l-2 border-primary' : 'border-l-2 border-transparent'}`}
       onClick={() => toggle(p.id)}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3">
         <Checkbox
           checked={isSelected}
           onCheckedChange={() => toggle(p.id)}
-          className="mt-1 flex-shrink-0"
+          className="mt-0.5 flex-shrink-0"
           onClick={e => e.stopPropagation()}
         />
         <div className="flex-1 min-w-0">
+          {/* Name + badges */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="font-medium text-foreground text-sm">{p.name}</span>
-            {p.marque && <span className="text-xs text-muted-foreground">({p.marque})</span>}
+            <span className="font-semibold text-foreground text-sm">{p.name}</span>
+            {p.marque && <span className="text-xs text-muted-foreground">· {p.marque}</span>}
+          </div>
+          {/* Status badges row */}
+          <div className="flex items-center gap-1.5 flex-wrap mt-1">
             {statusBadge(p)}
             {p.action === 'a_recommander' && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
@@ -135,17 +139,20 @@ function ProductOrderRow({ p, selectedIds, toggle, quantities, setQuantities, no
               </span>
             )}
           </div>
-          <div className="text-xs text-muted-foreground mt-1 flex flex-row flex-nowrap gap-2 overflow-x-auto">
-            {p.category && <span className="whitespace-nowrap">{t(categoryKeys[p.category] || p.category)}</span>}
-            {p.category && (p.rayon || p.expiration_date) && <span>·</span>}
-            {p.rayon && <span className="whitespace-nowrap">Rayon {p.rayon}</span>}
-            {p.rayon && p.expiration_date && <span>·</span>}
-            {p.expiration_date && <span className="whitespace-nowrap">{t('orders_dlc')} : {format(new Date(p.expiration_date), 'dd/MM/yyyy')} ({days}j)</span>}
+          {/* Meta info */}
+          <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-2 gap-y-0.5">
+            {p.category && <span>{t(categoryKeys[p.category] || p.category)}</span>}
+            {p.rayon && <span>Rayon {p.rayon}</span>}
+            {p.expiration_date && (
+              <span className={days < 0 ? 'text-red-500 font-medium' : days <= 7 ? 'text-orange-500 font-medium' : ''}>
+                DLC : {format(new Date(p.expiration_date), 'dd/MM/yy')} ({days}j)
+              </span>
+            )}
           </div>
         </div>
       </div>
       {isSelected && (
-        <div className="flex items-center gap-3 pl-8" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-2 pl-6 pt-1" onClick={e => e.stopPropagation()}>
           <div>
             <label className="text-xs text-muted-foreground block mb-1">{t('orders_qty_label')}</label>
             <Input
@@ -153,7 +160,7 @@ function ProductOrderRow({ p, selectedIds, toggle, quantities, setQuantities, no
               min="1"
               value={quantities[p.id] || 1}
               onChange={e => setQuantities(q => ({ ...q, [p.id]: parseInt(e.target.value) || 1 }))}
-              className="h-7 w-16 text-xs text-center"
+              className="h-8 w-16 text-sm text-center"
             />
           </div>
           <div className="flex-1">
@@ -161,7 +168,7 @@ function ProductOrderRow({ p, selectedIds, toggle, quantities, setQuantities, no
             <Input
               value={notes[p.id] || ''}
               onChange={e => setNotes(n => ({ ...n, [p.id]: e.target.value }))}
-              className="h-7 w-full text-xs"
+              className="h-8 w-full text-sm"
               placeholder={t('orders_note_placeholder')}
             />
           </div>
@@ -415,29 +422,24 @@ export default function Orders() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center justify-between gap-2 mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
-              <ShoppingCart className="w-7 h-7 text-primary" />
+            <h1 className="text-xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
               {t('orders_title')}
             </h1>
-            <p className="text-muted-foreground text-xs mt-1">
+            <p className="text-muted-foreground text-xs mt-0.5">
               {eligibleProducts.length} {t('orders_subtitle_plural')}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs" onClick={handlePrint} disabled={selectedIds.size === 0}>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs h-9 px-3" onClick={handlePrint} disabled={selectedIds.size === 0}>
               <Download className="w-3.5 h-3.5" />
-              PDF
+              <span className="hidden sm:inline">PDF</span>
             </Button>
-            <Button
-              size="sm"
-              className="rounded-full gap-1.5 text-xs"
-              onClick={handleSendEmail}
-              disabled={selectedIds.size === 0 || sending}
-            >
+            <Button size="sm" className="rounded-full gap-1.5 text-xs h-9 px-3" onClick={handleSendEmail} disabled={selectedIds.size === 0 || sending}>
               {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : sent ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
-              {sent ? 'Envoyé !' : 'Envoyer par email'}
+              <span className="hidden sm:inline">{sent ? 'Envoyé !' : 'Envoyer par email'}</span>
             </Button>
           </div>
         </div>
@@ -447,33 +449,30 @@ export default function Orders() {
           {/* Left — product list */}
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-white rounded-2xl shadow-sm border border-border/40 overflow-hidden">
-              <div className="px-5 py-4 border-b border-border/40 space-y-3">
+              <div className="px-4 py-3 border-b border-border/40 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-foreground flex items-center gap-2">
+                  <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
                     <Package className="w-4 h-4 text-primary" />
                     {t('orders_products_title')}
+                    {eligibleProducts.length > 0 && (
+                      <span className="bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">{eligibleProducts.length}</span>
+                    )}
                   </h2>
-                  <button
-                    className="text-xs text-primary hover:underline font-medium"
-                    onClick={toggleAll}
-                  >
+                  <button className="text-xs text-primary font-medium" onClick={toggleAll}>
                     {selectedIds.size === eligibleProducts.length ? t('orders_deselect_all') : t('orders_select_all')}
                   </button>
                 </div>
+
+                {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder="Rechercher un produit..."
-                    className="pl-8 h-8 text-xs rounded-full"
-                  />
+                  <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher un produit..." className="pl-8 h-9 text-sm rounded-full" />
                 </div>
-                {/* Filters */}
-                <div className="flex flex-wrap gap-2 items-center">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+
+                {/* Filters — scrollable row on mobile */}
+                <div className="flex gap-2 items-center overflow-x-auto pb-0.5 no-scrollbar">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="h-8 text-xs rounded-full w-36">
+                    <SelectTrigger className={`h-8 text-xs rounded-full flex-shrink-0 w-auto px-3 ${statusFilter !== 'all' ? 'border-primary text-primary' : ''}`}>
                       <SelectValue placeholder="Statut" />
                     </SelectTrigger>
                     <SelectContent>
@@ -485,33 +484,26 @@ export default function Orders() {
                     </SelectContent>
                   </Select>
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="h-8 text-xs rounded-full w-36">
+                    <SelectTrigger className={`h-8 text-xs rounded-full flex-shrink-0 w-auto px-3 ${categoryFilter !== 'all' ? 'border-primary text-primary' : ''}`}>
                       <SelectValue placeholder="Catégorie" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Toutes catégories</SelectItem>
-                      {Object.entries(categoryKeys).map(([v, k]) => (
-                        <SelectItem key={v} value={v}>{t(k)}</SelectItem>
-                      ))}
+                      {Object.entries(categoryKeys).map(([v, k]) => <SelectItem key={v} value={v}>{t(k)}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <Select value={rayonFilter} onValueChange={setRayonFilter}>
-                    <SelectTrigger className="h-8 text-xs rounded-full w-32">
+                    <SelectTrigger className={`h-8 text-xs rounded-full flex-shrink-0 w-auto px-3 ${rayonFilter !== 'all' ? 'border-primary text-primary' : ''}`}>
                       <SelectValue placeholder="Rayon" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tous les rayons</SelectItem>
-                      {Object.keys(rayonKeys).map(r => (
-                        <SelectItem key={r} value={r}>Rayon {r}</SelectItem>
-                      ))}
+                      {Object.keys(rayonKeys).map(r => <SelectItem key={r} value={r}>Rayon {r}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   {(statusFilter !== 'all' || categoryFilter !== 'all' || rayonFilter !== 'all') && (
-                    <button
-                      onClick={() => { setStatusFilter('all'); setCategoryFilter('all'); setRayonFilter('all'); }}
-                      className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      <X className="w-3 h-3" /> Réinitialiser
+                    <button onClick={() => { setStatusFilter('all'); setCategoryFilter('all'); setRayonFilter('all'); }} className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                      <X className="w-3 h-3" /> Reset
                     </button>
                   )}
                 </div>
