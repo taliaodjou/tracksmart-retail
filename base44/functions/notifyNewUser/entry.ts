@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     const today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
     const joinedAt = new Date().toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
 
-    const positionLabels = { owner: 'Propriétaire / Gérant', manager: 'Responsable / Manager', employee: 'Employé(e)' };
+    const positionLabels = { owner: 'Propriétaire', manager: 'Responsable / Manager', employee: 'Employé(e)' };
     const businessLabels = {
       supermarche: 'Supermarché / Grande surface', epicerie: 'Épicerie / Alimentation générale',
       boulangerie: 'Boulangerie / Pâtisserie', boucherie: 'Boucherie / Charcuterie',
@@ -248,8 +248,8 @@ Deno.serve(async (req) => {
             </h1>
             <p style="margin:0 0 28px;font-size:15px;color:#666666;line-height:1.8;">
               ${isEn
-                ? `Your access request has been received. Our team is currently reviewing your profile and you will receive a confirmation email within <strong style="color:#111111;">the next 10 minutes</strong>.`
-                : `Votre demande d'accès a bien été reçue. Notre équipe examine actuellement votre profil et vous recevrez un email de confirmation dans <strong style="color:#111111;">les 10 prochaines minutes</strong>.`}
+                ? `Your access request has been received. Our team is reviewing your profile and you will receive a confirmation email <strong style="color:#111111;">shortly</strong>.`
+                : `Votre demande d'accès a bien été reçue. Notre équipe examine votre profil et vous recevrez un email de confirmation <strong style="color:#111111;">sous peu</strong>.`}
             </p>
 
             <!-- Status card -->

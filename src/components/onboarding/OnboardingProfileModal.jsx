@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
-import { Globe, Building2, MapPin, User, ChevronRight, Sparkles } from 'lucide-react';
+import { Globe, Building2, User, ChevronRight, Sparkles } from 'lucide-react';
 
 const BUSINESS_TYPES = {
   fr: [
@@ -30,33 +30,28 @@ const BUSINESS_TYPES = {
 
 const POSITIONS = {
   fr: [
-    { value: 'owner', label: 'Propriétaire / Gérant' },
-    { value: 'manager', label: 'Responsable / Manager' },
-    { value: 'employee', label: 'Employé(e)' },
+    { value: 'owner', label: '👑 Propriétaire' },
+    { value: 'employee', label: '👤 Employé(e)' },
   ],
   en: [
-    { value: 'owner', label: 'Owner / Director' },
-    { value: 'manager', label: 'Manager / Supervisor' },
-    { value: 'employee', label: 'Employee' },
+    { value: 'owner', label: '👑 Owner' },
+    { value: 'employee', label: '👤 Employee' },
   ],
 };
 
 const i18n = {
   fr: {
     title: 'Bienvenue sur TrackSmart ! 👋',
-    subtitle: 'Dites-nous en plus sur vous pour personnaliser votre expérience.',
+    subtitle: 'Quelques informations pour personnaliser votre expérience.',
     step1_title: 'Votre langue',
     step1_sub: 'Choisissez la langue dans laquelle vous souhaitez utiliser TrackSmart.',
     lang_fr: 'Français',
     lang_en: 'English',
-    step2_title: 'Votre profil',
+    step2_title: 'Votre profil & commerce',
     full_name_label: 'Votre prénom et nom *',
     full_name_placeholder: 'Ex : Marie Dupont',
-    position_label: 'Votre poste *',
-    step3_title: 'Votre commerce',
+    position_label: 'Votre rôle *',
     business_type_label: 'Type de commerce *',
-    city_label: 'Ville *',
-    city_placeholder: 'Ex : Genève',
     country_label: 'Pays *',
     country_placeholder: 'Ex : Suisse',
     btn_next: 'Continuer',
@@ -68,19 +63,16 @@ const i18n = {
   },
   en: {
     title: 'Welcome to TrackSmart! 👋',
-    subtitle: 'Tell us a bit about yourself to personalize your experience.',
+    subtitle: 'A few details to personalize your experience.',
     step1_title: 'Your language',
     step1_sub: 'Choose the language you want to use TrackSmart in.',
     lang_fr: 'Français',
     lang_en: 'English',
-    step2_title: 'Your profile',
+    step2_title: 'Your profile & business',
     full_name_label: 'Your full name *',
     full_name_placeholder: 'e.g. Marie Dupont',
-    position_label: 'Your position *',
-    step3_title: 'Your business',
+    position_label: 'Your role *',
     business_type_label: 'Business type *',
-    city_label: 'City *',
-    city_placeholder: 'e.g. Geneva',
     country_label: 'Country *',
     country_placeholder: 'e.g. Switzerland',
     btn_next: 'Continue',
@@ -93,13 +85,12 @@ const i18n = {
 };
 
 export default function OnboardingProfileModal({ onComplete }) {
-  const [step, setStep] = useState(1); // 1=lang, 2=profile, 3=business
+  const [step, setStep] = useState(1); // 1=lang, 2=profile+business
   const [lang, setLangState] = useState('fr');
   const [form, setForm] = useState({
     full_name: '',
     user_position: '',
     business_type: '',
-    city: '',
     country: '',
   });
   const [error, setError] = useState('');
@@ -107,19 +98,9 @@ export default function OnboardingProfileModal({ onComplete }) {
 
   const tx = i18n[lang];
 
-  const handleLangSelect = (l) => {
-    setLangState(l);
-  };
-
   const next = () => {
     setError('');
     if (step === 2) {
-      if (!form.full_name.trim() || !form.user_position) {
-        setError(tx.required);
-        return;
-      }
-    }
-    if (step === 3) {
       handleSubmit();
       return;
     }
@@ -127,7 +108,7 @@ export default function OnboardingProfileModal({ onComplete }) {
   };
 
   const handleSubmit = async () => {
-    if (!form.business_type || !form.city.trim() || !form.country.trim()) {
+    if (!form.full_name.trim() || !form.user_position || !form.business_type || !form.country.trim()) {
       setError(tx.required);
       return;
     }
@@ -136,7 +117,6 @@ export default function OnboardingProfileModal({ onComplete }) {
       preferred_lang: lang,
       user_position: form.user_position,
       business_type: form.business_type,
-      city: form.city.trim(),
       country: form.country.trim(),
       onboarding_complete: true,
     });
@@ -163,15 +143,15 @@ export default function OnboardingProfileModal({ onComplete }) {
           <p className="text-sm text-white/60 mt-1">{tx.subtitle}</p>
           {/* Progress */}
           <div className="flex gap-1.5 mt-4">
-            {[1, 2, 3].map(s => (
+            {[1, 2].map(s => (
               <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= step ? 'bg-primary' : 'bg-white/20'}`} />
             ))}
           </div>
-          <p className="text-xs text-white/40 mt-2">{tx.step_of} {step} {tx.of} 3</p>
+          <p className="text-xs text-white/40 mt-2">{tx.step_of} {step} {tx.of} 2</p>
         </div>
 
         {/* Body */}
-        <div className="px-8 py-6 min-h-[280px]">
+        <div className="px-8 py-6 min-h-[320px]">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -184,7 +164,7 @@ export default function OnboardingProfileModal({ onComplete }) {
                   {[{ val: 'fr', label: tx.lang_fr, flag: '🇫🇷' }, { val: 'en', label: tx.lang_en, flag: '🇬🇧' }].map(l => (
                     <button
                       key={l.val}
-                      onClick={() => handleLangSelect(l.val)}
+                      onClick={() => setLangState(l.val)}
                       className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all ${lang === l.val ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
                     >
                       <span className="text-3xl">{l.flag}</span>
@@ -197,48 +177,50 @@ export default function OnboardingProfileModal({ onComplete }) {
 
             {step === 2 && (
               <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <User className="w-4 h-4 text-primary" />
-                  <p className="font-semibold text-foreground">{tx.step2_title}</p>
-                </div>
+                {/* Name */}
                 <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <User className="w-4 h-4 text-primary" />
+                    <p className="font-semibold text-foreground">{tx.step2_title}</p>
+                  </div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.full_name_label}</label>
                   <Input
                     placeholder={tx.full_name_placeholder}
                     value={form.full_name}
                     onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
                     className="rounded-xl"
+                    autoFocus
                   />
                 </div>
+
+                {/* Role */}
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.position_label}</label>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {POSITIONS[lang].map(pos => (
                       <button
                         key={pos.value}
+                        type="button"
                         onClick={() => setForm(f => ({ ...f, user_position: pos.value }))}
-                        className={`text-left px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${form.user_position === pos.value ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40 text-foreground'}`}
+                        className={`text-center px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${form.user_position === pos.value ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40 text-foreground'}`}
                       >
                         {pos.label}
                       </button>
                     ))}
                   </div>
                 </div>
-              </motion.div>
-            )}
 
-            {step === 3 && (
-              <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Building2 className="w-4 h-4 text-primary" />
-                  <p className="font-semibold text-foreground">{tx.step3_title}</p>
-                </div>
+                {/* Business type */}
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.business_type_label}</label>
-                  <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-primary" />
+                    <label className="text-xs font-medium text-muted-foreground">{tx.business_type_label}</label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto pr-1">
                     {BUSINESS_TYPES[lang].map(bt => (
                       <button
                         key={bt.value}
+                        type="button"
                         onClick={() => setForm(f => ({ ...f, business_type: bt.value }))}
                         className={`text-left px-3 py-2.5 rounded-xl border-2 text-xs font-medium transition-all ${form.business_type === bt.value ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40 text-foreground'}`}
                       >
@@ -247,15 +229,16 @@ export default function OnboardingProfileModal({ onComplete }) {
                     ))}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.city_label}</label>
-                    <Input placeholder={tx.city_placeholder} value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} className="rounded-xl" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.country_label}</label>
-                    <Input placeholder={tx.country_placeholder} value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))} className="rounded-xl" />
-                  </div>
+
+                {/* Country only */}
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.country_label}</label>
+                  <Input
+                    placeholder={tx.country_placeholder}
+                    value={form.country}
+                    onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
+                    className="rounded-xl"
+                  />
                 </div>
               </motion.div>
             )}
@@ -272,7 +255,7 @@ export default function OnboardingProfileModal({ onComplete }) {
             </button>
           ) : <div />}
           <Button onClick={next} disabled={saving} className="rounded-full px-6 gap-2">
-            {saving ? '...' : step === 3 ? tx.btn_finish : tx.btn_next}
+            {saving ? '...' : step === 2 ? tx.btn_finish : tx.btn_next}
             {!saving && <ChevronRight className="w-4 h-4" />}
           </Button>
         </div>
