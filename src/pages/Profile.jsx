@@ -12,7 +12,6 @@ import { format, addMonths } from 'date-fns';
 import { getNextRenewalDate } from '@/lib/schedulerUtils';
 import { User, Phone, Mail, MessageSquare, HeadphonesIcon, ExternalLink, ChevronDown, ChevronUp, CheckCircle2, BellOff, Bell, Trash2 } from 'lucide-react';
 import AccountingSettings from '@/components/profile/AccountingSettings';
-import SubscriptionPlans from '@/components/profile/SubscriptionPlans';
 
 export default function Profile() {
   const { t, lang } = useLanguage();
@@ -51,11 +50,6 @@ export default function Profile() {
       <DashboardHeader />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-20 sm:pt-10 pb-24 sm:pb-10">
         <h1 className="text-2xl font-bold text-foreground mb-8">{t('profile_title')}</h1>
-
-        {/* Subscription plans */}
-        <div className="mb-6">
-          <SubscriptionPlans user={user} />
-        </div>
 
         {/* Support card */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-border/40 mb-6">
