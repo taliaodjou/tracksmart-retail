@@ -7,22 +7,22 @@ import { Globe, Building2, User, ChevronRight, Sparkles } from 'lucide-react';
 
 const BUSINESS_TYPES = {
   fr: [
-    { value: 'supermarche', label: 'Supermarché / Grande surface' },
-    { value: 'epicerie', label: 'Épicerie / Alimentation générale' },
-    { value: 'boulangerie', label: 'Boulangerie / Pâtisserie' },
-    { value: 'boucherie', label: 'Boucherie / Charcuterie' },
-    { value: 'pharmacie', label: 'Pharmacie / Parapharmacie' },
-    { value: 'restaurant', label: 'Restaurant / Traiteur' },
+    { value: 'supermarche', label: 'Supermarché' },
+    { value: 'epicerie', label: 'Épicerie' },
+    { value: 'boulangerie', label: 'Boulangerie' },
+    { value: 'boucherie', label: 'Boucherie' },
+    { value: 'pharmacie', label: 'Pharmacie' },
+    { value: 'restaurant', label: 'Restaurant' },
     { value: 'cafe_bar', label: 'Café / Bar' },
     { value: 'autre', label: 'Autre' },
   ],
   en: [
-    { value: 'supermarche', label: 'Supermarket / Grocery store' },
+    { value: 'supermarche', label: 'Supermarket' },
     { value: 'epicerie', label: 'Convenience store' },
-    { value: 'boulangerie', label: 'Bakery / Pastry shop' },
+    { value: 'boulangerie', label: 'Bakery' },
     { value: 'boucherie', label: 'Butcher shop' },
-    { value: 'pharmacie', label: 'Pharmacy / Drugstore' },
-    { value: 'restaurant', label: 'Restaurant / Catering' },
+    { value: 'pharmacie', label: 'Pharmacy' },
+    { value: 'restaurant', label: 'Restaurant' },
     { value: 'cafe_bar', label: 'Café / Bar' },
     { value: 'autre', label: 'Other' },
   ],
@@ -41,42 +41,36 @@ const POSITIONS = {
 
 const i18n = {
   fr: {
-    title: 'Bienvenue sur TrackSmart ! 👋',
-    subtitle: 'Quelques informations pour personnaliser votre expérience.',
-    step1_title: 'Votre langue',
-    step1_sub: 'Choisissez la langue dans laquelle vous souhaitez utiliser TrackSmart.',
-    lang_fr: 'Français',
-    lang_en: 'English',
-    step2_title: 'Votre profil & commerce',
-    full_name_label: 'Votre prénom et nom *',
+    title: 'Bienvenue ! 👋',
+    subtitle: 'Quelques infos pour personnaliser votre expérience.',
+    step1_title: 'Choisissez votre langue',
+    step2_title: 'Votre profil',
+    full_name_label: 'Prénom et nom *',
     full_name_placeholder: 'Ex : Marie Dupont',
     position_label: 'Votre rôle *',
     business_type_label: 'Type de commerce *',
     country_label: 'Pays *',
     country_placeholder: 'Ex : Suisse',
     btn_next: 'Continuer',
-    btn_finish: 'Commencer TrackSmart',
+    btn_finish: 'Commencer',
     btn_back: 'Retour',
-    required: 'Veuillez remplir tous les champs obligatoires.',
+    required: 'Veuillez remplir tous les champs.',
     step_of: 'Étape',
     of: 'sur',
   },
   en: {
-    title: 'Welcome to TrackSmart! 👋',
+    title: 'Welcome! 👋',
     subtitle: 'A few details to personalize your experience.',
-    step1_title: 'Your language',
-    step1_sub: 'Choose the language you want to use TrackSmart in.',
-    lang_fr: 'Français',
-    lang_en: 'English',
-    step2_title: 'Your profile & business',
-    full_name_label: 'Your full name *',
+    step1_title: 'Choose your language',
+    step2_title: 'Your profile',
+    full_name_label: 'Full name *',
     full_name_placeholder: 'e.g. Marie Dupont',
     position_label: 'Your role *',
     business_type_label: 'Business type *',
     country_label: 'Country *',
     country_placeholder: 'e.g. Switzerland',
     btn_next: 'Continue',
-    btn_finish: 'Start TrackSmart',
+    btn_finish: 'Get started',
     btn_back: 'Back',
     required: 'Please fill in all required fields.',
     step_of: 'Step',
@@ -85,14 +79,9 @@ const i18n = {
 };
 
 export default function OnboardingProfileModal({ onComplete }) {
-  const [step, setStep] = useState(1); // 1=lang, 2=profile+business
+  const [step, setStep] = useState(1);
   const [lang, setLangState] = useState('fr');
-  const [form, setForm] = useState({
-    full_name: '',
-    user_position: '',
-    business_type: '',
-    country: '',
-  });
+  const [form, setForm] = useState({ full_name: '', user_position: '', business_type: '', country: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -125,47 +114,49 @@ export default function OnboardingProfileModal({ onComplete }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm">
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
+        initial={{ opacity: 0, y: 60 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
       >
-        {/* Header */}
-        <div className="bg-[#111111] px-8 py-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+        {/* Header — compact */}
+        <div className="bg-[#111111] px-6 py-5 sm:rounded-t-3xl rounded-t-3xl flex-shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
+              </div>
+              <span className="font-bold text-white text-sm">TrackSmart Retail</span>
             </div>
-            <span className="font-bold text-white text-base">TrackSmart Retail</span>
+            <span className="text-xs text-white/40">{tx.step_of} {step} {tx.of} 2</span>
           </div>
-          <h2 className="text-xl font-bold text-white">{tx.title}</h2>
-          <p className="text-sm text-white/60 mt-1">{tx.subtitle}</p>
+          <h2 className="text-lg font-bold text-white">{tx.title}</h2>
+          <p className="text-xs text-white/50 mt-0.5">{tx.subtitle}</p>
           {/* Progress */}
-          <div className="flex gap-1.5 mt-4">
+          <div className="flex gap-1.5 mt-3">
             {[1, 2].map(s => (
               <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= step ? 'bg-primary' : 'bg-white/20'}`} />
             ))}
           </div>
-          <p className="text-xs text-white/40 mt-2">{tx.step_of} {step} {tx.of} 2</p>
         </div>
 
-        {/* Body */}
-        <div className="px-8 py-6 min-h-[320px]">
+        {/* Scrollable body */}
+        <div className="overflow-y-auto flex-1 px-6 py-5">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <div className="flex items-center gap-2 mb-1">
                   <Globe className="w-4 h-4 text-primary" />
-                  <p className="font-semibold text-foreground">{tx.step1_title}</p>
+                  <p className="font-semibold text-foreground text-sm">{tx.step1_title}</p>
                 </div>
-                <p className="text-sm text-muted-foreground mb-6">{tx.step1_sub}</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {[{ val: 'fr', label: tx.lang_fr, flag: '🇫🇷' }, { val: 'en', label: tx.lang_en, flag: '🇬🇧' }].map(l => (
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  {[{ val: 'fr', label: 'Français', flag: '🇫🇷' }, { val: 'en', label: 'English', flag: '🇬🇧' }].map(l => (
                     <button
                       key={l.val}
                       onClick={() => setLangState(l.val)}
-                      className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all ${lang === l.val ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                      className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all active:scale-95 ${lang === l.val ? 'border-primary bg-primary/5' : 'border-border'}`}
                     >
                       <span className="text-3xl">{l.flag}</span>
                       <span className={`font-semibold text-sm ${lang === l.val ? 'text-primary' : 'text-foreground'}`}>{l.label}</span>
@@ -176,33 +167,32 @@ export default function OnboardingProfileModal({ onComplete }) {
             )}
 
             {step === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
+              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
                 {/* Name */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <User className="w-4 h-4 text-primary" />
-                    <p className="font-semibold text-foreground">{tx.step2_title}</p>
+                    <p className="font-semibold text-foreground text-sm">{tx.step2_title}</p>
                   </div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.full_name_label}</label>
                   <Input
                     placeholder={tx.full_name_placeholder}
                     value={form.full_name}
                     onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
-                    className="rounded-xl"
-                    autoFocus
+                    className="rounded-xl h-11 text-base"
                   />
                 </div>
 
                 {/* Role */}
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.position_label}</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-2 block">{tx.position_label}</label>
                   <div className="grid grid-cols-2 gap-2">
                     {POSITIONS[lang].map(pos => (
                       <button
                         key={pos.value}
                         type="button"
                         onClick={() => setForm(f => ({ ...f, user_position: pos.value }))}
-                        className={`text-center px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${form.user_position === pos.value ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40 text-foreground'}`}
+                        className={`text-center px-3 py-3.5 rounded-xl border-2 text-sm font-medium transition-all active:scale-95 ${form.user_position === pos.value ? 'border-primary bg-primary/5 text-primary' : 'border-border text-foreground'}`}
                       >
                         {pos.label}
                       </button>
@@ -212,17 +202,17 @@ export default function OnboardingProfileModal({ onComplete }) {
 
                 {/* Business type */}
                 <div>
-                  <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 mb-2">
                     <Building2 className="w-3.5 h-3.5 text-primary" />
                     <label className="text-xs font-medium text-muted-foreground">{tx.business_type_label}</label>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-2 gap-2">
                     {BUSINESS_TYPES[lang].map(bt => (
                       <button
                         key={bt.value}
                         type="button"
                         onClick={() => setForm(f => ({ ...f, business_type: bt.value }))}
-                        className={`text-left px-3 py-2.5 rounded-xl border-2 text-xs font-medium transition-all ${form.business_type === bt.value ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40 text-foreground'}`}
+                        className={`text-left px-3 py-2.5 rounded-xl border-2 text-xs font-medium transition-all active:scale-95 ${form.business_type === bt.value ? 'border-primary bg-primary/5 text-primary' : 'border-border text-foreground'}`}
                       >
                         {bt.label}
                       </button>
@@ -230,31 +220,36 @@ export default function OnboardingProfileModal({ onComplete }) {
                   </div>
                 </div>
 
-                {/* Country only */}
+                {/* Country */}
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.country_label}</label>
                   <Input
                     placeholder={tx.country_placeholder}
                     value={form.country}
                     onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
-                    className="rounded-xl"
+                    className="rounded-xl h-11 text-base"
                   />
                 </div>
+
+                {error && <p className="text-xs text-destructive">{error}</p>}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {error && <p className="text-xs text-destructive mt-3">{error}</p>}
+          {step === 1 && error && <p className="text-xs text-destructive mt-3">{error}</p>}
         </div>
 
-        {/* Footer */}
-        <div className="px-8 pb-6 flex items-center justify-between">
+        {/* Footer — always visible, safe area */}
+        <div className="px-6 pb-6 pt-3 flex items-center justify-between flex-shrink-0 border-t border-border/30" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}>
           {step > 1 ? (
-            <button onClick={() => setStep(s => s - 1)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              onClick={() => { setError(''); setStep(s => s - 1); }}
+              className="text-sm text-muted-foreground active:text-foreground transition-colors py-2 px-1"
+            >
               ← {tx.btn_back}
             </button>
           ) : <div />}
-          <Button onClick={next} disabled={saving} className="rounded-full px-6 gap-2">
+          <Button onClick={next} disabled={saving} className="rounded-full px-7 gap-2 h-11">
             {saving ? '...' : step === 2 ? tx.btn_finish : tx.btn_next}
             {!saving && <ChevronRight className="w-4 h-4" />}
           </Button>
