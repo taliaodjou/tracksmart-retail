@@ -311,12 +311,13 @@ export default function Dashboard() {
         {/* Mobile header */}
         <div className="sm:hidden flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-foreground">{t('dash_title')}</h1>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="rounded-full h-9 px-3 gap-1.5 text-xs">
               <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Excel</span>
             </Button>
-            <Button size="sm" onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full h-9 px-3 gap-1.5 text-xs">
-              <Plus className="w-3.5 h-3.5" /> {t('btn_add')}
+            <Button size="sm" onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
+              <Plus className="w-3.5 h-3.5" /> Ajouter un produit
             </Button>
           </div>
         </div>
