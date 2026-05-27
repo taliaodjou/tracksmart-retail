@@ -299,7 +299,7 @@ export default function Dashboard() {
             <ExportActions products={filteredProducts} />
             <Button variant="outline" onClick={() => setShowImport(true)} className="rounded-full gap-2">
               <XlsIcon />
-              {lang === 'fr' ? 'Importer Excel' : 'Import Excel'}
+              {lang === 'fr' ? 'Importer' : 'Import'}
             </Button>
             <Button variant="outline" onClick={() => setShowScanner(true)} className="rounded-full gap-2">
               <ScanLine className="w-4 h-4" />
@@ -318,7 +318,7 @@ export default function Dashboard() {
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="rounded-full h-9 px-3 gap-1.5 text-xs">
               <XlsIcon />
-              <span>Excel</span>
+              <span>Importer</span>
             </Button>
             <Button size="sm" onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Ajouter un produit
