@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, ScanLine, X, LayoutList, Layers } from 'lucide-react';
 
-const XlsIcon = ({ className = "w-4 h-4" }) => (
-  <span className={`inline-flex items-center justify-center rounded text-[9px] font-bold bg-green-600 text-white px-1 leading-none ${className}`} style={{height:'1.1em', fontSize:'9px', padding:'2px 3px'}}>XLS</span>
+const XlsIcon = () => (
+  <span className="inline-flex items-center justify-center rounded text-[9px] font-bold border border-current px-1 leading-none" style={{fontSize:'9px', padding:'2px 3px'}}>XLS</span>
 );
 import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
