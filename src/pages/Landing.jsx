@@ -109,78 +109,56 @@ export default function Landing() {
           </p>
         </motion.div>
 
-        {/* Entry cards */}
-        <div className="flex flex-col sm:flex-row gap-5 w-full max-w-2xl">
-
-          {/* Boutique card */}
+        {/* Main CTA — Boutique */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="w-full max-w-md"
+        >
           <motion.button
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            whileHover={{ scale: 1.03, y: -6 }}
+            whileHover={{ scale: 1.02, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleBoutique}
-            className="group flex-1 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col items-center gap-5" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}
+            className="group w-full rounded-2xl p-8 text-center transition-all duration-300 shadow-lg hover:shadow-2xl flex flex-col items-center gap-4"
+            style={{ background: 'linear-gradient(135deg, #C9A646 0%, #b8923a 100%)', border: 'none' }}
           >
             <motion.div
-              className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center"
+              className="w-16 h-16 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center"
               whileHover={{ rotate: [0, -8, 8, 0] }}
               transition={{ duration: 0.4 }}
             >
-              <Store className="w-8 h-8 text-primary" />
+              <Store className="w-8 h-8 text-white" />
             </motion.div>
             <div>
-              <div className="text-base font-bold mb-1.5" style={{ color: '#1a1a1a' }}>Je suis une boutique</div>
-              <div className="text-gray-500 text-xs leading-relaxed">
-                Accédez à votre espace de gestion des produits et des pertes.
+              <div className="text-lg font-extrabold text-white mb-1.5">Accéder à mon espace boutique</div>
+              <div className="text-white/80 text-sm leading-relaxed">
+                Gérez vos produits, DLC et pertes en toute simplicité.
               </div>
             </div>
-            <div className="flex items-center gap-2 text-primary text-sm font-semibold mt-auto">
-              Accéder à mon espace
+            <div className="flex items-center gap-2 text-white font-bold text-base mt-1">
+              Commencer maintenant
               <motion.span
-                animate={{ x: [0, 4, 0] }}
+                animate={{ x: [0, 5, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </motion.span>
             </div>
           </motion.button>
 
-          {/* Admin card */}
+          {/* Admin link — discreet */}
           <motion.button
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            whileHover={{ scale: 1.03, y: -6 }}
-            whileTap={{ scale: 0.97 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
             onClick={handleAdmin}
-            className="group flex-1 rounded-2xl p-8 text-center transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col items-center gap-5" style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}
+            className="mt-4 w-full flex items-center justify-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors py-2"
           >
-            <motion.div
-              className="w-16 h-16 rounded-2xl bg-secondary border border-border flex items-center justify-center"
-              whileHover={{ rotate: [0, -8, 8, 0] }}
-              transition={{ duration: 0.4 }}
-            >
-              <Shield className="w-8 h-8 text-muted-foreground" />
-            </motion.div>
-            <div>
-              <div className="text-base font-bold mb-1.5" style={{ color: '#1a1a1a' }}>Je suis administrateur</div>
-              <div className="text-gray-500 text-xs leading-relaxed">
-                Espace privé de gestion TrackSmart.
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm font-semibold mt-auto group-hover:text-gray-900 transition-colors">
-              Portail administrateur
-              <motion.span
-                animate={{ x: [0, 4, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-              >
-                <ArrowRight className="w-4 h-4" />
-              </motion.span>
-            </div>
+            <Shield className="w-3.5 h-3.5" />
+            Portail administrateur
           </motion.button>
-
-        </div>
+        </motion.div>
       </div>
 
       {/* Footer */}
