@@ -422,26 +422,18 @@ export default function Orders() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8">
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 mb-6">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <ShoppingCart className="w-5 h-5 text-primary" />
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <ShoppingCart className="w-4 h-4 text-primary" />
             </div>
-            <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-foreground leading-tight">{t('orders_title')}</h1>
-              <p className="text-muted-foreground text-xs mt-0.5">{eligibleProducts.length} {t('orders_subtitle_plural')}</p>
-            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+              {t('orders_title')}
+            </h1>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs h-9 px-3" onClick={handlePrint} disabled={selectedIds.size === 0}>
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">PDF</span>
-            </Button>
-            <Button size="sm" className="rounded-full gap-1.5 text-xs h-9 px-3" onClick={handleSendEmail} disabled={selectedIds.size === 0 || sending}>
-              {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : sent ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
-              <span className="hidden sm:inline">{sent ? 'Envoyé !' : 'Envoyer'}</span>
-            </Button>
-          </div>
+          <p className="text-muted-foreground text-xs pl-10">
+            {eligibleProducts.length} {t('orders_subtitle_plural')}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -555,83 +547,18 @@ export default function Orders() {
             </div>
           </div>
 
-          {/* Right — supplier + summary */}
+          {/* Right — supplier + summary + actions */}
           <div className="space-y-4">
 
-            {/* Supplier form */}
-            <div className="bg-white rounded-2xl shadow-sm border border-border/40 p-5">
-              <h2 className="font-semibold text-foreground flex items-center gap-2 mb-4">
-                <Building2 className="w-4 h-4 text-primary" />
-                {t('orders_supplier_title')}
-              </h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{t('orders_supplier_name')}</label>
-                  <Input
-                    value={supplier.name}
-                    onChange={e => setSupplier(s => ({ ...s, name: e.target.value }))}
-                    placeholder="Ex: Metro Cash & Carry"
-                    className="text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{t('orders_supplier_contact')}</label>
-                  <Input
-                    value={supplier.contact}
-                    onChange={e => setSupplier(s => ({ ...s, contact: e.target.value }))}
-                    placeholder={t('orders_supplier_contact_placeholder')}
-                    className="text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1 flex items-center gap-1">
-                    <Mail className="w-3 h-3" /> {t('orders_supplier_email')}
-                  </label>
-                  <Input
-                    type="email"
-                    value={supplier.email}
-                    onChange={e => setSupplier(s => ({ ...s, email: e.target.value }))}
-                    placeholder="fournisseur@example.com"
-                    className="text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1 flex items-center gap-1">
-                    <Phone className="w-3 h-3" /> {t('orders_supplier_phone')}
-                  </label>
-                  <Input
-                    value={supplier.phone}
-                    onChange={e => setSupplier(s => ({ ...s, phone: e.target.value }))}
-                    placeholder="+41 XX XXX XX XX"
-                    className="text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-muted-foreground block mb-1">{t('orders_supplier_address')}</label>
-                  <Input
-                    value={supplier.address}
-                    onChange={e => setSupplier(s => ({ ...s, address: e.target.value }))}
-                    placeholder={t('orders_supplier_address_placeholder')}
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Order summary */}
-            <div className="bg-white rounded-2xl shadow-sm border border-border/40 p-5">
-              <h2 className="font-semibold text-foreground flex items-center gap-2 mb-4">
-                <FileText className="w-4 h-4 text-primary" />
-                {t('orders_summary_title')}
-              </h2>
-              {selectedIds.size === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">{t('orders_summary_empty')}</p>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t('orders_summary_items')}</span>
-                    <span className="font-semibold">{selectedIds.size}</span>
-                  </div>
+            {/* Order summary (shown first on mobile when items selected) */}
+            {selectedIds.size > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-border/40 p-4">
+                <h2 className="font-semibold text-foreground text-sm flex items-center gap-2 mb-3">
+                  <FileText className="w-4 h-4 text-primary" />
+                  {t('orders_summary_title')}
+                  <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">{selectedIds.size}</span>
+                </h2>
+                <div className="space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{t('orders_summary_qty')}</span>
                     <span className="font-semibold">{orderItems.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0)} {t('units')}</span>
@@ -640,41 +567,62 @@ export default function Orders() {
                     <span className="text-muted-foreground">{t('orders_summary_order_num')}</span>
                     <span className="font-mono text-xs text-primary font-semibold">#{orderNumber}</span>
                   </div>
-                  <div className="border-t border-border/40 pt-3 mt-3 space-y-1">
-                    {orderItems.slice(0, 5).map(it => (
+                  <div className="border-t border-border/40 pt-2 mt-2 space-y-1">
+                    {orderItems.slice(0, 4).map(it => (
                       <div key={it.id} className="flex justify-between text-xs">
-                        <span className="text-foreground truncate max-w-[150px]">{it.name}</span>
-                        <span className="text-muted-foreground ml-2">×{it.quantity}</span>
+                        <span className="text-foreground truncate max-w-[160px]">{it.name}</span>
+                        <span className="text-muted-foreground ml-2 flex-shrink-0">×{it.quantity}</span>
                       </div>
                     ))}
-                    {orderItems.length > 5 && (
-                      <p className="text-xs text-muted-foreground">+{orderItems.length - 5} autres…</p>
+                    {orderItems.length > 4 && (
+                      <p className="text-xs text-muted-foreground">+{orderItems.length - 4} autres…</p>
                     )}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
+
+            {/* Supplier form */}
+            <div className="bg-white rounded-2xl shadow-sm border border-border/40 p-4">
+              <h2 className="font-semibold text-foreground text-sm flex items-center gap-2 mb-3">
+                <Building2 className="w-4 h-4 text-primary" />
+                {t('orders_supplier_title')}
+              </h2>
+              <div className="space-y-2.5">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">{t('orders_supplier_name')}</label>
+                  <Input value={supplier.name} onChange={e => setSupplier(s => ({ ...s, name: e.target.value }))} placeholder="Ex: Metro Cash & Carry" className="text-sm h-9" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">{t('orders_supplier_contact')}</label>
+                  <Input value={supplier.contact} onChange={e => setSupplier(s => ({ ...s, contact: e.target.value }))} placeholder={t('orders_supplier_contact_placeholder')} className="text-sm h-9" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1 flex items-center gap-1"><Mail className="w-3 h-3" /> {t('orders_supplier_email')}</label>
+                  <Input type="email" value={supplier.email} onChange={e => setSupplier(s => ({ ...s, email: e.target.value }))} placeholder="fournisseur@example.com" className="text-sm h-9" />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground block mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> {t('orders_supplier_phone')}</label>
+                    <Input value={supplier.phone} onChange={e => setSupplier(s => ({ ...s, phone: e.target.value }))} placeholder="+41 XX XXX XX XX" className="text-sm h-9" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground block mb-1">{t('orders_supplier_address')}</label>
+                    <Input value={supplier.address} onChange={e => setSupplier(s => ({ ...s, address: e.target.value }))} placeholder={t('orders_supplier_address_placeholder')} className="text-sm h-9" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Action buttons (mobile-friendly duplicate) */}
-            <div className="flex flex-col gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full gap-1.5 w-full text-xs"
-                onClick={handlePrint}
-                disabled={selectedIds.size === 0}
-              >
-                <Download className="w-3.5 h-3.5" />
-                Imprimer / PDF
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1 gap-2 rounded-xl h-11" onClick={handlePrint} disabled={selectedIds.size === 0}>
+                <Download className="w-4 h-4" />
+                PDF
               </Button>
-              <Button
-                size="sm"
-                className="rounded-full gap-1.5 w-full text-xs"
-                onClick={handleSendEmail}
-                disabled={selectedIds.size === 0 || sending}
-              >
-                {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : sent ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
-                {sent ? 'Envoyé !' : 'Envoyer au fournisseur'}
+              <Button className="flex-2 gap-2 rounded-xl h-11 px-5" onClick={handleSendEmail} disabled={selectedIds.size === 0 || sending}>
+                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : sent ? <CheckCircle2 className="w-4 h-4" /> : <Send className="w-4 h-4" />}
+                {sent ? 'Envoyé !' : 'Envoyer'}
               </Button>
             </div>
           </div>
