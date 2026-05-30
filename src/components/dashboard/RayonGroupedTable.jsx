@@ -157,7 +157,7 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
       {/* Grand total losses across all rayons */}
       {(() => {
         const grandTotal = products.reduce((sum, p) => {
-          if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
+          if (p.action === 'jeter' && p.quantity_thrown && p.price_chf) {
             return sum + (p.quantity_thrown * p.price_chf);
           }
           return sum;
@@ -167,7 +167,7 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
           <div className="mt-4 flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-2xl px-4 py-3">
             <div className="flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-red-600 flex-shrink-0" />
-              <span className="font-semibold text-red-800 text-xs">Total pertes — tous rayons</span>
+              <span className="font-semibold text-red-800 text-xs">Pertes totales (CHF)</span>
             </div>
             <span className="text-base font-bold text-red-700">CHF {grandTotal.toFixed(2)}</span>
           </div>
