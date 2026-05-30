@@ -59,30 +59,23 @@ export default function Dashboard() {
     queryKey: ['products', storeOwnerEmail, isOwnerOrManager],
     queryFn: async () => {
       if (isOwnerOrManager) {
-        // Fetch products scoped to this store (by store_owner_email OR created_by)
-        // Two separate queries merged to handle both products with and without store_owner_email
+        // Fetch ALL products belonging to this store
+        // Products can be linked via store_owner_email OR created_by (legacy data)
         const [byStoreOwner, byCreator] = await Promise.all([
-        base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 2000),
-        base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000)]
-        );
-        // Deduplicate by id, and only keep byCreator products that belong to this store
-        // (i.e. no store_owner_email, or store_owner_email matches this store)
+          base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 5000),
+          base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 5000),
+        ]);
+        // Merge and deduplicate
         const seen = new Set();
-        const storeOwnerProds = byStoreOwner.filter((p) => {
+        const all = [...byStoreOwner, ...byCreator].filter((p) => {
           if (seen.has(p.id)) return false;
           seen.add(p.id);
           return true;
         });
-        const creatorProds = byCreator.filter((p) => {
-          if (seen.has(p.id)) return false;
-          seen.add(p.id);
-          // Only include if no store_owner_email (old data) or matches this store
-          return !p.store_owner_email || p.store_owner_email === storeOwnerEmail;
-        });
-        return [...storeOwnerProds, ...creatorProds];
+        return all;
       }
       // Employees only see their own products
-      return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
+      return base44.entities.Product.filter({ created_by: user.email }, '-created_date', 5000);
     },
     enabled: canAccess && !!user?.email
   });
