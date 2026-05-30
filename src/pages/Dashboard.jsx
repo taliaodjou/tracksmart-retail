@@ -216,47 +216,59 @@ export default function Dashboard() {
       return;
     }
 
-    // 2. Try Open Food Facts + Open Beauty Facts in parallel
+    // 2. Try multiple APIs in order
     try {
-      const [foodRes, beautyRes] = await Promise.allSettled([
-      fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then((r) => r.json()),
-      fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then((r) => r.json())]
-      );
-
-      // Check Food Facts first
-      if (foodRes.status === 'fulfilled' && foodRes.value?.status === 1 && foodRes.value?.product) {
-        const p = foodRes.value.product;
+      // Open Food Facts
+      const foodRes = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then(r => r.json()).catch(() => null);
+      if (foodRes?.status === 1 && foodRes?.product) {
+        const p = foodRes.product;
         const category = matchCategory(p.categories_tags || []);
         const name = p.product_name_fr || p.product_name || p.generic_name || '';
         const brand = p.brands || '';
         const existing = findExistingProduct(name, brand);
-        setQuickAdd({
-          barcode: code,
-          prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
-          existingProduct: existing
-        });
+        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' }, existingProduct: existing });
         return;
       }
 
-      // Then check Beauty Facts (cosmétiques, huiles, soins...)
-      if (beautyRes.status === 'fulfilled' && beautyRes.value?.status === 1 && beautyRes.value?.product) {
-        const p = beautyRes.value.product;
+      // Open Products Facts
+      const prodRes = await fetch(`https://world.openproductsfacts.org/api/v0/product/${code}.json`).then(r => r.json()).catch(() => null);
+      if (prodRes?.status === 1 && prodRes?.product) {
+        const p = prodRes.product;
         const name = p.product_name_fr || p.product_name || p.generic_name || '';
         const brand = p.brands || '';
-        // Beauty products → hygiene_beaute by default, refine with tags
+        const category = matchCategory(p.categories_tags || []);
+        const existing = findExistingProduct(name, brand);
+        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' }, existingProduct: existing });
+        return;
+      }
+
+      // Open Beauty Facts
+      const beautyRes = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then(r => r.json()).catch(() => null);
+      if (beautyRes?.status === 1 && beautyRes?.product) {
+        const p = beautyRes.product;
+        const name = p.product_name_fr || p.product_name || p.generic_name || '';
+        const brand = p.brands || '';
         const rawCategory = matchCategory(p.categories_tags || []);
         const category = rawCategory || 'hygiene_beaute';
         const existing = findExistingProduct(name, brand);
-        setQuickAdd({
-          barcode: code,
-          prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
-          existingProduct: existing
-        });
+        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' }, existingProduct: existing });
+        return;
+      }
+
+      // UPC Item DB
+      const upcRes = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`).then(r => r.json()).catch(() => null);
+      if (upcRes?.code === 'OK' && upcRes?.items?.length > 0) {
+        const item = upcRes.items[0];
+        const name = item.title || '';
+        const brand = item.brand || '';
+        const category = matchCategory((item.category || '').toLowerCase().split(' '));
+        const existing = findExistingProduct(name, brand);
+        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: item.images?.[0] || '' }, existingProduct: existing });
         return;
       }
     } catch (_) {}
 
-    // 3. Not found — manual entry (null prefill → QuickAddModal shows manual form)
+    // Not found in any API — manual entry
     setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
