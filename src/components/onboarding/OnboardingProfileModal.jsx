@@ -5,6 +5,22 @@ import { Input } from '@/components/ui/input';
 import { base44 } from '@/api/base44Client';
 import { Globe, Building2, User, ChevronRight, Sparkles } from 'lucide-react';
 
+const COUNTRIES = [
+  'Afghanistan','Afrique du Sud','Albanie','Algérie','Allemagne','Angola','Arabie Saoudite','Argentine','Arménie','Australie',
+  'Autriche','Azerbaïdjan','Bahreïn','Bangladesh','Belgique','Bénin','Biélorussie','Bolivie','Bosnie-Herzégovine','Brésil',
+  'Bulgarie','Burkina Faso','Burundi','Cameroun','Canada','Chili','Chine','Chypre','Colombie','Congo','Corée du Sud',
+  'Costa Rica','Côte d\'Ivoire','Croatie','Cuba','Danemark','Djibouti','Égypte','Émirats arabes unis','Équateur','Espagne',
+  'Estonie','États-Unis','Éthiopie','Finlande','France','Gabon','Géorgie','Ghana','Grèce','Guatemala','Guinée','Haïti',
+  'Honduras','Hongrie','Inde','Indonésie','Irak','Iran','Irlande','Islande','Israël','Italie','Jamaïque','Japon',
+  'Jordanie','Kazakhstan','Kenya','Kosovo','Koweït','Laos','Liban','Libye','Lituanie','Luxembourg','Macédoine du Nord',
+  'Madagascar','Malaisie','Mali','Maroc','Mauritanie','Mexique','Moldavie','Mongolie','Mozambique','Myanmar',
+  'Namibie','Népal','Nicaragua','Niger','Nigéria','Norvège','Nouvelle-Zélande','Oman','Ouganda','Pakistan',
+  'Panama','Paraguay','Pays-Bas','Pérou','Philippines','Pologne','Portugal','Qatar','République dominicaine',
+  'République tchèque','Roumanie','Royaume-Uni','Russie','Rwanda','Sénégal','Serbie','Sierra Leone','Singapour',
+  'Slovaquie','Slovénie','Somalie','Soudan','Sri Lanka','Suède','Suisse','Syrie','Taïwan','Tanzanie','Thaïlande',
+  'Togo','Tunisie','Turquie','Ukraine','Uruguay','Venezuela','Vietnam','Yémen','Zimbabwe'
+];
+
 const BUSINESS_TYPES = {
   fr: [
     { value: 'supermarche', label: 'Supermarché' },
@@ -223,12 +239,16 @@ export default function OnboardingProfileModal({ onComplete }) {
                 {/* Country */}
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.country_label}</label>
-                  <Input
-                    placeholder={tx.country_placeholder}
+                  <select
                     value={form.country}
                     onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
-                    className="rounded-xl h-11 text-base"
-                  />
+                    className="w-full rounded-xl h-11 border border-input bg-white px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="">{tx.country_placeholder}</option>
+                    {COUNTRIES.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {error && <p className="text-xs text-destructive">{error}</p>}

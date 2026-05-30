@@ -69,15 +69,24 @@ export default function Analytics() {
       const [y, m] = monthKey.split('-');
       const monthDate = new Date(parseInt(y), parseInt(m) - 1, 1);
 
-      // Products that expired in this month (expiration_date falls in month)
+      // Products thrown (action=jeter) in this month — same formula as reportUtils
+      const thrownInMonth = products.filter(p => {
+        if (p.action !== 'jeter' || !p.quantity_thrown || !p.price_chf) return false;
+        const actionDate = p.order_date || p.updated_date || p.created_date;
+        if (!actionDate) return false;
+        const d = new Date(actionDate);
+        return isSameMonth(d, monthDate);
+      });
+
+      // Products expired in this month (for the expired count chart)
       const expiredInMonth = products.filter(p => {
         if (!p.expiration_date) return false;
         const exp = new Date(p.expiration_date);
         return isSameMonth(exp, monthDate);
       });
 
-      const totalLoss = expiredInMonth.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
-      const totalThrown = expiredInMonth.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
+      const totalLoss = thrownInMonth.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
+      const totalThrown = thrownInMonth.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
 
       return {
         month: monthKey,
@@ -103,13 +112,11 @@ export default function Analytics() {
   const categoryStats = useMemo(() => {
     const map = {};
     products.forEach(p => {
-      if (!p.category) return;
+      if (!p.category || p.action !== 'jeter' || !p.quantity_thrown || !p.price_chf) return;
       if (!map[p.category]) map[p.category] = { count: 0, loss: 0, thrown: 0 };
-      if (getProductStatus(p.expiration_date) === 'expired') {
-        map[p.category].count++;
-        map[p.category].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
-        map[p.category].thrown += (p.quantity_thrown || 0);
-      }
+      map[p.category].count++;
+      map[p.category].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
+      map[p.category].thrown += (p.quantity_thrown || 0);
     });
     return Object.entries(map)
       .map(([cat, data]) => ({ cat, label: t(categoryKeys[cat] || cat), ...data }))
@@ -121,12 +128,10 @@ export default function Analytics() {
   const rayonStats = useMemo(() => {
     const map = {};
     products.forEach(p => {
-      if (!p.rayon) return;
+      if (!p.rayon || p.action !== 'jeter' || !p.quantity_thrown || !p.price_chf) return;
       if (!map[p.rayon]) map[p.rayon] = { count: 0, loss: 0 };
-      if (getProductStatus(p.expiration_date) === 'expired') {
-        map[p.rayon].count++;
-        map[p.rayon].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
-      }
+      map[p.rayon].count++;
+      map[p.rayon].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
     });
     return Object.entries(map)
       .map(([rayon, data]) => ({ rayon: `R${rayon}`, ...data }))
@@ -137,7 +142,7 @@ export default function Analytics() {
   // Most problematic products
   const topProblematicProducts = useMemo(() => {
     return products
-      .filter(p => getProductStatus(p.expiration_date) === 'expired' && p.price_chf)
+      .filter(p => p.action === 'jeter' && p.quantity_thrown && p.price_chf)
       .sort((a, b) => ((b.quantity_thrown || 0) * (b.price_chf || 0)) - ((a.quantity_thrown || 0) * (a.price_chf || 0)))
       .slice(0, 5);
   }, [products]);
@@ -155,9 +160,11 @@ export default function Analytics() {
     );
   }
 
-  const totalLossAll = products.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
-  const totalExpired = products.filter(p => getProductStatus(p.expiration_date) === 'expired').length;
-  const totalThrown = products.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
+  // Losses = only products with action 'jeter' (same formula as reportUtils)
+  const thrownProducts = products.filter(p => p.action === 'jeter' && p.quantity_thrown && p.price_chf);
+  const totalLossAll = thrownProducts.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
+  const totalExpired = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length;
+  const totalThrown = thrownProducts.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
