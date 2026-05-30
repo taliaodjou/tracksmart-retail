@@ -157,7 +157,7 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
       {/* Grand total losses across all rayons */}
       {(() => {
         const grandTotal = products.reduce((sum, p) => {
-          if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
+          if (p.action === 'jeter' && p.quantity_thrown && p.price_chf) {
             return sum + (p.quantity_thrown * p.price_chf);
           }
           return sum;
