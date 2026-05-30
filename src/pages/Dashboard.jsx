@@ -65,13 +65,21 @@ export default function Dashboard() {
         base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 2000),
         base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000)]
         );
-        // Deduplicate by id
+        // Deduplicate by id, and only keep byCreator products that belong to this store
+        // (i.e. no store_owner_email, or store_owner_email matches this store)
         const seen = new Set();
-        return [...byStoreOwner, ...byCreator].filter((p) => {
+        const storeOwnerProds = byStoreOwner.filter((p) => {
           if (seen.has(p.id)) return false;
           seen.add(p.id);
           return true;
         });
+        const creatorProds = byCreator.filter((p) => {
+          if (seen.has(p.id)) return false;
+          seen.add(p.id);
+          // Only include if no store_owner_email (old data) or matches this store
+          return !p.store_owner_email || p.store_owner_email === storeOwnerEmail;
+        });
+        return [...storeOwnerProds, ...creatorProds];
       }
       // Employees only see their own products
       return base44.entities.Product.filter({ created_by: user.email }, '-created_date');

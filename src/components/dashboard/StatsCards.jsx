@@ -6,8 +6,8 @@ import { getProductStatus } from '@/lib/productUtils';
 export default function StatsCards({ products }) {
   const { t } = useLanguage();
   const total = products.length;
-  const expired = products.filter(p => getProductStatus(p.expiration_date) === 'expired').length;
-  const urgent = products.filter(p => getProductStatus(p.expiration_date) === 'urgent').length;
+  const expired = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length;
+  const urgent = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length;
 
   const cards = [
     { label: t('dash_total_products'),   value: total,   icon: Package,       bg: 'bg-primary/10',  iconColor: 'text-primary' },
