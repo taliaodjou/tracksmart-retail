@@ -14,7 +14,7 @@ export default function StatsCards({ products }) {
   const cards = [
     { label: t('dash_total_products'),   value: total,   icon: Package,       bg: 'bg-primary/10',  iconColor: 'text-primary' },
     { label: t('dash_expired_products'), value: expired, icon: XCircle,       bg: 'bg-red-50',      iconColor: 'text-red-500' },
-    { label: 'Pertes totales', value: `CHF ${totalLoss.toFixed(2)}`, icon: TrendingDown, bg: 'bg-orange-50', iconColor: 'text-orange-500' },
+    { label: t('dash_losses') || 'Pertes (CHF)', value: `CHF ${totalLoss.toFixed(2)}`, icon: TrendingDown, bg: 'bg-orange-50', iconColor: 'text-orange-500' },
   ];
 
   return (

@@ -273,7 +273,7 @@ export default function WeeklyAlert({ products, onUpdate }) {
       <div className="space-y-3">
         {/* Box 1 — Expirés & Urgents */}
         <WatchBox
-          title={isFr ? 'Expirés' : 'Expired'}
+          title={isFr ? 'Expirés & Urgents' : 'Expired & Urgent'}
           products={expiredProducts}
           icon={<AlertTriangle className="w-4 h-4 text-red-600" />}
           borderColor="border-red-200"

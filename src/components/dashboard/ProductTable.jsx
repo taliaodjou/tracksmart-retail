@@ -229,10 +229,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                     </span>
                   )}
                   {p.rayon && <span>R{p.rayon}</span>}
-                  {p.action === 'jeter' && total > 0
-                    ? <span className="text-red-600 font-semibold">Perte: CHF {total.toFixed(2)}</span>
-                    : p.price_chf ? <span className="text-muted-foreground">CHF {Number(p.price_chf).toFixed(2)}</span> : null
-                  }
+                  {isExpired && total > 0 && <span className="text-red-600 font-semibold">CHF {total.toFixed(2)}</span>}
                 </div>
               </div>
               <div className="flex items-center gap-0.5 flex-shrink-0">
@@ -306,10 +303,10 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                     {isExpired && p.action ? t(ACTION_KEYS[p.action] || p.action) : '—'}
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {p.quantity_thrown != null && p.quantity_thrown !== 0 ? p.quantity_thrown : '—'}
+                    {isExpired && p.quantity_thrown != null ? p.quantity_thrown : '—'}
                   </td>
                   <td className="px-4 py-3 font-medium text-red-700">
-                    {p.action === 'jeter' && total > 0 ? `CHF ${total.toFixed(2)}` : p.price_chf ? `CHF ${Number(p.price_chf).toFixed(2)}` : '—'}
+                    {isExpired && total > 0 ? `${total.toFixed(2)}` : '—'}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                     {p.added_by_name || '—'}
@@ -337,7 +334,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
           {/* Total losses footer */}
           {(() => {
             const totalLoss = products.reduce((sum, p) => {
-              if (p.action === 'jeter' && p.quantity_thrown && p.price_chf) {
+              if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
                 return sum + (p.quantity_thrown * p.price_chf);
               }
               return sum;
