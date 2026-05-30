@@ -71,7 +71,7 @@ function RayonHeader({ rayon, products, open, onClick }) {
   );
 }
 
-export default function RayonGroupedTable({ products, onEdit, onDelete, onInlineSave }) {
+export default function RayonGroupedTable({ products, allProducts, onEdit, onDelete, onInlineSave }) {
   // Group products by rayon — only include rayons that actually exist in the data
   const groups = useMemo(() => {
     const map = {};
@@ -156,9 +156,9 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
 
       {/* Grand total losses across all rayons */}
       {(() => {
-        const grandTotal = products.reduce((sum, p) => {
+        const grandTotal = (allProducts || products).reduce((sum, p) => {
           if (p.action === 'jeter' && p.quantity_thrown && p.price_chf) {
-            return sum + (p.quantity_thrown * p.price_chf);
+            return sum + (Number(p.quantity_thrown) * Number(p.price_chf));
           }
           return sum;
         }, 0);

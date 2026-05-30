@@ -9,7 +9,7 @@ export default function StatsCards({ products }) {
   const expired = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length;
   const totalLoss = products
     .filter(p => p.action === 'jeter' && p.quantity_thrown && p.price_chf)
-    .reduce((sum, p) => sum + (p.quantity_thrown * p.price_chf), 0);
+    .reduce((sum, p) => sum + (Number(p.quantity_thrown) * Number(p.price_chf)), 0);
 
   const cards = [
     { label: t('dash_total_products'),   value: total,   icon: Package,       bg: 'bg-primary/10',  iconColor: 'text-primary' },

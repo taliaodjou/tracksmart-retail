@@ -175,7 +175,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
   );
 }
 
-export default function ProductTable({ products, onEdit, onDelete, onInlineSave }) {
+export default function ProductTable({ products, allProducts, onEdit, onDelete, onInlineSave }) {
   const { t } = useLanguage();
   const [editingId, setEditingId] = useState(null);
 
@@ -333,9 +333,9 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
           </tbody>
           {/* Total losses footer */}
           {(() => {
-            const totalLoss = products.reduce((sum, p) => {
+            const totalLoss = (allProducts || products).reduce((sum, p) => {
               if (p.action === 'jeter' && p.quantity_thrown && p.price_chf) {
-                return sum + (p.quantity_thrown * p.price_chf);
+                return sum + (Number(p.quantity_thrown) * Number(p.price_chf));
               }
               return sum;
             }, 0);

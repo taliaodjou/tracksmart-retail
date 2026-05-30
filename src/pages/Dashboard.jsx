@@ -446,6 +446,7 @@ export default function Dashboard() {
             {groupByRayon ?
           <RayonGroupedTable
             products={filteredProducts}
+            allProducts={products}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onInlineSave={(id, data) => updateMutation.mutate({ id, data })} /> :
@@ -453,6 +454,7 @@ export default function Dashboard() {
 
           <ProductTable
             products={filteredProducts}
+            allProducts={products}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
