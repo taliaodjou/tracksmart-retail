@@ -175,7 +175,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
   );
 }
 
-export default function ProductTable({ products, allProducts, onEdit, onDelete, onInlineSave }) {
+export default function ProductTable({ products, onEdit, onDelete, onInlineSave }) {
   const { t } = useLanguage();
   const [editingId, setEditingId] = useState(null);
 
@@ -333,9 +333,9 @@ export default function ProductTable({ products, allProducts, onEdit, onDelete, 
           </tbody>
           {/* Total losses footer */}
           {(() => {
-            const totalLoss = (allProducts || products).reduce((sum, p) => {
-              if (p.action === 'jeter' && p.quantity_thrown && p.price_chf) {
-                return sum + (Number(p.quantity_thrown) * Number(p.price_chf));
+            const totalLoss = products.reduce((sum, p) => {
+              if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
+                return sum + (p.quantity_thrown * p.price_chf);
               }
               return sum;
             }, 0);
@@ -344,7 +344,7 @@ export default function ProductTable({ products, allProducts, onEdit, onDelete, 
               <tfoot>
                 <tr className="border-t-2 border-red-200 bg-red-50/60">
                   <td colSpan={9} className="px-4 py-3 text-xs font-semibold text-red-700 text-right">
-                    Pertes totales (CHF)
+                    Total pertes enregistrées
                   </td>
                   <td className="px-4 py-3 font-bold text-red-700 text-base whitespace-nowrap">
                     CHF {totalLoss.toFixed(2)}

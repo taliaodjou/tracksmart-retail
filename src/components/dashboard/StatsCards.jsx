@@ -1,20 +1,18 @@
 import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { Package, XCircle, TrendingDown } from 'lucide-react';
+import { Package, AlertTriangle, XCircle } from 'lucide-react';
 import { getProductStatus } from '@/lib/productUtils';
 
 export default function StatsCards({ products }) {
   const { t } = useLanguage();
   const total = products.length;
   const expired = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length;
-  const totalLoss = products
-    .filter(p => p.action === 'jeter' && p.quantity_thrown && p.price_chf)
-    .reduce((sum, p) => sum + (Number(p.quantity_thrown) * Number(p.price_chf)), 0);
+  const urgent = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length;
 
   const cards = [
     { label: t('dash_total_products'),   value: total,   icon: Package,       bg: 'bg-primary/10',  iconColor: 'text-primary' },
     { label: t('dash_expired_products'), value: expired, icon: XCircle,       bg: 'bg-red-50',      iconColor: 'text-red-500' },
-    { label: 'Pertes totales (CHF)', value: `CHF ${totalLoss.toFixed(2)}`, icon: TrendingDown, bg: 'bg-orange-50', iconColor: 'text-orange-500' },
+    { label: t('dash_urgent_products'),  value: urgent,  icon: AlertTriangle, bg: 'bg-orange-50',   iconColor: 'text-orange-500' },
   ];
 
   return (

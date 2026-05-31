@@ -71,7 +71,7 @@ function RayonHeader({ rayon, products, open, onClick }) {
   );
 }
 
-export default function RayonGroupedTable({ products, allProducts, onEdit, onDelete, onInlineSave }) {
+export default function RayonGroupedTable({ products, onEdit, onDelete, onInlineSave }) {
   // Group products by rayon — only include rayons that actually exist in the data
   const groups = useMemo(() => {
     const map = {};
@@ -156,9 +156,9 @@ export default function RayonGroupedTable({ products, allProducts, onEdit, onDel
 
       {/* Grand total losses across all rayons */}
       {(() => {
-        const grandTotal = (allProducts || products).reduce((sum, p) => {
-          if (p.action === 'jeter' && p.quantity_thrown && p.price_chf) {
-            return sum + (Number(p.quantity_thrown) * Number(p.price_chf));
+        const grandTotal = products.reduce((sum, p) => {
+          if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
+            return sum + (p.quantity_thrown * p.price_chf);
           }
           return sum;
         }, 0);
@@ -167,7 +167,7 @@ export default function RayonGroupedTable({ products, allProducts, onEdit, onDel
           <div className="mt-4 flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-2xl px-4 py-3">
             <div className="flex items-center gap-2">
               <TrendingDown className="w-4 h-4 text-red-600 flex-shrink-0" />
-              <span className="font-semibold text-red-800 text-xs">Pertes totales (CHF)</span>
+              <span className="font-semibold text-red-800 text-xs">Total pertes — tous rayons</span>
             </div>
             <span className="text-base font-bold text-red-700">CHF {grandTotal.toFixed(2)}</span>
           </div>
