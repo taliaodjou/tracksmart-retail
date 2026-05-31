@@ -2,8 +2,36 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
 import { Globe, Building2, User, ChevronRight, Sparkles } from 'lucide-react';
+
+const COUNTRIES = [
+  'Afghanistan','Afrique du Sud','Albanie','Algérie','Allemagne','Andorre','Angola','Antigua-et-Barbuda',
+  'Arabie saoudite','Argentine','Arménie','Australie','Autriche','Azerbaïdjan','Bahamas','Bahreïn',
+  'Bangladesh','Barbade','Bélarus','Belgique','Belize','Bénin','Bhoutan','Bolivie','Bosnie-Herzégovine',
+  'Botswana','Brésil','Brunéi','Bulgarie','Burkina Faso','Burundi','Cabo Verde','Cambodge','Cameroun',
+  'Canada','Chili','Chine','Chypre','Colombie','Comores','Congo','Corée du Nord','Corée du Sud',
+  'Costa Rica','Côte d\'Ivoire','Croatie','Cuba','Danemark','Djibouti','Dominique','Égypte','Émirats arabes unis',
+  'Équateur','Érythrée','Espagne','Estonie','Eswatini','Éthiopie','Fidji','Finlande','France',
+  'Gabon','Gambie','Géorgie','Ghana','Grèce','Grenade','Guatemala','Guinée','Guinée-Bissau',
+  'Guinée équatoriale','Guyana','Haïti','Honduras','Hongrie','Inde','Indonésie','Irak','Iran',
+  'Irlande','Islande','Israël','Italie','Jamaïque','Japon','Jordanie','Kazakhstan','Kenya',
+  'Kirghizistan','Kiribati','Koweït','Laos','Lesotho','Lettonie','Liban','Libéria','Libye',
+  'Liechtenstein','Lituanie','Luxembourg','Madagascar','Malawi','Malaisie','Maldives','Mali','Malte',
+  'Maroc','Marshall','Maurice','Mauritanie','Mexique','Micronésie','Moldavie','Monaco','Mongolie',
+  'Monténégro','Mozambique','Myanmar','Namibie','Nauru','Népal','Nicaragua','Niger','Nigéria',
+  'Norvège','Nouvelle-Zélande','Oman','Ouganda','Ouzbékistan','Pakistan','Palaos','Palestine',
+  'Panama','Papouasie-Nouvelle-Guinée','Paraguay','Pays-Bas','Pérou','Philippines','Pologne',
+  'Portugal','Qatar','République centrafricaine','République démocratique du Congo','République dominicaine',
+  'République tchèque','Roumanie','Royaume-Uni','Russie','Rwanda','Saint-Kitts-et-Nevis',
+  'Saint-Marin','Saint-Vincent-et-les-Grenadines','Sainte-Lucie','Salomon','Salvador','Samoa',
+  'São Tomé-et-Príncipe','Sénégal','Serbie','Seychelles','Sierra Leone','Singapour','Slovaquie',
+  'Slovénie','Somalie','Soudan','Soudan du Sud','Sri Lanka','Suède','Suisse','Suriname','Syrie',
+  'Tadjikistan','Tanzanie','Tchad','Thaïlande','Timor oriental','Togo','Tonga','Trinité-et-Tobago',
+  'Tunisie','Turkménistan','Turquie','Tuvalu','Ukraine','Uruguay','Vanuatu','Vatican',
+  'Venezuela','Viêt Nam','Yémen','Zambie','Zimbabwe',
+];
 
 const BUSINESS_TYPES = {
   fr: [
@@ -104,9 +132,10 @@ export default function OnboardingProfileModal({ onComplete }) {
     setSaving(true);
     await base44.auth.updateMe({
       preferred_lang: lang,
+      full_name: form.full_name.trim(),
       user_position: form.user_position,
       business_type: form.business_type,
-      country: form.country.trim(),
+      country: form.country,
       onboarding_complete: true,
     });
     setSaving(false);
@@ -223,12 +252,16 @@ export default function OnboardingProfileModal({ onComplete }) {
                 {/* Country */}
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.country_label}</label>
-                  <Input
-                    placeholder={tx.country_placeholder}
-                    value={form.country}
-                    onChange={e => setForm(f => ({ ...f, country: e.target.value }))}
-                    className="rounded-xl h-11 text-base"
-                  />
+                  <Select value={form.country} onValueChange={v => setForm(f => ({ ...f, country: v }))}>
+                    <SelectTrigger className="rounded-xl h-11 text-base w-full">
+                      <SelectValue placeholder={tx.country_placeholder} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {COUNTRIES.map(c => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {error && <p className="text-xs text-destructive">{error}</p>}
