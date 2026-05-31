@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { getProductStatus, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
+import { getProductStatus, hasActiveSubscription, isAdmin, getStoreOwnerEmail, calculateTotalLoss } from '@/lib/productUtils';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ArrowRight, PackageX, AlertTriangle, TrendingDown, Clock, Sparkles } from 'lucide-react';
@@ -51,19 +51,32 @@ export default function Welcome() {
     }
   }, [user?.preferred_lang]);
 
+  const storeOwnerEmail = getStoreOwnerEmail(user);
+  const isOwnerOrManager = user?.role === 'owner' || user?.role === 'user' || user?.role === 'manager';
+
   const { data: products = [] } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => base44.entities.Product.list('-created_date'),
-    enabled: canAccess && !userIsAdmin,
+    queryKey: ['products', storeOwnerEmail, isOwnerOrManager],
+    queryFn: async () => {
+      if (isOwnerOrManager) {
+        const [byStoreOwner, byCreator] = await Promise.all([
+          base44.entities.Product.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 2000),
+          base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000),
+        ]);
+        const seen = new Set();
+        const storeOwnerProds = byStoreOwner.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+        const creatorProds = byCreator.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return !p.store_owner_email || p.store_owner_email === storeOwnerEmail; });
+        return [...storeOwnerProds, ...creatorProds];
+      }
+      return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
+    },
+    enabled: canAccess && !userIsAdmin && !!user?.email,
   });
 
   const stats = useMemo(() => {
-    const expired = products.filter(p => getProductStatus(p.expiration_date) === 'expired');
-    const urgent = products.filter(p => getProductStatus(p.expiration_date) === 'urgent');
-    const monthlyLoss = products
-      .filter(p => getProductStatus(p.expiration_date) === 'expired')
-      .reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
-    return { expired: expired.length, urgent: urgent.length, monthlyLoss };
+    const expired = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired');
+    const urgent = products.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent');
+    const totalLoss = calculateTotalLoss(products);
+    return { expired: expired.length, urgent: urgent.length, totalLoss };
   }, [products]);
 
   const today = new Date();
@@ -96,8 +109,8 @@ export default function Welcome() {
     },
     {
       icon: TrendingDown,
-      value: `CHF ${stats.monthlyLoss.toFixed(0)}`,
-      label: lang === 'fr' ? 'Pertes estimées' : 'Estimated losses',
+      value: `CHF ${stats.totalLoss.toFixed(0)}`,
+      label: lang === 'fr' ? 'Pertes totales' : 'Total losses',
       bg: 'bg-primary/10',
       iconColor: 'text-primary',
       delay: 0.6,

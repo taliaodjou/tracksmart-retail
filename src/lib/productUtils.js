@@ -98,6 +98,15 @@ export function getStoreOwnerEmail(user) {
   return user.email; // owner = their own store
 }
 
+/**
+ * Calcule les pertes totales d'une liste de produits.
+ * Formule unique utilisée partout dans l'app : somme de (quantity_thrown * price_chf) pour chaque produit.
+ * Ne dépend pas du statut d'expiration — un produit jeté est une perte, peu importe quand.
+ */
+export function calculateTotalLoss(products) {
+  return (products || []).reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
+}
+
 export function hasActiveSubscription(user) {
   if (!user) return false;
   if (isAdmin(user)) return true;

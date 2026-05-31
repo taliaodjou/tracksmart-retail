@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, calculateTotalLoss } from '@/lib/productUtils';
 
 const ACTION_KEYS = {
   jeter: 'action_jeter',
@@ -333,12 +333,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
           </tbody>
           {/* Total losses footer */}
           {(() => {
-            const totalLoss = products.reduce((sum, p) => {
-              if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
-                return sum + (p.quantity_thrown * p.price_chf);
-              }
-              return sum;
-            }, 0);
+            const totalLoss = calculateTotalLoss(products);
             if (totalLoss <= 0) return null;
             return (
               <tfoot>

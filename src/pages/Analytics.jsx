@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
-import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin, calculateTotalLoss } from '@/lib/productUtils';
 import { format, startOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -46,11 +46,9 @@ export default function Analytics() {
           base44.entities.Product.filter({ created_by: storeOwnerEmail }, '-created_date', 2000),
         ]);
         const seen = new Set();
-        return [...byStoreOwner, ...byCreator].filter(p => {
-          if (seen.has(p.id)) return false;
-          seen.add(p.id);
-          return true;
-        });
+        const storeOwnerProds = byStoreOwner.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
+        const creatorProds = byCreator.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return !p.store_owner_email || p.store_owner_email === storeOwnerEmail; });
+        return [...storeOwnerProds, ...creatorProds];
       }
       return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
     },
@@ -155,7 +153,7 @@ export default function Analytics() {
     );
   }
 
-  const totalLossAll = products.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
+  const totalLossAll = calculateTotalLoss(products);
   const totalExpired = products.filter(p => getProductStatus(p.expiration_date) === 'expired').length;
   const totalThrown = products.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
 

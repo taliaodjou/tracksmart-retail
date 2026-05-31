@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { ChevronDown, ChevronRight, TrendingDown } from 'lucide-react';
 import ProductTable from './ProductTable';
-import { getProductStatus } from '@/lib/productUtils';
+import { getProductStatus, calculateTotalLoss } from '@/lib/productUtils';
 
 // Rayon display labels
 function rayonLabel(rayon) {
@@ -156,12 +156,7 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
 
       {/* Grand total losses across all rayons */}
       {(() => {
-        const grandTotal = products.reduce((sum, p) => {
-          if (getProductStatus(p.expiration_date) === 'expired' && p.quantity_thrown && p.price_chf) {
-            return sum + (p.quantity_thrown * p.price_chf);
-          }
-          return sum;
-        }, 0);
+        const grandTotal = calculateTotalLoss(products);
         if (grandTotal <= 0) return null;
         return (
           <div className="mt-4 flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-2xl px-4 py-3">
