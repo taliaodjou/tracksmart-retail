@@ -165,25 +165,61 @@ export default function Dashboard() {
 
   // ── Category mapping from Open Food Facts tags ───────────
   const OFF_CATEGORY_MAP = {
+    // Snacks
     snack: 'snacks', crisp: 'snacks', chip: 'snacks', biscuit: 'snacks', cracker: 'snacks',
-    beverage: 'boissons', drink: 'boissons', water: 'boissons', juice: 'boissons', soda: 'boissons', milk: 'boissons',
-    fish: 'congeles_poisson', seafood: 'congeles_poisson',
-    chicken: 'congeles_poulet', poultry: 'congeles_poulet',
+    gâteau: 'snacks', cake: 'snacks', cookie: 'snacks', galette: 'snacks',
+    // Boissons
+    beverage: 'boissons', drink: 'boissons', water: 'boissons', juice: 'boissons', soda: 'boissons',
+    milk: 'boissons', lait: 'boissons', eau: 'boissons', jus: 'boissons', boisson: 'boissons',
+    nectar: 'boissons', limonade: 'boissons', sirop: 'boissons', thé: 'boissons', café: 'boissons',
+    tea: 'boissons', coffee: 'boissons', infusion: 'boissons',
+    // Poisson congelé
+    fish: 'congeles_poisson', seafood: 'congeles_poisson', poisson: 'congeles_poisson',
+    crevette: 'congeles_poisson', thon: 'congeles_poisson', sardine: 'congeles_poisson',
+    // Poulet congelé
+    chicken: 'congeles_poulet', poultry: 'congeles_poulet', poulet: 'congeles_poulet',
+    volaille: 'congeles_poulet', dinde: 'congeles_poulet',
+    // Produits frais
     dairy: 'produits_frais', yogurt: 'produits_frais', cheese: 'produits_frais', fresh: 'produits_frais',
-    pasta: 'epicerie_seche', rice: 'epicerie_seche', flour: 'epicerie_seche', cereal: 'epicerie_seche', grain: 'epicerie_seche',
+    yaourt: 'produits_frais', fromage: 'produits_frais', beurre: 'produits_frais', butter: 'produits_frais',
+    crème: 'produits_frais', cream: 'produits_frais', oeuf: 'produits_frais', egg: 'produits_frais',
+    // Épicerie sèche
+    pasta: 'epicerie_seche', rice: 'epicerie_seche', flour: 'epicerie_seche', cereal: 'epicerie_seche',
+    grain: 'epicerie_seche', riz: 'epicerie_seche', farine: 'epicerie_seche', sucre: 'epicerie_seche',
+    sugar: 'epicerie_seche', sel: 'epicerie_seche', huile: 'epicerie_seche', oil: 'epicerie_seche',
+    pâte: 'epicerie_seche', semoule: 'epicerie_seche', couscous: 'epicerie_seche', légumineuse: 'epicerie_seche',
+    lentille: 'epicerie_seche', haricot: 'epicerie_seche', pois: 'epicerie_seche', épice: 'epicerie_seche',
+    spice: 'epicerie_seche', condiment: 'epicerie_seche', sauce: 'epicerie_seche',
+    // Confiseries
     candy: 'confiseries', chocolate: 'confiseries', sweet: 'confiseries', confectionery: 'confiseries',
-    canned: 'conserves', tinned: 'conserves', preserve: 'conserves',
-    hygiene: 'hygiene_beaute', beauty: 'hygiene_beaute', soap: 'hygiene_beaute', shampoo: 'hygiene_beaute', cosmetic: 'hygiene_beaute',
+    chocolat: 'confiseries', bonbon: 'confiseries', caramel: 'confiseries', nougat: 'confiseries',
+    // Conserves
+    canned: 'conserves', tinned: 'conserves', preserve: 'conserves', conserve: 'conserves',
+    tomate: 'conserves', confiture: 'conserves', jam: 'conserves', miel: 'conserves', honey: 'conserves',
+    // Hygiène / Beauté
+    hygiene: 'hygiene_beaute', beauty: 'hygiene_beaute', soap: 'hygiene_beaute', shampoo: 'hygiene_beaute',
+    cosmetic: 'hygiene_beaute', savon: 'hygiene_beaute', dentifrice: 'hygiene_beaute', déodorant: 'hygiene_beaute',
+    parfum: 'hygiene_beaute', crème: 'hygiene_beaute', lotion: 'hygiene_beaute', rasoir: 'hygiene_beaute',
+    // Entretien maison
     cleaning: 'entretien_maison', detergent: 'entretien_maison', household: 'entretien_maison',
-    baby: 'bebe', infant: 'bebe',
-    pet: 'animaux', dog: 'animaux', cat: 'animaux',
+    lessive: 'entretien_maison', nettoyant: 'entretien_maison', désinfectant: 'entretien_maison',
+    vaisselle: 'entretien_maison', balai: 'entretien_maison',
+    // Bébé
+    baby: 'bebe', infant: 'bebe', bébé: 'bebe', couche: 'bebe', diaper: 'bebe', biberon: 'bebe',
+    // Animaux
+    pet: 'animaux', dog: 'animaux', cat: 'animaux', chien: 'animaux', chat: 'animaux',
+    // Alcool
     alcohol: 'alcool', wine: 'alcool', beer: 'alcool', spirit: 'alcool',
-    tobacco: 'tabac', cigarette: 'tabac'
+    bière: 'alcool', vin: 'alcool', whisky: 'alcool', rhum: 'alcool', liqueur: 'alcool',
+    // Tabac
+    tobacco: 'tabac', cigarette: 'tabac', cigare: 'tabac',
   };
 
   const matchCategory = (tags = []) => {
-    for (const tag of tags) {
-      const clean = tag.replace(/^[a-z]{2}:/, '').toLowerCase().replace(/-/g, ' ');
+    // tags can be an array of strings (OFF format) or a single string split
+    const allTags = Array.isArray(tags) ? tags : [tags];
+    for (const tag of allTags) {
+      const clean = (tag || '').replace(/^[a-z]{2}:/, '').toLowerCase().replace(/[-_]/g, ' ');
       for (const [keyword, cat] of Object.entries(OFF_CATEGORY_MAP)) {
         if (clean.includes(keyword)) return cat;
       }
