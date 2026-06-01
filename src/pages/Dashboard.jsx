@@ -30,7 +30,6 @@ import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
 
-
 export default function Dashboard() {
   const { t, lang } = useLanguage();
   const { user } = useAuth();
@@ -318,8 +317,8 @@ export default function Dashboard() {
     setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
-  // Active products (non-archived) for stock view; archived shown separately
-  const activeProducts = useMemo(() => products.filter(p => !p.discarded), [products]);
+  // All products (including discarded) shown in stock list
+  const activeProducts = useMemo(() => products, [products]);
 
   const filteredProducts = useMemo(() => activeProducts.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -413,7 +412,6 @@ export default function Dashboard() {
 
             <WeeklyAlert
               products={activeProducts}
-              allProducts={products}
               onUpdate={async (id, data) => {
                 const updateData = { ...data };
                 // When action is "jeter", mark as discarded to remove from active stock
@@ -423,7 +421,6 @@ export default function Dashboard() {
                 }
                 updateMutation.mutate({ id, data: updateData });
               }}
-              onDelete={handleDelete}
             />
 
             {/* Filters */}
@@ -532,8 +529,6 @@ export default function Dashboard() {
             onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
 
           }
-
-
           </div>
         }
       </main>
