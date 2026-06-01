@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -46,6 +47,7 @@ export default function Dashboard() {
   const [showFilters, setShowFilters] = useState(false);
   const [groupByRayon, setGroupByRayon] = useState(true);
 
+  const navigate = useNavigate();
   const canAccess = hasActiveSubscription(user);
   const needsOnboarding = canAccess && user && !user.onboarding_complete;
   const [onboardingDone, setOnboardingDone] = useState(false);
@@ -349,7 +351,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen pb-20 sm:pb-0 pt-16 sm:pt-20" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       {needsOnboarding && !onboardingDone &&
-      <OnboardingModal user={user} onComplete={() => setOnboardingDone(true)} />
+      <OnboardingModal user={user} onComplete={() => { setOnboardingDone(true); navigate('/welcome'); }} />
       }
       <DashboardHeader />
 

@@ -239,20 +239,24 @@ export default function WeeklyAlert({ products, onUpdate }) {
   const [showModal, setShowModal] = useState(false);
   const [activeProduct, setActiveProduct] = useState(null);
   const [modalFilter, setModalFilter] = useState('all'); // 'all' | 'expired' | 'soon'
+  const [dismissedIds, setDismissedIds] = useState(new Set());
   const isFr = lang === 'fr';
 
-  // Split by status, sorted by most urgent first
+  // Split by status, sorted by most urgent first (exclude dismissed)
   const expiredProducts = sortByUrgency(products.filter(p => {
+    if (dismissedIds.has(p.id)) return false;
     const s = getProductStatus(p.expiration_date);
     return s === 'expired' || s === 'urgent';
   }));
 
   const soonProducts = sortByUrgency(products.filter(p => {
+    if (dismissedIds.has(p.id)) return false;
     const s = getProductStatus(p.expiration_date);
     return s === 'soon';
   }));
 
   const allWatchProducts = sortByUrgency(products.filter(p => {
+    if (dismissedIds.has(p.id)) return false;
     const s = getProductStatus(p.expiration_date);
     return s === 'expired' || s === 'urgent' || s === 'soon';
   }));
@@ -353,7 +357,12 @@ export default function WeeklyAlert({ products, onUpdate }) {
                   product={activeProduct}
                   onUpdate={async (id, data) => {
                     if (onUpdate) await onUpdate(id, data);
+                    // If thrown, remove immediately from the alert lists
+                    if (data.action === 'jeter') {
+                      setDismissedIds(prev => new Set([...prev, id]));
+                    }
                     setActiveProduct(null);
+                    setShowModal(false);
                   }}
                   lang={lang}
                 />
