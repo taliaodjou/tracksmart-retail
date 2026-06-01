@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { getProductStatus, getDaysRemaining, statusConfig } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, statusConfig, isDiscarded } from '@/lib/productUtils';
 import { AlertTriangle, X, ChevronRight, Trash2, CalendarClock, Loader2, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
@@ -242,21 +242,24 @@ export default function WeeklyAlert({ products, onUpdate }) {
   const [dismissedIds, setDismissedIds] = useState(new Set());
   const isFr = lang === 'fr';
 
-  // Split by status, sorted by most urgent first (exclude dismissed)
+  // Split by status, sorted by most urgent first (exclude dismissed and discarded/archived)
   const expiredProducts = sortByUrgency(products.filter(p => {
     if (dismissedIds.has(p.id)) return false;
+    if (isDiscarded(p)) return false; // discarded = archivé, ne plus afficher dans les alertes
     const s = getProductStatus(p.expiration_date);
     return s === 'expired' || s === 'urgent';
   }));
 
   const soonProducts = sortByUrgency(products.filter(p => {
     if (dismissedIds.has(p.id)) return false;
+    if (isDiscarded(p)) return false;
     const s = getProductStatus(p.expiration_date);
     return s === 'soon';
   }));
 
   const allWatchProducts = sortByUrgency(products.filter(p => {
     if (dismissedIds.has(p.id)) return false;
+    if (isDiscarded(p)) return false;
     const s = getProductStatus(p.expiration_date);
     return s === 'expired' || s === 'urgent' || s === 'soon';
   }));

@@ -317,8 +317,8 @@ export default function Dashboard() {
     setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
-  // Active stock = non-discarded products only
-  const activeProducts = useMemo(() => products.filter(p => !isDiscarded(p)), [products]);
+  // All products (including discarded) shown in stock list
+  const activeProducts = useMemo(() => products, [products]);
 
   const filteredProducts = useMemo(() => activeProducts.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
