@@ -120,15 +120,15 @@ export default function Landing() {
             whileHover={{ scale: 1.02, y: -4 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleBoutique}
-            className="group w-full rounded-2xl p-8 text-center transition-all duration-300 shadow-lg hover:shadow-2xl flex flex-col items-center gap-4"
+            className="group w-full rounded-2xl p-5 sm:p-8 text-center transition-all duration-300 shadow-lg hover:shadow-2xl flex flex-col items-center gap-3"
             style={{ background: 'linear-gradient(135deg, #C9A646 0%, #b8923a 100%)', border: 'none' }}
           >
             <motion.div
-              className="w-16 h-16 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center"
+              className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center"
               whileHover={{ rotate: [0, -8, 8, 0] }}
               transition={{ duration: 0.4 }}
             >
-              <Store className="w-8 h-8 text-white" />
+              <Store className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </motion.div>
             <div>
               <div className="text-lg font-extrabold text-white mb-1.5">Accéder à mon espace boutique</div>
