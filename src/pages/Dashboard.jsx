@@ -29,6 +29,7 @@ import OnboardingModal from '@/components/dashboard/OnboardingModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
+import ArchivedProductsSection from '@/components/dashboard/ArchivedProductsSection';
 
 export default function Dashboard() {
   const { t, lang } = useLanguage();
@@ -317,8 +318,8 @@ export default function Dashboard() {
     setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
-  // All products (including discarded) shown in stock list
-  const activeProducts = useMemo(() => products, [products]);
+  // Active products (non-archived) for stock view; archived shown separately
+  const activeProducts = useMemo(() => products.filter(p => !p.discarded), [products]);
 
   const filteredProducts = useMemo(() => activeProducts.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -529,6 +530,12 @@ export default function Dashboard() {
             onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
 
           }
+
+            {/* Archived products section */}
+            <ArchivedProductsSection
+              products={products}
+              onDelete={handleDelete}
+            />
           </div>
         }
       </main>
