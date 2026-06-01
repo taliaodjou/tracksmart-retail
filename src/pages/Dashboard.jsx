@@ -322,7 +322,14 @@ export default function Dashboard() {
 
   const filteredProducts = useMemo(() => activeProducts.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (statusFilter !== 'all' && getProductStatus(p.expiration_date) !== statusFilter) return false;
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'archived') {
+        if (!p.discarded) return false;
+      } else {
+        if (p.discarded) return false;
+        if (getProductStatus(p.expiration_date) !== statusFilter) return false;
+      }
+    }
     if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
     if (rayonFilter !== 'all' && p.rayon !== rayonFilter) return false;
     return true;
@@ -348,7 +355,8 @@ export default function Dashboard() {
   { key: 'expired', label: t('dash_filter_expired') },
   { key: 'urgent', label: t('dash_filter_urgent') },
   { key: 'soon', label: t('dash_filter_soon') },
-  { key: 'ok', label: t('dash_filter_ok') }];
+  { key: 'ok', label: t('dash_filter_ok') },
+  { key: 'archived', label: 'Archivé' }];
 
 
   return (
