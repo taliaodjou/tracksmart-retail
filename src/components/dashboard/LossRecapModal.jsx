@@ -64,16 +64,18 @@ export default function LossRecapModal({ products, onClose }) {
                   >
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm text-foreground truncate">{p.name}</p>
-                      <div className="flex flex-wrap gap-2 mt-0.5 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">
                         {p.marque && <span>{p.marque}</span>}
                         {p.category && <span>· {t(categoryKeys[p.category] || p.category)}</span>}
                         {p.rayon && <span>· Rayon {p.rayon}</span>}
-                        {p.discarded_at && (
-                          <span>· Jeté le {format(new Date(p.discarded_at), 'dd/MM/yyyy')}</span>
-                        )}
                       </div>
-                      <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
                         <span>{p.quantity_thrown} unité{p.quantity_thrown > 1 ? 's' : ''} × CHF {p.price_chf?.toFixed(2)}</span>
+                        {(p.discarded_at || p.updated_date) && (
+                          <span className="text-red-500 font-medium">
+                            🗑 Jeté le {format(new Date(p.discarded_at || p.updated_date), 'dd/MM/yyyy')}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="ml-4 flex-shrink-0 text-right">
