@@ -29,7 +29,7 @@ import OnboardingModal from '@/components/dashboard/OnboardingModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
-import ArchivedProductsSection from '@/components/dashboard/ArchivedProductsSection';
+
 
 export default function Dashboard() {
   const { t, lang } = useLanguage();
@@ -413,6 +413,7 @@ export default function Dashboard() {
 
             <WeeklyAlert
               products={activeProducts}
+              allProducts={products}
               onUpdate={async (id, data) => {
                 const updateData = { ...data };
                 // When action is "jeter", mark as discarded to remove from active stock
@@ -422,6 +423,7 @@ export default function Dashboard() {
                 }
                 updateMutation.mutate({ id, data: updateData });
               }}
+              onDelete={handleDelete}
             />
 
             {/* Filters */}
@@ -531,11 +533,7 @@ export default function Dashboard() {
 
           }
 
-            {/* Archived products section */}
-            <ArchivedProductsSection
-              products={products}
-              onDelete={handleDelete}
-            />
+
           </div>
         }
       </main>

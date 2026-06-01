@@ -5,6 +5,7 @@ import { AlertTriangle, X, ChevronRight, Trash2, CalendarClock, Loader2, Check }
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import ArchivedProductsSection from './ArchivedProductsSection';
 
 const PREVIEW_COUNT = 10;
 
@@ -234,7 +235,7 @@ function WatchBox({ title, products, icon, borderColor, bgColor, titleColor, onP
   );
 }
 
-export default function WeeklyAlert({ products, onUpdate }) {
+export default function WeeklyAlert({ products, onUpdate, onDelete, allProducts }) {
   const { t, lang } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [activeProduct, setActiveProduct] = useState(null);
@@ -300,6 +301,10 @@ export default function WeeklyAlert({ products, onUpdate }) {
           onProductClick={handleProductClick}
           isFr={isFr}
         />
+        {/* Box 3 — Archivés */}
+        {onDelete && allProducts && (
+          <ArchivedProductsSection products={allProducts} onDelete={onDelete} />
+        )}
       </div>
 
       {/* Full modal */}
