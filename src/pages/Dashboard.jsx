@@ -216,47 +216,66 @@ export default function Dashboard() {
       return;
     }
 
-    // 2. Try Open Food Facts + Open Beauty Facts in parallel
-    try {
-      const [foodRes, beautyRes] = await Promise.allSettled([
-      fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then((r) => r.json()),
-      fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then((r) => r.json())]
-      );
+    // Helper to build prefill and setQuickAdd from an OFF-style product object
+    const applyPrefill = (p, defaultCategory = '') => {
+      const name = p.product_name_fr || p.product_name || p.generic_name || '';
+      const brand = p.brands || '';
+      const rawCategory = matchCategory(p.categories_tags || []);
+      const category = rawCategory || defaultCategory;
+      const existing = findExistingProduct(name, brand);
+      setQuickAdd({
+        barcode: code,
+        prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
+        existingProduct: existing
+      });
+    };
 
-      // Check Food Facts first
-      if (foodRes.status === 'fulfilled' && foodRes.value?.status === 1 && foodRes.value?.product) {
-        const p = foodRes.value.product;
-        const category = matchCategory(p.categories_tags || []);
-        const name = p.product_name_fr || p.product_name || p.generic_name || '';
-        const brand = p.brands || '';
-        const existing = findExistingProduct(name, brand);
-        setQuickAdd({
-          barcode: code,
-          prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
-          existingProduct: existing
-        });
+    // 2. Open Food Facts
+    try {
+      const foodData = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then(r => r.json());
+      if (foodData?.status === 1 && foodData?.product) {
+        applyPrefill(foodData.product);
         return;
       }
+    } catch (_) {}
 
-      // Then check Beauty Facts (cosmétiques, huiles, soins...)
-      if (beautyRes.status === 'fulfilled' && beautyRes.value?.status === 1 && beautyRes.value?.product) {
-        const p = beautyRes.value.product;
-        const name = p.product_name_fr || p.product_name || p.generic_name || '';
-        const brand = p.brands || '';
-        // Beauty products → hygiene_beaute by default, refine with tags
-        const rawCategory = matchCategory(p.categories_tags || []);
-        const category = rawCategory || 'hygiene_beaute';
+    // 3. Open Beauty Facts
+    try {
+      const beautyData = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then(r => r.json());
+      if (beautyData?.status === 1 && beautyData?.product) {
+        applyPrefill(beautyData.product, 'hygiene_beaute');
+        return;
+      }
+    } catch (_) {}
+
+    // 4. Open Products Facts (produits ménagers, Afrique, etc.)
+    try {
+      const opData = await fetch(`https://world.openproductsfacts.org/api/v0/product/${code}.json`).then(r => r.json());
+      if (opData?.status === 1 && opData?.product) {
+        applyPrefill(opData.product);
+        return;
+      }
+    } catch (_) {}
+
+    // 5. UPC Item DB (base de données mondiale, bons résultats pour produits africains)
+    try {
+      const upcData = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`).then(r => r.json());
+      if (upcData?.code === 'OK' && upcData?.items?.length > 0) {
+        const item = upcData.items[0];
+        const name = item.title || '';
+        const brand = item.brand || '';
+        const category = matchCategory((item.category || '').toLowerCase().split(/[,/]/).map(s => s.trim()));
         const existing = findExistingProduct(name, brand);
         setQuickAdd({
           barcode: code,
-          prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
+          prefill: { name, brand, category, image_url: item.images?.[0] || '' },
           existingProduct: existing
         });
         return;
       }
     } catch (_) {}
 
-    // 3. Not found — manual entry (null prefill → QuickAddModal shows manual form)
+    // 6. Not found anywhere — manual entry
     setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
