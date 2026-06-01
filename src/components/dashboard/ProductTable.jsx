@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, calculateTotalLoss } from '@/lib/productUtils';
+import LossRecapModal from './LossRecapModal';
 
 const ACTION_KEYS = {
   jeter: 'action_jeter',
@@ -178,6 +179,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
 export default function ProductTable({ products, onEdit, onDelete, onInlineSave }) {
   const { t } = useLanguage();
   const [editingId, setEditingId] = useState(null);
+  const [showLossRecap, setShowLossRecap] = useState(false);
 
   const handleSave = (product, data) => {
     if (onInlineSave) {
@@ -337,9 +339,14 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
             if (totalLoss <= 0) return null;
             return (
               <tfoot>
-                <tr className="border-t-2 border-red-200 bg-red-50/60">
+                <tr
+                  className="border-t-2 border-red-200 bg-red-50/60 cursor-pointer hover:bg-red-100 transition-colors"
+                  onClick={() => setShowLossRecap(true)}
+                  title="Voir le détail des pertes"
+                >
                   <td colSpan={9} className="px-4 py-3 text-xs font-semibold text-red-700 text-right">
                     Total pertes enregistrées
+                    <span className="ml-2 text-red-500 underline font-normal">Voir le détail</span>
                   </td>
                   <td className="px-4 py-3 font-bold text-red-700 text-base whitespace-nowrap">
                     CHF {totalLoss.toFixed(2)}
@@ -352,6 +359,10 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
         </table>
         </div>
       </div>
+
+      {showLossRecap && (
+        <LossRecapModal products={products} onClose={() => setShowLossRecap(false)} />
+      )}
     </>
   );
 }
