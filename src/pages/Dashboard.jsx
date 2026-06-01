@@ -12,7 +12,7 @@ import { Plus, Search, ScanLine, X, LayoutList, Layers } from 'lucide-react';
 const XlsIcon = () =>
 <span className="text-[10px] font-bold hidden">XLS</span>;
 
-import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail } from '@/lib/productUtils';
+import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail, isDiscarded } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 import { logActivity } from '@/lib/activityLogger';
 
@@ -317,13 +317,16 @@ export default function Dashboard() {
     setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
-  const filteredProducts = useMemo(() => products.filter((p) => {
+  // Active stock = non-discarded products only
+  const activeProducts = useMemo(() => products.filter(p => !isDiscarded(p)), [products]);
+
+  const filteredProducts = useMemo(() => activeProducts.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (statusFilter !== 'all' && getProductStatus(p.expiration_date) !== statusFilter) return false;
     if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
     if (rayonFilter !== 'all' && p.rayon !== rayonFilter) return false;
     return true;
-  }), [products, search, statusFilter, categoryFilter, rayonFilter]);
+  }), [activeProducts, search, statusFilter, categoryFilter, rayonFilter]);
 
   const activeFilterCount = [
   statusFilter !== 'all',
@@ -397,7 +400,7 @@ export default function Dashboard() {
           </div> :
 
         <div className="space-y-4 sm:space-y-6">
-            <StatsCards products={products} />
+            <StatsCards products={activeProducts} />
 
             {showForm &&
           <ProductForm
@@ -407,7 +410,18 @@ export default function Dashboard() {
 
           }
 
-            <WeeklyAlert products={products} onUpdate={(id, data) => updateMutation.mutate({ id, data })} />
+            <WeeklyAlert
+              products={activeProducts}
+              onUpdate={async (id, data) => {
+                const updateData = { ...data };
+                // When action is "jeter", mark as discarded to remove from active stock
+                if (data.action === 'jeter') {
+                  updateData.discarded = true;
+                  updateData.discarded_at = new Date().toISOString().split('T')[0];
+                }
+                updateMutation.mutate({ id, data: updateData });
+              }}
+            />
 
             {/* Filters */}
             <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-border/40 space-y-3">

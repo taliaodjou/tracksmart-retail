@@ -114,6 +114,16 @@
       "type": "string",
       "description": "Description optionnelle du produit",
       "maxLength": 1000
+    },
+    "discarded": {
+      "type": "boolean",
+      "default": false,
+      "description": "Produit jet\u00e9 \u2014 exclu du stock actif mais conserv\u00e9 pour les analytiques et rapports de pertes"
+    },
+    "discarded_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Date \u00e0 laquelle le produit a \u00e9t\u00e9 jet\u00e9"
     }
   },
   "required": [

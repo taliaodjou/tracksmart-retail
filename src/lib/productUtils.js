@@ -1,5 +1,13 @@
 import { differenceInDays, startOfDay } from 'date-fns';
 
+/**
+ * Returns true if a product has been discarded (jeté).
+ * Discarded products are excluded from active stock but kept for analytics.
+ */
+export function isDiscarded(product) {
+  return product?.discarded === true;
+}
+
 export function getProductStatus(expirationDate) {
   const today = startOfDay(new Date());
   const expiry = startOfDay(new Date(expirationDate));

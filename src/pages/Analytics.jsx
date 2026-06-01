@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
-import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin, calculateTotalLoss } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin, calculateTotalLoss, isDiscarded } from '@/lib/productUtils';
 import { format, startOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -67,11 +67,13 @@ export default function Analytics() {
       const [y, m] = monthKey.split('-');
       const monthDate = new Date(parseInt(y), parseInt(m) - 1, 1);
 
-      // Products that expired in this month (expiration_date falls in month)
+      // Products that expired OR were discarded in this month
       const expiredInMonth = products.filter(p => {
-        if (!p.expiration_date) return false;
-        const exp = new Date(p.expiration_date);
-        return isSameMonth(exp, monthDate);
+        if (!p.expiration_date && !p.discarded_at) return false;
+        // Discarded: use discarded_at date if available, otherwise expiration_date
+        const dateToCheck = p.discarded_at ? new Date(p.discarded_at) : (p.expiration_date ? new Date(p.expiration_date) : null);
+        if (!dateToCheck) return false;
+        return isSameMonth(dateToCheck, monthDate);
       });
 
       const totalLoss = expiredInMonth.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
@@ -97,13 +99,13 @@ export default function Analytics() {
     ? currentMonth?.expiredCount - prevMonth.expiredCount
     : null;
 
-  // Category analysis
+  // Category analysis — includes discarded products
   const categoryStats = useMemo(() => {
     const map = {};
     products.forEach(p => {
       if (!p.category) return;
       if (!map[p.category]) map[p.category] = { count: 0, loss: 0, thrown: 0 };
-      if (getProductStatus(p.expiration_date) === 'expired') {
+      if (isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired') {
         map[p.category].count++;
         map[p.category].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
         map[p.category].thrown += (p.quantity_thrown || 0);
@@ -115,13 +117,13 @@ export default function Analytics() {
       .slice(0, 6);
   }, [products, t]);
 
-  // Rayon analysis
+  // Rayon analysis — includes discarded products
   const rayonStats = useMemo(() => {
     const map = {};
     products.forEach(p => {
       if (!p.rayon) return;
       if (!map[p.rayon]) map[p.rayon] = { count: 0, loss: 0 };
-      if (getProductStatus(p.expiration_date) === 'expired') {
+      if (isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired') {
         map[p.rayon].count++;
         map[p.rayon].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
       }
@@ -132,10 +134,10 @@ export default function Analytics() {
       .slice(0, 8);
   }, [products]);
 
-  // Most problematic products
+  // Most problematic products — includes discarded
   const topProblematicProducts = useMemo(() => {
     return products
-      .filter(p => getProductStatus(p.expiration_date) === 'expired' && p.price_chf)
+      .filter(p => (isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired') && p.price_chf)
       .sort((a, b) => ((b.quantity_thrown || 0) * (b.price_chf || 0)) - ((a.quantity_thrown || 0) * (a.price_chf || 0)))
       .slice(0, 5);
   }, [products]);
@@ -153,8 +155,9 @@ export default function Analytics() {
     );
   }
 
+  // Include discarded products in loss calculations — they are archived, not deleted
   const totalLossAll = calculateTotalLoss(products);
-  const totalExpired = products.filter(p => getProductStatus(p.expiration_date) === 'expired').length;
+  const totalExpired = products.filter(p => isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired').length;
   const totalThrown = products.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
 
   return (
