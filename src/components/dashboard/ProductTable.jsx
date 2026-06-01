@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, calculateTotalLoss } from '@/lib/productUtils';
+import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, calculateTotalLoss } from '@/lib/productUtils';
 
 const ACTION_KEYS = {
   jeter: 'action_jeter',
@@ -204,21 +204,21 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
   const MobileCards = () => (
     <div className="space-y-2 sm:hidden">
       {products.map(p => {
-        const status = getProductStatus(p.expiration_date);
+        const status = getDisplayStatus(p);
         const days = getDaysRemaining(p.expiration_date);
         const cfg = statusConfig[status];
         const total = (p.quantity_thrown || 0) * (p.price_chf || 0);
-        const isExpired = status === 'expired';
+        const isExpired = getProductStatus(p.expiration_date) === 'expired';
 
         return (
-          <div key={p.id} className={`bg-white rounded-xl border px-3 py-2.5 shadow-sm ${isExpired ? 'border-red-200 bg-red-50/30' : status === 'urgent' ? 'border-orange-200 bg-orange-50/20' : 'border-border/40'}`}>
+          <div key={p.id} className={`bg-white rounded-xl border px-3 py-2.5 shadow-sm ${status === 'archived' ? 'border-blue-200 bg-blue-50/20' : isExpired ? 'border-red-200 bg-red-50/30' : status === 'urgent' ? 'border-orange-200 bg-orange-50/20' : 'border-border/40'}`}>
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="font-semibold text-sm text-foreground">{p.name}</span>
                   <span className={`inline-flex items-center gap-1 px-1.5 py-0 rounded-full text-[10px] font-medium border ${cfg.color}`}>
                     <span className={`w-1 h-1 rounded-full ${cfg.dot}`} />
-                    {t('status_' + status)}
+                    {status === 'archived' ? 'Archivé' : t('status_' + status)}
                   </span>
                 </div>
                 <div className="flex gap-2 mt-0.5 text-[11px] text-muted-foreground flex-wrap">
@@ -273,14 +273,14 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                 );
               }
 
-              const status = getProductStatus(p.expiration_date);
+              const status = getDisplayStatus(p);
               const days = getDaysRemaining(p.expiration_date);
               const cfg = statusConfig[status];
               const total = (p.quantity_thrown || 0) * (p.price_chf || 0);
-              const isExpired = status === 'expired';
+              const isExpired = getProductStatus(p.expiration_date) === 'expired';
 
               return (
-                <tr key={p.id} className={`border-t border-border/30 hover:bg-secondary/20 ${isExpired ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/40' : status === 'soon' ? 'bg-yellow-50/20' : ''}`}>
+                <tr key={p.id} className={`border-t border-border/30 hover:bg-secondary/20 ${status === 'archived' ? 'bg-blue-50/30' : isExpired ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/40' : status === 'soon' ? 'bg-yellow-50/20' : ''}`}>
                   <td className="px-4 py-3 font-medium text-foreground max-w-[160px] truncate">{p.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{p.marque || '—'}</td>
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
@@ -296,7 +296,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                      {t('status_' + status)}
+                      {status === 'archived' ? 'Archivé' : t('status_' + status)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground text-xs">

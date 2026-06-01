@@ -25,11 +25,25 @@ export function getDaysRemaining(expirationDate) {
 }
 
 export const statusConfig = {
-  expired: { color: 'bg-red-100 text-red-700 border-red-200', dot: 'bg-red-500' },
-  urgent:  { color: 'bg-orange-100 text-orange-700 border-orange-200', dot: 'bg-orange-500' },
-  soon:    { color: 'bg-yellow-100 text-yellow-700 border-yellow-200', dot: 'bg-yellow-500' },
-  ok:      { color: 'bg-green-100 text-green-700 border-green-200', dot: 'bg-green-500' },
+  expired:  { color: 'bg-red-100 text-red-700 border-red-200', dot: 'bg-red-500' },
+  urgent:   { color: 'bg-orange-100 text-orange-700 border-orange-200', dot: 'bg-orange-500' },
+  soon:     { color: 'bg-yellow-100 text-yellow-700 border-yellow-200', dot: 'bg-yellow-500' },
+  ok:       { color: 'bg-green-100 text-green-700 border-green-200', dot: 'bg-green-500' },
+  archived: { color: 'bg-blue-100 text-blue-700 border-blue-200', dot: 'bg-blue-500' },
 };
+
+/**
+ * Returns the display status for a product, taking into account discarded state.
+ * - If discarded AND DLC is still in the past → "archived" (blue)
+ * - If discarded BUT DLC updated to future → normal status (ok/soon/urgent)
+ * - Otherwise → normal status based on DLC
+ */
+export function getDisplayStatus(product) {
+  if (!product) return 'ok';
+  const baseStatus = product.expiration_date ? getProductStatus(product.expiration_date) : 'ok';
+  if (product.discarded && baseStatus === 'expired') return 'archived';
+  return baseStatus;
+}
 
 export const categoryKeys = {
   snacks:           'cat_snacks',
