@@ -18,6 +18,8 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Landing from '@/pages/Landing';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
 import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
@@ -81,8 +83,10 @@ const AuthenticatedApp = () => {
     <>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          {/* Public landing — accessible to everyone */}
+          {/* Public pages — accessible to everyone */}
           <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+          <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+          <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
 
           {/* Public auth routes */}
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />

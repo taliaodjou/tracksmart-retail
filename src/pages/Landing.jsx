@@ -281,9 +281,9 @@ export default function Landing() {
               <span className="font-bold text-white">TrackSmart Retail</span>
             </div>
             <div className="flex items-center gap-6 text-sm">
+              <Link to="/about" className="hover:text-white transition-colors">À propos</Link>
+              <Link to="/contact" className="hover:text-white transition-colors">Contact</Link>
               <a href="mailto:support@tracksmart.com" className="hover:text-white transition-colors">Support</a>
-              <span className="hover:text-white transition-colors cursor-pointer">Conditions d'utilisation</span>
-              <span className="hover:text-white transition-colors cursor-pointer">Confidentialité</span>
             </div>
             <span className="text-xs">© {new Date().getFullYear()} TNO Studio. Tous droits réservés.</span>
           </div>
