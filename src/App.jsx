@@ -11,7 +11,12 @@ import { SupportModeProvider } from '@/lib/SupportModeContext';
 import { isAdmin } from '@/lib/productUtils';
 import BottomTabBar from '@/components/mobile/BottomTabBar';
 import PageTransition from '@/components/mobile/PageTransition';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { useEffect } from 'react';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import Landing from '@/pages/Landing';
 import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
@@ -28,7 +33,7 @@ import TeamManagement from '@/pages/TeamManagement';
 import ActivityLogs from '@/pages/ActivityLogs';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user, isAuthenticated } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, user, isAuthenticated } = useAuth();
   const location = useLocation();
 
   // Force light mode always — TrackSmart uses fixed light theme
@@ -50,13 +55,8 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
-    }
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   // Admin guard: block admin from client pages, redirect to admin-portal
@@ -81,26 +81,35 @@ const AuthenticatedApp = () => {
     <>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+          {/* Public auth routes */}
+          <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
+          <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+          <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
 
-          {/* Client-facing routes */}
-          <Route path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />
-          <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
-          <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
-          <Route path="/analytics" element={<PageTransition><Analytics /></PageTransition>} />
-          <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
-          <Route path="/reports" element={<PageTransition><Reports /></PageTransition>} />
-          <Route path="/documents" element={<PageTransition><Documents /></PageTransition>} />
-          <Route path="/team" element={<PageTransition><TeamManagement /></PageTransition>} />
-          <Route path="/activity" element={<PageTransition><ActivityLogs /></PageTransition>} />
-          <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
+          {/* Protected app routes */}
+          <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+            <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
 
-          {/* Admin-only routes */}
-          <Route path="/admin-portal" element={<PageTransition><ClientGuard><AdminPortal /></ClientGuard></PageTransition>} />
-          <Route path="/support-view" element={<PageTransition><ClientSupportView /></PageTransition>} />
-          <Route path="/email-preferences" element={<PageTransition><EmailPreferences /></PageTransition>} />
+            {/* Client-facing routes */}
+            <Route path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />
+            <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+            <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+            <Route path="/analytics" element={<PageTransition><Analytics /></PageTransition>} />
+            <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
+            <Route path="/reports" element={<PageTransition><Reports /></PageTransition>} />
+            <Route path="/documents" element={<PageTransition><Documents /></PageTransition>} />
+            <Route path="/team" element={<PageTransition><TeamManagement /></PageTransition>} />
+            <Route path="/activity" element={<PageTransition><ActivityLogs /></PageTransition>} />
+            <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
 
-          <Route path="*" element={<PageTransition><PageNotFound /></PageTransition>} />
+            {/* Admin-only routes */}
+            <Route path="/admin-portal" element={<PageTransition><ClientGuard><AdminPortal /></ClientGuard></PageTransition>} />
+            <Route path="/support-view" element={<PageTransition><ClientSupportView /></PageTransition>} />
+            <Route path="/email-preferences" element={<PageTransition><EmailPreferences /></PageTransition>} />
+
+            <Route path="*" element={<PageTransition><PageNotFound /></PageTransition>} />
+          </Route>
         </Routes>
       </AnimatePresence>
       {showBottomBar && <BottomTabBar />}
