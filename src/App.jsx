@@ -81,6 +81,9 @@ const AuthenticatedApp = () => {
     <>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
+          {/* Public landing — accessible to everyone */}
+          <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+
           {/* Public auth routes */}
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
@@ -88,8 +91,7 @@ const AuthenticatedApp = () => {
           <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
 
           {/* Protected app routes */}
-          <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-            <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+          <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/" replace />} />}>
 
             {/* Client-facing routes */}
             <Route path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />
