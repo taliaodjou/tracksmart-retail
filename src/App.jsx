@@ -20,6 +20,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import Landing from '@/pages/Landing';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
+import Demo from '@/pages/Demo';
 import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
@@ -87,6 +88,7 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+          <Route path="/demo" element={<PageTransition><Demo /></PageTransition>} />
 
           {/* Public auth routes */}
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
