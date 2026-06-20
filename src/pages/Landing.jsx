@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React from 'react';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -49,22 +49,20 @@ const benefits = [
 ];
 
 export default function Landing() {
-  const { isAuthenticated, user, isLoadingAuth } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated, isLoadingAuth } = useAuth();
 
-  // Redirect authenticated users to dashboard
-  React.useEffect(() => {
-    if (!isLoadingAuth && isAuthenticated && user) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [isLoadingAuth, isAuthenticated, user, navigate]);
-
-  if (isLoadingAuth || isAuthenticated) {
+  // Show spinner while auth is loading
+  if (isLoadingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#fafaf8' }}>
         <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
       </div>
     );
+  }
+
+  // If user is already authenticated, redirect immediately (no flash)
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
