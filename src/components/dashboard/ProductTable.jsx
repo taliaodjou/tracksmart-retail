@@ -22,6 +22,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
   const [form, setForm] = useState({
     name: product.name || '',
     marque: product.marque || '',
+    etagere: product.etagere || '',
     category: product.category || '',
     rayon: product.rayon || '',
     expiration_date: product.expiration_date || '',
@@ -50,6 +51,15 @@ function InlineEditRow({ product, onSave, onCancel }) {
           value={form.marque}
           onChange={e => setForm(f => ({ ...f, marque: e.target.value }))}
           className="h-7 text-xs min-w-[90px]"
+        />
+      </td>
+      {/* Étagère */}
+      <td className="px-3 py-2">
+        <Input
+          value={form.etagere}
+          onChange={e => setForm(f => ({ ...f, etagere: e.target.value }))}
+          className="h-7 text-xs min-w-[80px]"
+          placeholder="Étagère"
         />
       </td>
       {/* Catégorie */}
@@ -155,6 +165,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
               onSave({
                 name: form.name,
                 marque: form.marque || undefined,
+                etagere: form.etagere || undefined,
                 category: form.category || undefined,
                 rayon: form.rayon || undefined,
                 expiration_date: form.expiration_date,
@@ -225,6 +236,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                 </div>
                 <div className="flex gap-2 mt-0.5 text-[11px] text-muted-foreground flex-wrap">
                   {p.marque && <span>{p.marque}</span>}
+                  {p.etagere && <span>• {p.etagere}</span>}
                   {p.expiration_date && (
                     <span className={`font-medium ${isExpired ? 'text-red-600' : days < 3 ? 'text-orange-600' : days < 14 ? 'text-yellow-600' : 'text-green-600'}`}>
                       {format(new Date(p.expiration_date), 'dd/MM/yy')} ({days}j)
@@ -257,7 +269,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
         <table className="w-full text-sm">
           <thead className="bg-secondary/40">
             <tr>
-              {[t('col_product'), t('col_brand'), t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', ''].map((h, i) => (
+              {[t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', ''].map((h, i) => (
                 <th key={i} className="text-left px-4 py-3 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
               ))}
             </tr>
@@ -285,6 +297,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                 <tr key={p.id} className={`border-t border-border/30 hover:bg-secondary/20 ${status === 'archived' ? 'bg-blue-50/30' : isExpired ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/40' : status === 'soon' ? 'bg-yellow-50/20' : ''}`}>
                   <td className="px-4 py-3 font-medium text-foreground max-w-[160px] truncate">{p.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{p.marque || '—'}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{p.etagere || '—'}</td>
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
                     {p.category ? t(categoryKeys[p.category] || p.category) : '—'}
                   </td>
@@ -344,7 +357,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
                   onClick={() => setShowLossRecap(true)}
                   title="Voir le détail des pertes"
                 >
-                  <td colSpan={9} className="px-4 py-3 text-xs font-semibold text-red-700 text-right">
+                  <td colSpan={10} className="px-4 py-3 text-xs font-semibold text-red-700 text-right">
                     Total pertes enregistrées
                     <span className="ml-2 text-red-500 underline font-normal">Voir le détail</span>
                   </td>

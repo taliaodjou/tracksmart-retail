@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Marque"
     },
+    "etagere": {
+      "type": "string",
+      "description": "\u00c9tag\u00e8re (optionnel)"
+    },
     "category": {
       "type": "string",
       "enum": [

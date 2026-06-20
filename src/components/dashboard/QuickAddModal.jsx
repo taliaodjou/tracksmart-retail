@@ -22,6 +22,7 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
   const [form, setForm] = useState({
     name: prefill?.name || '',
     marque: prefill?.brand || prefill?.marque || '',
+    etagere: '',
     category: prefill?.category || '',
     rayon: prefill?.default_rayon || '',
     expiration_date: '',
@@ -151,6 +152,19 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
             <span>{isFr ? 'Date de réception' : 'Reception date'}: <strong>{today}</strong></span>
           </div>
 
+          {/* Étagère */}
+          <div>
+            <label className="block text-sm font-semibold text-foreground mb-2">
+              {isFr ? 'Étagère' : 'Shelf'} <span className="text-muted-foreground font-normal text-xs">({isFr ? 'optionnel' : 'optional'})</span>
+            </label>
+            <Input
+              value={form.etagere}
+              onChange={e => set('etagere', e.target.value)}
+              placeholder={isFr ? 'Ex: Étagère du haut' : 'Ex: Top shelf'}
+              className="h-11 text-sm rounded-xl"
+            />
+          </div>
+
           {/* Rayon */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
@@ -250,6 +264,7 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
               const data = {
                 name: form.name,
                 marque: form.marque || undefined,
+                etagere: form.etagere || undefined,
                 category: form.category || undefined,
                 rayon: form.rayon || undefined,
                 expiration_date: form.expiration_date,

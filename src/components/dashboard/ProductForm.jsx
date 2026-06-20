@@ -19,7 +19,7 @@ const ACTION_KEYS = {
 };
 
 const empty = {
-  name: '', marque: '', category: '', rayon: '',
+  name: '', marque: '', etagere: '', category: '', rayon: '',
   reception_date: '', expiration_date: '',
   action: '', order_date: '', quantity_thrown: '', price_chf: '',
 };
@@ -36,6 +36,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
       setForm({
         name: editProduct.name || '',
         marque: editProduct.marque || '',
+        etagere: editProduct.etagere || '',
         category: editProduct.category || '',
         rayon: editProduct.rayon || '',
         reception_date: editProduct.reception_date || '',
@@ -63,6 +64,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
       expiration_date: form.expiration_date,
     };
     if (form.marque) data.marque = form.marque;
+    if (form.etagere) data.etagere = form.etagere;
     if (form.category) data.category = form.category;
     if (form.rayon) data.rayon = form.rayon;
     if (form.reception_date) data.reception_date = form.reception_date;
@@ -161,6 +163,12 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         <div className="space-y-1">
           <Label className="text-xs">{t('form_brand')}</Label>
           <Input value={form.marque} onChange={set('marque')} placeholder="Ex: Nestlé" className="h-8 text-sm" />
+        </div>
+
+        {/* Étagère */}
+        <div className="space-y-1">
+          <Label className="text-xs">{lang === 'fr' ? 'Étagère' : 'Shelf'} <span className="text-muted-foreground font-normal">({lang === 'fr' ? 'optionnel' : 'optional'})</span></Label>
+          <Input value={form.etagere} onChange={set('etagere')} placeholder={lang === 'fr' ? 'Ex: Étagère du haut' : 'Ex: Top shelf'} className="h-8 text-sm" />
         </div>
 
         {/* Catégorie */}
