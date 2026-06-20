@@ -24,6 +24,11 @@
       "type": "string",
       "description": "Notification message content"
     },
+    "description": {
+      "type": "string",
+      "description": "Description optionnelle",
+      "maxLength": 1000
+    },
     "read": {
       "type": "boolean",
       "default": false

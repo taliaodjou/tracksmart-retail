@@ -9,6 +9,11 @@
     "shop_name": {
       "type": "string"
     },
+    "description": {
+      "type": "string",
+      "description": "Description optionnelle",
+      "maxLength": 1000
+    },
     "quarter_label": {
       "type": "string",
       "description": "e.g. T1 2025"
