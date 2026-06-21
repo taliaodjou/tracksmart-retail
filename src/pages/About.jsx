@@ -132,14 +132,14 @@ export default function About() {
                   <p className="font-bold">+41 77 222 97 64</p>
                 </div>
               </a>
-              <a href="mailto:contact@tracksmart.ch" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-5 h-5 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="font-bold">contact@tracksmart.ch</p>
-                </div>
+              <a href="mailto:contact@tracksmart.ch" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">Email
+
+contact@tracksmart.com
+
+
+
+
+
               </a>
             </div>
           </motion.div>
