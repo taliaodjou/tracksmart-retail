@@ -56,8 +56,7 @@ export default function About() {
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
                 className={`p-6 rounded-2xl border ${item.color} text-center`}>
                 
@@ -72,9 +71,8 @@ export default function About() {
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
               className="prose prose-lg max-w-none text-muted-foreground">
               
               <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-100">
@@ -112,9 +110,8 @@ export default function About() {
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}>
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}>
             
             <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
               Envie d'en savoir plus ?
@@ -132,14 +129,14 @@ export default function About() {
                   <p className="font-bold">+41 77 222 97 64</p>
                 </div>
               </a>
-              <a href="mailto:contact@tracksmart.ch" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">Email
-
-contact@tracksmart.com
-
-
-
-
-
+              <a href="mailto:contact@tracksmart.ch" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-bold">contact@tracksmart.ch</p>
+                </div>
               </a>
             </div>
           </motion.div>
