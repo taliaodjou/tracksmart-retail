@@ -6,8 +6,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowRight, Play, Check, Lock, Phone, Search, Clock, Mail,
   Boxes, AlertTriangle, Barcode, BarChart3, Smartphone,
-  LayoutDashboard, Package, Warehouse, Bell, ArrowLeftRight, FileText, Settings,
-  TrendingUp, ShoppingCart, ChevronDown
+  LayoutDashboard, Package, ChevronDown
 } from 'lucide-react';
 
 export default function Landing() {
@@ -42,7 +41,6 @@ export default function Landing() {
               <span className="text-neutral-200">Pour qui ?</span>
               <span className="text-neutral-200">Tarifs</span>
               <span className="text-neutral-200">Ressources</span>
-              <Link to="/about" className="hover:text-foreground transition-colors">À propos</Link>
             </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -110,108 +108,102 @@ export default function Landing() {
                 </div>
               </motion.div>
 
-              {/* Right Column — App Dashboard Preview */}
+              {/* Right Column — Phone Mockup like the reference */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="hidden lg:block"
+                className="hidden lg:flex justify-center relative"
               >
-                <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
-                  <div className="flex h-[420px]">
-                    {/* Sidebar */}
-                    <div className="w-[160px] bg-neutral-50 border-r border-neutral-100 p-4 flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2 mb-4 px-2">
-                        <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
-                          <span className="text-white text-[10px] font-bold">TS</span>
-                        </div>
-                        <span className="text-xs font-semibold">TrackSmart</span>
-                      </div>
-                      {[
-                        { icon: LayoutDashboard, label: 'Tableau de bord', active: true },
-                        { icon: Package, label: 'Produits' },
-                        { icon: Warehouse, label: 'Stocks' },
-                        { icon: Bell, label: 'Alertes DLC' },
-                        { icon: ArrowLeftRight, label: 'Entrées / Sorties' },
-                        { icon: FileText, label: 'Rapports' },
-                        { icon: Settings, label: 'Paramètres' },
-                      ].map((item, idx) => (
-                        <div
-                          key={idx}
-                          className={`flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-colors ${
-                            item.active
-                              ? 'bg-primary/10 text-primary font-medium'
-                              : 'text-muted-foreground hover:bg-neutral-100'
-                          }`}
-                        >
-                          <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                          {item.label}
-                        </div>
-                      ))}
+                {/* Phone frame */}
+                <div className="relative w-[300px]">
+                  <div className="bg-white rounded-[2.5rem] shadow-2xl border-[3px] border-neutral-800 overflow-hidden">
+                    {/* Notch */}
+                    <div className="bg-neutral-800 h-7 flex items-center justify-center">
+                      <div className="w-20 h-4 bg-neutral-900 rounded-full" />
                     </div>
-
-                    {/* Main Content */}
-                    <div className="flex-1 p-4 overflow-hidden">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-xs font-semibold">Bonjour, Marie 👋</p>
+                    {/* Status bar */}
+                    <div className="bg-white px-5 pt-2 pb-1 flex items-center justify-between">
+                      <span className="text-[10px] font-semibold text-neutral-800">9:41</span>
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded-full border border-neutral-400" />
+                        <div className="w-3 h-3 rounded-full border border-neutral-400" />
+                        <div className="w-3 h-3 rounded-full border border-neutral-400" />
+                      </div>
+                    </div>
+                    {/* App content */}
+                    <div className="px-4 pt-1 pb-5 space-y-3">
+                      {/* Header row */}
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-[9px] font-bold">TS</span>
                         </div>
-                        <div className="flex items-center gap-1.5 bg-neutral-100 rounded-lg px-2.5 py-1 text-[10px] text-muted-foreground">
-                          <Search className="w-3 h-3" />
-                          Rechercher...
+                        <p className="text-xs font-bold">Tableau de bord</p>
+                      </div>
+
+                      {/* Stats cards */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-2.5">
+                          <p className="text-[9px] text-muted-foreground mb-0.5">Produits en stock</p>
+                          <p className="text-lg font-bold">1 248</p>
+                          <p className="text-[9px] text-green-600 font-medium">+12 ce mois</p>
+                        </div>
+                        <div className="bg-amber-50 border border-amber-100 rounded-xl p-2.5">
+                          <p className="text-[9px] text-muted-foreground mb-0.5">Alertes DLC</p>
+                          <p className="text-lg font-bold">23</p>
+                          <p className="text-[9px] text-red-500 font-medium">à traiter</p>
+                        </div>
+                        <div className="bg-green-50 border border-green-100 rounded-xl p-2.5">
+                          <p className="text-[9px] text-muted-foreground mb-0.5">Pertes évitées</p>
+                          <p className="text-lg font-bold">12 500 CHF</p>
+                          <p className="text-[9px] text-green-600 font-medium">ce mois</p>
+                        </div>
+                        <div className="bg-purple-50 border border-purple-100 rounded-xl p-2.5">
+                          <p className="text-[9px] text-muted-foreground mb-0.5">Valeur du stock</p>
+                          <p className="text-lg font-bold">85 000 CHF</p>
+                          <p className="text-[9px] text-muted-foreground">total</p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-3">
-                        {[
-                          { label: 'Produits en stock', value: '1 248', icon: Package, color: 'bg-blue-50 border-blue-100' },
-                          { label: 'Alertes DLC', value: '23', icon: Bell, color: 'bg-amber-50 border-amber-100' },
-                          { label: 'Pertes évitées', value: '12 500 CHF', icon: TrendingUp, color: 'bg-green-50 border-green-100' },
-                          { label: 'Valeur du stock', value: '85 000 CHF', icon: ShoppingCart, color: 'bg-purple-50 border-purple-100' },
-                        ].map((card, idx) => (
-                          <div key={idx} className={`rounded-xl border p-2.5 ${card.color}`}>
-                            <div className="flex items-center gap-1.5 mb-1">
-                              <card.icon className="w-3 h-3 text-muted-foreground" />
-                              <span className="text-[10px] text-muted-foreground">{card.label}</span>
-                            </div>
-                            <p className="text-sm font-bold">{card.value}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-3">
-                        <p className="text-[10px] font-semibold text-red-700 mb-2">⚠️ Alerte proches expiration</p>
+                      {/* Alert section */}
+                      <div className="bg-red-50 border border-red-100 rounded-xl p-3">
+                        <p className="text-[9px] font-semibold text-red-700 mb-2">⚠️ Proches expiration</p>
                         {[
                           { name: 'Lait Candia 1L', date: '30/06/2026' },
                           { name: 'Yaourt nature x12', date: '02/07/2026' },
                           { name: 'Jambon de dinde', date: '05/07/2026' },
                         ].map((item, idx) => (
                           <div key={idx} className="flex items-center justify-between py-1 border-b border-red-100 last:border-0">
-                            <span className="text-[10px]">{item.name}</span>
-                            <span className="text-[10px] text-red-600 font-medium">{item.date}</span>
+                            <span className="text-[9px]">{item.name}</span>
+                            <span className="text-[9px] text-red-600 font-medium">{item.date}</span>
                           </div>
                         ))}
                       </div>
 
-                      <div className="bg-neutral-50 rounded-xl p-3">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-[10px] font-semibold">Évolution des pertes évitées</p>
-                          <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                        </div>
-                        <div className="h-16 flex items-end gap-1.5">
-                          {[20, 25, 18, 35, 40, 30, 50, 45, 55, 48, 60, 65, 58, 70, 72, 68, 75, 80, 78, 82, 85, 80, 88, 90, 85, 92, 95, 90, 98, 100].map((h, i) => (
-                            <div
-                              key={i}
-                              className="flex-1 bg-primary/60 rounded-sm hover:bg-primary transition-colors"
-                              style={{ height: `${h}%` }}
-                            />
-                          ))}
-                        </div>
-                        <div className="flex justify-between mt-1.5 text-[9px] text-muted-foreground">
-                          <span>1 Juin</span>
-                          <span>30 Juin</span>
-                        </div>
+                      {/* Bottom nav bar */}
+                      <div className="flex items-center justify-around pt-1 border-t border-neutral-100">
+                        <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><LayoutDashboard className="w-3.5 h-3.5 text-primary" /></div>
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center"><Package className="w-3.5 h-3.5 text-muted-foreground" /></div>
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center"><Search className="w-3.5 h-3.5 text-muted-foreground" /></div>
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center"><BarChart3 className="w-3.5 h-3.5 text-muted-foreground" /></div>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Floating evolution card */}
+                  <div className="absolute -right-24 top-[55%] -translate-y-1/2 bg-white rounded-xl shadow-lg border border-neutral-200 p-3 w-44 z-10">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-[10px] font-semibold">Évolution</p>
+                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                    </div>
+                    <div className="h-12 flex items-end gap-[2px] mb-1">
+                      {[30, 35, 28, 50, 45, 40, 60, 55, 65, 58, 70, 75, 68, 80, 85, 78, 90, 95].map((h, i) => (
+                        <div key={i} className="flex-1 bg-primary/60 rounded-[1px]" style={{ height: `${h}%` }} />
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold">12 500 CHF</span>
+                      <span className="text-[9px] text-green-600 font-semibold">+18%</span>
                     </div>
                   </div>
                 </div>
@@ -317,13 +309,13 @@ export default function Landing() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 tracking-tight text-foreground">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-3 tracking-tight text-foreground">
               Intéressé(e) par TrackSmart Retail&nbsp;?
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-3">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-2">
               Vous souhaitez plus d'informations sur nos tarifs ou devenir client chez nous&nbsp;?
             </p>
-            <p className="text-sm sm:text-base text-muted-foreground mb-8">
+            <p className="text-sm text-muted-foreground mb-6">
               Contactez-nous directement, nous serons ravis d'échanger avec vous.
             </p>
 
