@@ -12,6 +12,7 @@ import {
 import { TrendingDown, TrendingUp, PackageX, Flame, AlertTriangle, BarChart2 } from 'lucide-react';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
+import LossRecapByMonth from '@/components/analytics/LossRecapByMonth';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
 import PremiumGate from '@/components/dashboard/PremiumGate';
 
@@ -368,6 +369,9 @@ export default function Analytics() {
             )}
           </div>
         </div>
+
+        {/* Loss Recap by Month */}
+        <LossRecapByMonth products={products} lang={lang} />
 
       </main>
       <DashboardFooter />

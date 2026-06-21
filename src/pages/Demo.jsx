@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
+import LossRecapByMonth from '@/components/analytics/LossRecapByMonth';
 import { rayonKeys, categoryKeys } from '@/lib/productUtils';
 import { format, startOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -351,9 +352,10 @@ function AnalyticsTab({ products }) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="bg-white rounded-2xl p-6 shadow-sm border"><h3 className="font-semibold mb-4 flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-orange-500"/>Rayons à surveiller</h3>{rayStats.length===0?<p className="text-sm text-muted-foreground">Aucun rayon problématique.</p>:<div className="space-y-2">{rayStats.map((r,i)=><div key={r.rayon} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50"><div className="flex items-center gap-3"><span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${i===0?'bg-red-500':i===1?'bg-orange-500':'bg-yellow-500'}`}>{i+1}</span><span className="font-medium text-sm">Rayon {r.rayon.slice(1)}</span></div><div className="text-right"><p className="text-sm font-semibold">CHF {r.loss.toFixed(2)}</p><p className="text-xs text-muted-foreground">{r.count} expirés</p></div></div>)}</div>}</div>
       <div className="bg-white rounded-2xl p-6 shadow-sm border"><h3 className="font-semibold mb-4 flex items-center gap-2"><Flame className="w-4 h-4 text-red-500"/>Produits problématiques</h3>{topP.length===0?<p className="text-sm text-muted-foreground">Aucune perte.</p>:<div className="space-y-2">{topP.map((p,i)=>{const l=(p.quantity_thrown||0)*(p.price_chf||0);return <div key={p._id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50"><div className="flex items-center gap-3"><span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${i===0?'bg-red-500':i===1?'bg-orange-500':'bg-yellow-500'}`}>{i+1}</span><div><p className="text-sm font-medium">{p.name}</p>{p.marque&&<p className="text-xs text-muted-foreground">{p.marque}</p>}</div></div><div className="text-right"><p className="text-sm font-semibold text-red-600">CHF {l.toFixed(2)}</p><p className="text-xs text-muted-foreground">{p.quantity_thrown} jetés</p></div></div>})}</div>}</div>
-    </div>
-  </div>);
-}
+      </div>
+      <LossRecapByMonth products={products}/>
+      </div>);
+      }
 
 // ═══════════ TAB: ORDERS ═══════════
 function OrdersTab({ products }) {
