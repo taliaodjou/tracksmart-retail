@@ -66,14 +66,10 @@ export default function Landing() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <motion.div
-                  animate={{ scale: [1, 1.02, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 sm:mb-6"
-                >
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 sm:mb-6">
                   <Check className="w-3 h-3 sm:w-4 sm:h-4" />
                   LA SOLUTION DES COMMERÇANTS MALINS
-                </motion.div>
+                </div>
                 <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-bold leading-[1.12] tracking-tight mb-4 sm:mb-6">
                   Gérez vos stocks.<br />
                   Évitez les pertes.<br />
@@ -220,10 +216,9 @@ export default function Landing() {
         <section className="pb-10 sm:pb-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: false, margin: "-100px" }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.5 }}
               className="text-center"
             >
               <div className="inline-flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-3 bg-white/80 backdrop-blur rounded-2xl px-6 sm:px-10 py-4 sm:py-6 shadow-sm border border-neutral-100">
@@ -241,8 +236,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="text-center mb-8 sm:mb-10 md:mb-14"
           >
@@ -287,8 +281,7 @@ export default function Landing() {
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
                 whileHover={{ y: -4 }}
                 className="group p-4 sm:p-5 md:p-6 rounded-2xl border border-neutral-100 hover:border-primary/20 hover:shadow-lg transition-all duration-300 text-center"
@@ -309,9 +302,8 @@ export default function Landing() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
           >
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold mb-3 tracking-tight text-foreground">
               Intéressé(e) par TrackSmart Retail&nbsp;?
