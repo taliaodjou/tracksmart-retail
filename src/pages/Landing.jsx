@@ -46,8 +46,8 @@ export default function Landing() {
             </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link to="/login" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
-              Déjà un compte ?
+            <Link to="/login" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Connexion
             </Link>
             <Link to="/register">
               <Button size="sm" className="rounded-lg text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4">Créer un compte</Button>
