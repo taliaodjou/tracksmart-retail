@@ -23,7 +23,7 @@ export default function Register() {
     e.preventDefault();
     setError("");
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Les mots de passe ne correspondent pas");
       return;
     }
     setLoading(true);
@@ -31,7 +31,7 @@ export default function Register() {
       await base44.auth.register({ email, password });
       setShowOtp(true);
     } catch (err) {
-      setError(err.message || "Registration failed");
+      setError(err.message || "Échec de l'inscription");
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function Register() {
       }
       window.location.href = "/";
     } catch (err) {
-      setError(err.message || "Invalid verification code");
+      setError(err.message || "Code de vérification invalide");
     } finally {
       setLoading(false);
     }
@@ -58,11 +58,11 @@ export default function Register() {
     try {
       await base44.auth.resendOtp(email);
       toast({
-        title: "Code sent",
-        description: "Check your email for the new code.",
+        title: "Code envoyé",
+        description: "Vérifiez votre email pour le nouveau code.",
       });
     } catch (err) {
-      setError(err.message || "Failed to resend code");
+      setError(err.message || "Échec de l'envoi du code");
     }
   };
 
@@ -82,8 +82,8 @@ export default function Register() {
     return (
       <AuthLayout
         icon={Mail}
-        title="Verify your email"
-        subtitle={`We sent a code to ${email}`}
+        title="Vérifiez votre email"
+        subtitle={`Nous avons envoyé un code à ${email}`}
       >
         {error && (
           <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
@@ -116,16 +116,16 @@ export default function Register() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Verifying...
+              Vérification...
             </>
           ) : (
-            "Verify"
+            "Vérifier"
           )}
         </Button>
         <p className="text-center text-sm text-muted-foreground mt-4">
-          Didn't receive the code?{" "}
+          Vous n'avez pas reçu le code ?{" "}
           <button onClick={handleResend} className="text-primary font-medium hover:underline">
-            Resend
+            Renvoyer
           </button>
         </p>
       </AuthLayout>
@@ -135,13 +135,13 @@ export default function Register() {
   return (
     <AuthLayout
       icon={UserPlus}
-      title="Create your account"
-      subtitle="Sign up to get started"
+      title="Créez votre compte"
+      subtitle="Inscrivez-vous pour commencer"
       footer={
         <>
-          Already have an account?{" "}
+          Déjà un compte ?{" "}
           <Link to="/login" className="text-primary font-medium hover:underline">
-            Log in
+            Se connecter
           </Link>
         </>
       }
@@ -153,7 +153,7 @@ export default function Register() {
           onClick={handleGoogle}
         >
           <GoogleIcon className="w-5 h-5 mr-2" />
-          Continue with Google
+          Continuer avec Google
         </Button>
         <Button
           variant="outline"
@@ -166,7 +166,7 @@ export default function Register() {
             <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
             <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
           </svg>
-          Continue with Microsoft
+          Continuer avec Microsoft
         </Button>
         <Button
           variant="outline"
@@ -176,7 +176,7 @@ export default function Register() {
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
           </svg>
-          Continue with Apple
+          Continuer avec Apple
         </Button>
       </div>
 
@@ -185,7 +185,7 @@ export default function Register() {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
+          <span className="bg-card px-3 text-muted-foreground">ou</span>
         </div>
       </div>
 
@@ -214,7 +214,7 @@ export default function Register() {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Mot de passe</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -230,7 +230,7 @@ export default function Register() {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirm">Confirm Password</Label>
+          <Label htmlFor="confirm">Confirmer le mot de passe</Label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -249,10 +249,10 @@ export default function Register() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Creating account...
+              Création du compte...
             </>
           ) : (
-            "Create account"
+            "Créer un compte"
           )}
         </Button>
       </form>

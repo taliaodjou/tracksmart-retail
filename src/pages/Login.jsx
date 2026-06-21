@@ -22,7 +22,7 @@ export default function Login() {
       await base44.auth.loginViaEmailPassword(email, password);
       window.location.href = "/dashboard";
     } catch (err) {
-      setError(err.message || "Invalid email or password");
+      setError(err.message || "Email ou mot de passe invalide");
     } finally {
       setLoading(false);
     }
@@ -43,13 +43,13 @@ export default function Login() {
   return (
     <AuthLayout
       icon={LogIn}
-      title="Welcome back"
-      subtitle="Log in to your account"
+      title="Bon retour"
+      subtitle="Connectez-vous à votre compte"
       footer={
         <>
-          Don't have an account?{" "}
+          Pas encore de compte ?{" "}
           <Link to="/register" className="text-primary font-medium hover:underline">
-            Create one
+            Créez-en un
           </Link>
         </>
       }
@@ -61,7 +61,7 @@ export default function Login() {
           onClick={handleGoogle}
         >
           <GoogleIcon className="w-5 h-5 mr-2" />
-          Continue with Google
+          Continuer avec Google
         </Button>
         <Button
           variant="outline"
@@ -74,7 +74,7 @@ export default function Login() {
             <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
             <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
           </svg>
-          Continue with Microsoft
+          Continuer avec Microsoft
         </Button>
         <Button
           variant="outline"
@@ -84,7 +84,7 @@ export default function Login() {
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
           </svg>
-          Continue with Apple
+          Continuer avec Apple
         </Button>
       </div>
 
@@ -93,7 +93,7 @@ export default function Login() {
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-3 text-muted-foreground">or</span>
+          <span className="bg-card px-3 text-muted-foreground">ou</span>
         </div>
       </div>
 
@@ -123,9 +123,9 @@ export default function Login() {
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Mot de passe</Label>
             <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-              Forgot password?
+              Mot de passe oublié ?
             </Link>
           </div>
           <div className="relative">
@@ -146,10 +146,10 @@ export default function Login() {
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Logging in...
+              Connexion...
             </>
           ) : (
-            "Log in"
+            "Se connecter"
           )}
         </Button>
       </form>
