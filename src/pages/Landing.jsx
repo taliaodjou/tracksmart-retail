@@ -166,8 +166,8 @@ export default function Landing() {
                         {[
                           { label: 'Produits en stock', value: '1 248', icon: Package, color: 'bg-blue-50 border-blue-100' },
                           { label: 'Alertes DLC', value: '23', icon: Bell, color: 'bg-amber-50 border-amber-100' },
-                          { label: 'Pertes évitées', value: '250 000 CHF', icon: TrendingUp, color: 'bg-green-50 border-green-100' },
-                          { label: 'Valeur du stock', value: '2 450 000 CHF', icon: ShoppingCart, color: 'bg-purple-50 border-purple-100' },
+                          { label: 'Pertes évitées', value: '12 500 CHF', icon: TrendingUp, color: 'bg-green-50 border-green-100' },
+                          { label: 'Valeur du stock', value: '85 000 CHF', icon: ShoppingCart, color: 'bg-purple-50 border-purple-100' },
                         ].map((card, idx) => (
                           <div key={idx} className={`rounded-xl border p-2.5 ${card.color}`}>
                             <div className="flex items-center gap-1.5 mb-1">
@@ -220,21 +220,21 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* 98% Stat */}
+        {/* 98% Stat — scroll-triggered animation */}
         <section className="pb-10 sm:pb-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: false, margin: "-100px" }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
               className="text-center"
             >
-              <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                <Check className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
-                <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary">98%</span>
+              <div className="inline-flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-3 bg-white/80 backdrop-blur rounded-2xl px-6 sm:px-10 py-4 sm:py-6 shadow-sm border border-neutral-100">
+                <Check className="w-6 h-6 sm:w-8 sm:h-8 text-green-500 flex-shrink-0" />
+                <span className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-primary">98%</span>
               </div>
-              <p className="text-muted-foreground text-sm sm:text-base md:text-lg">de nos clients réduisent leurs pertes produits</p>
+              <p className="text-muted-foreground text-sm sm:text-base md:text-lg mt-2">de nos clients réduisent leurs pertes produits</p>
             </motion.div>
           </div>
         </section>
@@ -308,8 +308,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA Contact Section */}
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white">
+      {/* CTA Contact Section — soft orange / light tone */}
+      <section className="py-16 sm:py-24 bg-gradient-to-br from-orange-50 via-amber-50/60 to-orange-100/40 text-foreground">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -317,45 +317,45 @@ export default function Landing() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 tracking-tight text-foreground">
               Intéressé(e) par TrackSmart Retail&nbsp;?
             </h2>
-            <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto mb-3">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-3">
               Vous souhaitez plus d'informations sur nos tarifs ou devenir client chez nous&nbsp;?
             </p>
-            <p className="text-sm sm:text-base text-white/60 mb-8">
+            <p className="text-sm sm:text-base text-muted-foreground mb-8">
               Contactez-nous directement, nous serons ravis d'échanger avec vous.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
               <a
                 href="tel:+41772229764"
-                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group"
               >
                 <div className="w-10 h-10 rounded-xl bg-[#25D366] flex items-center justify-center flex-shrink-0">
                   <Phone className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-white/50">Par téléphone</p>
-                  <p className="text-lg font-bold text-white group-hover:text-primary transition-colors">+41 77 222 97 64</p>
+                  <p className="text-xs text-muted-foreground">Par téléphone</p>
+                  <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">+41 77 222 97 64</p>
                 </div>
               </a>
 
               <a
                 href="mailto:contact@tracksmart.ch"
-                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
                   <Mail className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-white/50">Par email</p>
-                  <p className="text-lg font-bold text-white group-hover:text-primary transition-colors">contact@tracksmart.ch</p>
+                  <p className="text-xs text-muted-foreground">Par email</p>
+                  <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">contact@tracksmart.ch</p>
                 </div>
               </a>
             </div>
 
-            <p className="text-xs text-white/30 mt-8">
+            <p className="text-xs text-muted-foreground mt-8">
               Disponible du lundi au vendredi · Réponse sous 24h
             </p>
           </motion.div>
