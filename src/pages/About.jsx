@@ -29,8 +29,8 @@ export default function About() {
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+              transition={{ duration: 0.5 }}>
+              
               <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6 shadow-sm">
                 <span className="text-white text-2xl font-bold">TS</span>
               </div>
@@ -49,25 +49,25 @@ export default function About() {
           <div className="max-w-4xl mx-auto px-6">
             <div className="grid sm:grid-cols-3 gap-6 mb-16">
               {[
-                { icon: Target, title: 'Notre mission', desc: 'Aider chaque commerçant à ne plus jamais perdre d\'argent à cause d\'une date oubliée.', color: 'bg-amber-50 border-amber-100', iconColor: 'text-amber-600', iconBg: 'bg-amber-100' },
-                { icon: Lightbulb, title: 'Notre vision', desc: 'Un monde où aucun produit alimentaire n\'est gaspillé pour une simple question d\'organisation.', color: 'bg-blue-50 border-blue-100', iconColor: 'text-blue-600', iconBg: 'bg-blue-100' },
-                { icon: Heart, title: 'Nos valeurs', desc: 'Simplicité, utilité et proximité avec les commerçants qui utilisent notre outil au quotidien.', color: 'bg-red-50 border-red-100', iconColor: 'text-red-600', iconBg: 'bg-red-100' },
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
-                  className={`p-6 rounded-2xl border ${item.color} text-center`}
-                >
+              { icon: Target, title: 'Notre mission', desc: 'Aider chaque commerçant à ne plus jamais perdre d\'argent à cause d\'une date oubliée.', color: 'bg-amber-50 border-amber-100', iconColor: 'text-amber-600', iconBg: 'bg-amber-100' },
+              { icon: Lightbulb, title: 'Notre vision', desc: 'Un monde où aucun produit alimentaire n\'est gaspillé pour une simple question d\'organisation.', color: 'bg-blue-50 border-blue-100', iconColor: 'text-blue-600', iconBg: 'bg-blue-100' },
+              { icon: Heart, title: 'Nos valeurs', desc: 'Simplicité, utilité et proximité avec les commerçants qui utilisent notre outil au quotidien.', color: 'bg-red-50 border-red-100', iconColor: 'text-red-600', iconBg: 'bg-red-100' }].
+              map((item, i) =>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className={`p-6 rounded-2xl border ${item.color} text-center`}>
+                
                   <div className={`w-12 h-12 rounded-xl ${item.iconBg} flex items-center justify-center mx-auto mb-4`}>
                     <item.icon className={`w-6 h-6 ${item.iconColor}`} />
                   </div>
                   <h3 className="font-bold text-lg mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
                 </motion.div>
-              ))}
+              )}
             </div>
 
             <motion.div
@@ -75,12 +75,12 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="prose prose-lg max-w-none text-muted-foreground"
-            >
+              className="prose prose-lg max-w-none text-muted-foreground">
+              
               <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-100">
-                <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-3">
-                  <Zap className="w-6 h-6 text-primary" />
-                  Pourquoi TrackSmart ?
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-3 text-[hsl(var(--foreground))]">Pourquoi TrackSmart Retail ?
+
+
                 </h2>
                 <p className="mb-4">
                   Chaque année, des tonnes de produits alimentaires sont jetées parce qu'une date limite est passée inaperçue. TrackSmart Retail résout ce problème en suivant chaque produit du rayon au congélateur, et en envoyant des alertes intelligentes 14, 7 et 3 jours avant expiration.
@@ -114,8 +114,8 @@ export default function About() {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
+            transition={{ duration: 0.5 }}>
+            
             <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
               Envie d'en savoir plus ?
             </h2>
@@ -162,6 +162,6 @@ export default function About() {
           <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} TNO Studio</span>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
