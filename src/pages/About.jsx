@@ -94,9 +94,9 @@ export default function About() {
               </div>
 
               <div className="bg-primary/5 rounded-2xl p-8 border border-primary/10 mt-6">
-                <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-3">
-                  <Shield className="w-6 h-6 text-primary" />
-                  La promesse TrackSmart
+                <h2 className="text-2xl font-bold text-foreground mb-4 flex items-center gap-3">La promesse TrackSmart Retail
+
+
                 </h2>
                 <p>
                   Que vous gériez une petite épicerie de quartier ou une chaîne de plusieurs magasins, TrackSmart Retail s'adapte à votre taille et à vos besoins. Rejoignez les commerçants qui ont déjà réduit leurs pertes de plus de 30 % grâce à une meilleure gestion de leurs dates.
