@@ -83,11 +83,11 @@ export default function About() {
                 <p className="mb-4">
                   Chaque année, des tonnes de produits alimentaires sont jetées parce qu'une date limite est passée inaperçue. TrackSmart Retail résout ce problème en suivant chaque produit du rayon au congélateur, et en envoyant des alertes intelligentes 14, 7 et 3 jours avant expiration.
                 </p>
-                <p className="mb-4">
-                  La plateforme offre une gestion complète : suivi des commandes fournisseurs, rapports trimestriels détaillés avec analyse des pertes par catégorie et par rayon, suivi financier en CHF des produits jetés, et un espace collaboratif pour votre équipe.
+                <p className="mb-4">La plateforme offre une gestion complète : suivi des commandes fournisseurs, rapports trimestriels détaillés avec analyse des pertes par catégorie et par rayon, suivi financier des produits jetés, et un espace collaboratif pour votre équipe.
+
                 </p>
-                <p>
-                  TrackSmart Retail est développé par <strong>TNO Studio</strong>, une entreprise spécialisée dans les solutions numériques pour les commerces et les indépendants. Nous croyons que la technologie doit être simple, utile et accessible — c'est pourquoi TrackSmart est utilisable dès la première connexion, sans formation complexe.
+                <p>TrackSmart Retail est développé par TNO Studio, une entreprise spécialisée dans les solutions numériques pour les commerces et les indépendants. Nous croyons que la technologie doit être simple, utile et accessible — c'est pourquoi TrackSmart Retail est utilisable dès la première connexion, sans formation complexe.
+
                 </p>
               </div>
 
