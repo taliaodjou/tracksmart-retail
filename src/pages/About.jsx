@@ -37,8 +37,8 @@ export default function About() {
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
                 À propos de <span className="text-primary">TrackSmart Retail</span>
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Une plateforme conçue pour aider les commerçants à réduire le gaspillage alimentaire et à mieux gérer leurs stocks.
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">Une plateforme conçue pour vous aider  à réduire le gaspillage alimentaire et à mieux gérer vos stocks.
+
               </p>
             </motion.div>
           </div>
