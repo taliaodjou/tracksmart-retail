@@ -14,7 +14,7 @@ export default function BottomTabBar() {
 
   return (
     <nav
-      className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 no-select"
+      className="sm:hidden fixed bottom-0 left-0 right-0 z-[9999] bg-white border-t border-gray-200 no-select shadow-[0_-4px_12px_rgba(0,0,0,0.06)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex">

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Target, Lightbulb, Heart, Shield, Zap } from 'lucide-react';
+import { ArrowLeft, Target, Lightbulb, Heart, Shield, Zap, Phone, Mail } from 'lucide-react';
 
 export default function About() {
   return (
@@ -106,6 +106,45 @@ export default function About() {
           </div>
         </section>
       </main>
+
+      {/* CTA Contact */}
+      <section className="py-16 sm:py-20 bg-gradient-to-br from-primary/10 via-white to-orange-50/30">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
+              Envie d'en savoir plus ?
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto mb-8">
+              Des questions sur nos tarifs ou sur comment devenir client ? Contactez-nous directement, nous sommes là pour vous répondre.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a href="tel:+41772229764" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
+                <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs text-muted-foreground">Téléphone</p>
+                  <p className="font-bold">+41 77 222 97 64</p>
+                </div>
+              </a>
+              <a href="mailto:contact@tracksmart.ch" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="font-bold">contact@tracksmart.ch</p>
+                </div>
+              </a>
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="py-10 border-t border-neutral-100">

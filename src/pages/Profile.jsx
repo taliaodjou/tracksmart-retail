@@ -174,36 +174,24 @@ export default function Profile() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm">{t('profile_report_channel')}</Label>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, report_channel: 'email' })}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
-                        form.report_channel === 'email'
-                          ? 'border-primary bg-primary/5 text-primary'
-                          : 'border-border text-muted-foreground hover:border-primary/40'
-                      }`}
-                    >
-                      <Mail className="w-4 h-4" />
-                      {t('profile_email')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, report_channel: 'sms' })}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
-                        form.report_channel === 'sms'
-                          ? 'border-primary bg-primary/5 text-primary'
-                          : 'border-border text-muted-foreground hover:border-primary/40'
-                      }`}
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      {t('profile_sms')}
-                    </button>
-                  </div>
-                  {form.report_channel === 'sms' && !form.phone_number && (
-                    <p className="text-xs text-orange-600">{lang === 'fr' ? 'Veuillez entrer un numéro de téléphone.' : 'Please enter a phone number.'}</p>
-                  )}
+                 <Label className="text-sm">{lang === 'fr' ? 'Rappels hebdomadaires' : 'Weekly reminders'}</Label>
+                 <p className="text-xs text-muted-foreground">
+                   {lang === 'fr' ? 'Recevez un récapitulatif hebdomadaire de vos produits à surveiller.' : 'Receive a weekly summary of your products to watch.'}
+                 </p>
+                 <div className="flex gap-3">
+                   <button
+                     type="button"
+                     onClick={() => setForm({ ...form, report_channel: 'email' })}
+                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                       form.report_channel === 'email'
+                         ? 'border-primary bg-primary/5 text-primary'
+                         : 'border-border text-muted-foreground hover:border-primary/40'
+                     }`}
+                   >
+                     <Mail className="w-4 h-4" />
+                     {lang === 'fr' ? 'Par email' : 'By email'}
+                   </button>
+                 </div>
                 </div>
 
                 <div className="flex justify-end">

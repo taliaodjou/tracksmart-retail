@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import {
-  ArrowRight, Play, Check, Lock, Phone, Search, Clock,
+  ArrowRight, Play, Check, Lock, Phone, Search, Clock, Mail,
   Boxes, AlertTriangle, Barcode, BarChart3, Smartphone,
   LayoutDashboard, Package, Warehouse, Bell, ArrowLeftRight, FileText, Settings,
   TrendingUp, ShoppingCart, ChevronDown
@@ -305,6 +305,60 @@ export default function Landing() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* CTA Contact Section */}
+      <section className="py-16 sm:py-24 bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">
+              Intéressé(e) par TrackSmart Retail&nbsp;?
+            </h2>
+            <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto mb-3">
+              Vous souhaitez plus d'informations sur nos tarifs ou devenir client chez nous&nbsp;?
+            </p>
+            <p className="text-sm sm:text-base text-white/60 mb-8">
+              Contactez-nous directement, nous serons ravis d'échanger avec vous.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+              <a
+                href="tel:+41772229764"
+                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#25D366] flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs text-white/50">Par téléphone</p>
+                  <p className="text-lg font-bold text-white group-hover:text-primary transition-colors">+41 77 222 97 64</p>
+                </div>
+              </a>
+
+              <a
+                href="mailto:contact@tracksmart.ch"
+                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs text-white/50">Par email</p>
+                  <p className="text-lg font-bold text-white group-hover:text-primary transition-colors">contact@tracksmart.ch</p>
+                </div>
+              </a>
+            </div>
+
+            <p className="text-xs text-white/30 mt-8">
+              Disponible du lundi au vendredi · Réponse sous 24h
+            </p>
+          </motion.div>
         </div>
       </section>
 

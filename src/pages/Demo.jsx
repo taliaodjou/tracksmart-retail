@@ -169,11 +169,11 @@ function StatsCards({ products }) {
     { label: 'Produits urgents', value: urgent, icon: AlertTriangle, bg: 'bg-orange-50', iconColor: 'text-orange-500' },
   ];
   return (
-    <div className="grid grid-cols-3 gap-2 sm:gap-4">
+    <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
       {cards.map((c, i) => (
-        <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm border border-neutral-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div><p className="text-xs sm:text-sm text-muted-foreground">{c.label}</p><p className="text-2xl sm:text-3xl font-bold mt-0.5 sm:mt-1">{c.value}</p></div>
+        <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-sm border border-neutral-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+            <div><p className="text-[10px] sm:text-sm text-muted-foreground truncate">{c.label}</p><p className="text-lg sm:text-3xl font-bold mt-0.5 sm:mt-1">{c.value}</p></div>
             <div className={`hidden sm:flex w-12 h-12 rounded-xl ${c.bg} items-center justify-center`}><c.icon className={`w-6 h-6 ${c.iconColor}`} /></div>
           </div>
         </div>
@@ -192,7 +192,7 @@ function WeeklyAlert({ products, onProductAction, onEditDlc }) {
   if (all.length===0) return null;
   const Pill = ({ p }) => {
     const cfg = statusConfig[getProductStatus(p.expiration_date)];
-    return <button onClick={()=>{setActive(p);setShowModal(true)}} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer hover:opacity-80 ${cfg.color}`}><span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`}/>{p.name} ({getDaysRemaining(p.expiration_date)}j)</button>;
+    return <button onClick={()=>{setActive(p);setShowModal(true)}} className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-medium border cursor-pointer hover:opacity-80 ${cfg.color}`}><span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`}/><span className="truncate max-w-[140px] sm:max-w-none">{p.name}</span> ({getDaysRemaining(p.expiration_date)}j)</button>;
   };
   return (<>
     <div className="space-y-3">
@@ -207,8 +207,8 @@ function QuickActionPanel({ product, onDone, onEditDlc }) {
   const [tab, setTab] = useState('info'); const [qty, setQty] = useState(''); const [price, setPrice] = useState(product.price_chf?String(product.price_chf):''); const [done, setDone] = useState(false);
   const [newDlc, setNewDlc] = useState(product.expiration_date||'');
   const loss = (parseFloat(qty)||0)*(parseFloat(price)||0);
-  if (done) return <div className="flex flex-col items-center justify-center py-6 gap-2 text-green-600"><div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center"><CheckCircle2 className="w-5 h-5"/></div><p className="text-sm font-semibold">Mis à jour !</p></div>;
-  return <div className="space-y-3"><div><p className="font-semibold text-sm">{product.name}</p><div className="flex items-center gap-2 mt-0.5 flex-wrap">{product.marque&&<span className="text-xs text-muted-foreground">{product.marque}</span>}{product.rayon&&<span className="text-xs text-muted-foreground">• Rayon {product.rayon}</span>}</div></div><div className="flex gap-1 bg-secondary/50 p-1 rounded-xl flex-wrap">{[{k:'info',l:'Infos',cls:'bg-white shadow-sm text-foreground'},{k:'modifier',l:'Modifier DLC',cls:'bg-primary/80 text-white shadow-sm'},{k:'jeter',l:'Jeter',cls:'bg-red-500 text-white shadow-sm'}].map(tb=><button key={tb.k} onClick={()=>setTab(tb.k)} className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${tab===tb.k?tb.cls:'text-muted-foreground hover:text-foreground'}`}>{tb.l}</button>)}</div>{tab==='info'&&<div className="text-xs text-muted-foreground space-y-1 px-1">{product.expiration_date&&<p>DLC: {product.expiration_date}</p>}{product.price_chf&&<p>Prix: CHF {product.price_chf}</p>}{product.added_by_name&&<p>Ajouté par: {product.added_by_name}</p>}</div>}{tab==='modifier'&&<div className="space-y-3"><div><label className="text-xs font-semibold mb-1 block">📅 Nouvelle date d'expiration</label><Input type="date" value={newDlc} onChange={e=>setNewDlc(e.target.value)} className="h-14 text-lg font-medium rounded-xl border-2 border-primary/30 focus:border-primary"/></div><p className="text-xs text-muted-foreground">Ancienne DLC: <strong>{product.expiration_date}</strong></p><Button className="w-full rounded-xl h-12" disabled={!newDlc||newDlc===product.expiration_date} onClick={()=>{if(onEditDlc)onEditDlc(product._id,newDlc);setDone(true)}}>💾 Enregistrer la nouvelle DLC</Button></div>}{tab==='jeter'&&<div className="space-y-3"><div className="grid grid-cols-2 gap-2"><div><label className="text-xs font-semibold mb-1 block">Quantité jetée</label><Input type="number" min="0" value={qty} onChange={e=>setQty(e.target.value)} placeholder="0" className="h-10 text-sm rounded-xl" autoFocus/></div><div><label className="text-xs font-semibold mb-1 block">Prix vente CHF</label><Input type="number" min="0" step="0.05" value={price} onChange={e=>setPrice(e.target.value)} placeholder="0.00" className="h-10 text-sm rounded-xl"/></div></div>{loss>0&&<div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 flex items-center justify-between"><span className="text-xs font-semibold text-red-700">Perte estimée</span><span className="text-base font-bold text-red-700">CHF {loss.toFixed(2)}</span></div>}<Button className="w-full bg-red-500 hover:bg-red-600 text-white rounded-xl" disabled={!qty||!price} onClick={()=>setDone(true)}>Confirmer le jet</Button></div>}</div>;
+  if (done) return <div className="flex flex-col items-center justify-center py-8 gap-3 text-green-600"><div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center"><CheckCircle2 className="w-6 h-6"/></div><p className="text-sm font-semibold">Mis à jour !</p></div>;
+  return <div className="space-y-4"><div><p className="font-semibold text-sm">{product.name}</p><div className="flex items-center gap-2 mt-0.5 flex-wrap">{product.marque&&<span className="text-xs text-muted-foreground">{product.marque}</span>}{product.rayon&&<span className="text-xs text-muted-foreground">• Rayon {product.rayon}</span>}</div></div><div className="flex gap-1.5 bg-secondary/50 p-1 rounded-xl">{[{k:'info',l:'Infos',cls:'bg-white shadow-sm text-foreground'},{k:'modifier',l:'Modifier DLC',cls:'bg-primary/80 text-white shadow-sm'},{k:'jeter',l:'Jeter',cls:'bg-red-500 text-white shadow-sm'}].map(tb=><button key={tb.k} onClick={()=>setTab(tb.k)} className={`flex-1 text-xs sm:text-sm py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${tab===tb.k?tb.cls:'text-muted-foreground hover:text-foreground'}`}>{tb.l}</button>)}</div>{tab==='info'&&<div className="text-xs text-muted-foreground space-y-1.5 px-1">{product.expiration_date&&<p>📅 DLC: {product.expiration_date}</p>}{product.price_chf&&<p>💰 Prix: CHF {Number(product.price_chf).toFixed(2)}</p>}{product.added_by_name&&<p>👤 Ajouté par: {product.added_by_name}</p>}</div>}{tab==='modifier'&&<div className="space-y-3"><div><label className="text-xs font-semibold mb-1 block">📅 Nouvelle date d'expiration</label><Input type="date" value={newDlc} onChange={e=>setNewDlc(e.target.value)} className="h-12 sm:h-14 text-base sm:text-lg font-medium rounded-xl border-2 border-primary/30 focus:border-primary"/></div><p className="text-xs text-muted-foreground">Ancienne DLC: <strong>{product.expiration_date}</strong></p><Button className="w-full rounded-xl h-11 sm:h-12 text-sm" disabled={!newDlc||newDlc===product.expiration_date} onClick={()=>{if(onEditDlc)onEditDlc(product._id,newDlc);setDone(true)}}>💾 Enregistrer la nouvelle DLC</Button></div>}{tab==='jeter'&&<div className="space-y-3"><div className="grid grid-cols-2 gap-2 sm:gap-3"><div><label className="text-xs font-semibold mb-1 block">Quantité jetée</label><Input type="number" min="0" value={qty} onChange={e=>setQty(e.target.value)} placeholder="0" className="h-11 text-sm rounded-xl" autoFocus/></div><div><label className="text-xs font-semibold mb-1 block">Prix CHF</label><Input type="number" min="0" step="0.05" value={price} onChange={e=>setPrice(e.target.value)} placeholder="0.00" className="h-11 text-sm rounded-xl"/></div></div>{loss>0&&<div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center justify-between"><span className="text-xs sm:text-sm font-semibold text-red-700">Perte estimée</span><span className="text-base sm:text-lg font-bold text-red-700">CHF {loss.toFixed(2)}</span></div>}<Button className="w-full bg-red-500 hover:bg-red-600 text-white rounded-xl h-11 sm:h-12 text-sm" disabled={!qty||!price} onClick={()=>setDone(true)}>🗑 Confirmer le jet</Button></div>}</div>;
 }
 
 function ProductTable({ products, onDelete, onEdit }) {
@@ -491,9 +491,9 @@ export default function Demo() {
   };
 
   const tabs = [
-    { key: 'dashboard', label: 'Dashboard', short: 'TdB', icon: LayoutDashboard },
-    { key: 'analytics', label: 'Analytiques', short: 'Stats', icon: BarChart3 },
-    { key: 'orders', label: 'Commandes', short: 'Cmd', icon: ShoppingCart },
+    { key: 'dashboard', label: 'Dashboard', short: 'Dashbrd', icon: LayoutDashboard },
+    { key: 'analytics', label: 'Analytiques', short: 'Analyt.', icon: BarChart3 },
+    { key: 'orders', label: 'Commandes', short: 'Commandes', icon: ShoppingCart },
     { key: 'documents', label: 'Documents', short: 'Docs', icon: Folder },
     { key: 'team', label: 'Équipe', short: 'Équipe', icon: Users },
   ];
@@ -507,22 +507,23 @@ export default function Demo() {
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary flex items-center justify-center"><span className="text-white font-bold text-xs sm:text-sm">TS</span></div>
             <span className="font-bold text-sm sm:text-lg tracking-tight hidden sm:inline">TrackSmart <span className="text-primary">Démo</span></span>
           </Link>
-          <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto">
+          <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto flex-1 mx-1 sm:mx-0 sm:flex-none scrollbar-hide">
             {tabs.map(t => (
-              <button key={t.key} onClick={()=>setTab(t.key)} className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${tab===t.key?'bg-primary text-primary-foreground':'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
-                <t.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5"/><span className="sm:hidden">{t.short}</span><span className="hidden sm:inline">{t.label}</span>
+              <button key={t.key} onClick={()=>setTab(t.key)} className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${tab===t.key?'bg-primary text-primary-foreground':'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
+                <t.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5"/><span>{t.label}</span>
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Button variant="outline" size="sm" onClick={()=>setShowScanner(true)} className="rounded-full gap-1 sm:gap-2 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-3">
-              <ScanLine className="w-3.5 h-3.5 sm:w-4 sm:h-4"/> <span className="hidden sm:inline">Scanner</span>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <Link to="/about"><button className="text-[10px] sm:text-xs text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap">À propos</button></Link>
+            <Button variant="outline" size="sm" onClick={()=>setShowScanner(true)} className="rounded-full gap-1 sm:gap-2 text-[10px] sm:text-xs h-7 sm:h-9 px-2 sm:px-3">
+              <ScanLine className="w-3 h-3 sm:w-3.5 sm:h-3.5"/> <span className="hidden sm:inline">Scanner</span>
             </Button>
-            <Link to="/register"><Button size="sm" className="rounded-lg text-xs sm:text-sm h-8 sm:h-9 px-3">Essayer</Button></Link>
+            <Link to="/register"><Button size="sm" className="rounded-lg text-[10px] sm:text-xs h-7 sm:h-9 px-2.5 sm:px-3">Essayer</Button></Link>
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pt-4 sm:pt-6 pb-6 sm:pb-8">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pt-2 sm:pt-6 pb-24 sm:pb-8">
         {tab==='dashboard'&&<DashboardTab products={products} addProduct={addProduct} deleteProduct={deleteProduct} handleProductAction={handleProductAction} editProductDlc={editProductDlc} editProductField={editProductField}/>}
         {tab==='analytics'&&<AnalyticsTab products={products}/>}
         {tab==='orders'&&<OrdersTab products={products}/>}

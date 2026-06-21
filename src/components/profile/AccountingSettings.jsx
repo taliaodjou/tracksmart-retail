@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Mail, MessageSquare, BarChart2, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import { Mail, BarChart2, ToggleLeft, ToggleRight, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const GOLD = '#C9A646';
@@ -79,7 +79,9 @@ export default function AccountingSettings({ user, onSaved }) {
 
       {open && (
       <div className="px-6 pb-6 border-t border-border/30">
-        <p className="text-xs text-muted-foreground mt-4 mb-5">Configurez votre cycle trimestriel et la réception automatique des rapports.</p>
+        <p className="text-xs text-muted-foreground mt-4 mb-5 leading-relaxed">
+          Les paramètres comptables vous permettent de définir le début de votre trimestre fiscal et la manière dont TrackSmart vous envoie vos rapports trimestriels. Ces rapports récapitulent les pertes, les produits jetés et les tendances sur la période pour vous aider à mieux gérer votre stock et votre comptabilité.
+        </p>
         <form onSubmit={handleSave} className="space-y-5">
         {/* Quarter start */}
         <div className="space-y-1.5">
@@ -104,30 +106,8 @@ export default function AccountingSettings({ user, onSaved }) {
 
         {/* Delivery mode */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Mode de réception des rapports</Label>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { value: 'email', label: 'Email', icon: Mail },
-              { value: 'sms', label: 'SMS + PDF', icon: MessageSquare },
-              { value: 'both', label: 'Les deux', icon: BarChart2 },
-            ].map(opt => {
-              const Icon = opt.icon;
-              const active = form.report_delivery_mode === opt.value;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setForm({ ...form, report_delivery_mode: opt.value })}
-                  className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 text-xs font-medium transition-all ${
-                    active ? 'border-[#C9A646] bg-[#fdf9ee] text-[#9a7c2e]' : 'border-border text-muted-foreground hover:border-[#C9A646]/40'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
+          <Label className="text-sm font-medium">Réception des rapports</Label>
+          <p className="text-xs text-muted-foreground">Les rapports trimestriels vous sont envoyés par email automatiquement.</p>
         </div>
 
         {/* Email */}
@@ -143,19 +123,6 @@ export default function AccountingSettings({ user, onSaved }) {
             placeholder="votre@email.com"
           />
         </div>
-
-        {/* Phone (shown for SMS or both) */}
-        {(form.report_delivery_mode === 'sms' || form.report_delivery_mode === 'both') && (
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Numéro de téléphone (SMS)</Label>
-            <Input
-              type="tel"
-              value={form.phone_number}
-              onChange={e => setForm({ ...form, phone_number: e.target.value })}
-              placeholder="+41 79 000 00 00"
-            />
-          </div>
-        )}
 
         {/* Auto reports toggle */}
         <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-secondary/40 border border-border/40">
