@@ -57,8 +57,8 @@ export default function Contact() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+          transition={{ duration: 0.5 }}>
+          
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-8">
             <span className="text-primary">Contactez</span>-nous
           </h1>
@@ -66,16 +66,16 @@ export default function Contact() {
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Contact form */}
             <div className="bg-white rounded-2xl border border-border/60 p-6 sm:p-8 shadow-sm">
-              {sent ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
+              {sent ?
+              <div className="flex flex-col items-center justify-center py-12 text-center">
                   <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
                   <h2 className="text-xl font-bold mb-2">Message envoyé !</h2>
                   <p className="text-muted-foreground text-sm">
                     Merci pour votre message. Nous vous répondrons dans les plus brefs délais.
                   </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
+                </div> :
+
+              <form onSubmit={handleSubmit} className="space-y-5">
                   <h2 className="text-lg font-bold mb-1">Envoyez-nous un message</h2>
                   <p className="text-sm text-muted-foreground mb-4">
                     Une question, une suggestion ou besoin d'aide ? Écrivez-nous.
@@ -84,53 +84,53 @@ export default function Contact() {
                   <div>
                     <label className="text-sm font-medium mb-1 block">Nom</label>
                     <Input
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      placeholder="Votre nom"
-                      className="h-10"
-                    />
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Votre nom"
+                    className="h-10" />
+                  
                   </div>
 
                   <div>
                     <label className="text-sm font-medium mb-1 block">Email</label>
                     <Input
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      placeholder="vous@exemple.com"
-                      className="h-10"
-                    />
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="vous@exemple.com"
+                    className="h-10" />
+                  
                   </div>
 
                   <div>
                     <label className="text-sm font-medium mb-1 block">Message</label>
                     <Textarea
-                      value={message}
-                      onChange={e => setMessage(e.target.value)}
-                      placeholder="Votre message..."
-                      rows={5}
-                    />
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Votre message..."
+                    rows={5} />
+                  
                   </div>
 
-                  {error && (
-                    <p className="text-sm text-red-600">{error}</p>
-                  )}
+                  {error &&
+                <p className="text-sm text-red-600">{error}</p>
+                }
 
                   <Button type="submit" disabled={sending} className="w-full h-11">
-                    {sending ? (
-                      <span className="flex items-center gap-2">
+                    {sending ?
+                  <span className="flex items-center gap-2">
                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Envoi...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
+                      </span> :
+
+                  <span className="flex items-center gap-2">
                         <Send className="w-4 h-4" />
                         Envoyer
                       </span>
-                    )}
+                  }
                   </Button>
                 </form>
-              )}
+              }
             </div>
 
             {/* Contact info */}
@@ -140,8 +140,8 @@ export default function Contact() {
                 <div className="space-y-4">
                   <a
                     href="mailto:support@tracksmart.com"
-                    className="flex items-center gap-3 p-4 rounded-xl bg-white border border-border/60 hover:border-primary/30 hover:shadow-sm transition-all"
-                  >
+                    className="flex items-center gap-3 p-4 rounded-xl bg-white border border-border/60 hover:border-primary/30 hover:shadow-sm transition-all">
+                    
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Mail className="w-5 h-5 text-primary" />
                     </div>
@@ -151,7 +151,7 @@ export default function Contact() {
                     </div>
                   </a>
 
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-border/60">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-border/60 hidden">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <MapPin className="w-5 h-5 text-primary" />
                     </div>
@@ -193,6 +193,6 @@ export default function Contact() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
