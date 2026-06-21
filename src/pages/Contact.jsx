@@ -151,15 +151,15 @@ export default function Contact() {
                     </div>
                   </a>
 
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-border/60 hidden">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Adresse</p>
-                      <p className="text-muted-foreground text-sm">TNO Studio — Suisse</p>
-                    </div>
-                  </div>
+                  
+
+
+
+
+
+
+
+                  
                 </div>
               </div>
 
