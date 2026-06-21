@@ -29,13 +29,13 @@ export default function Landing() {
     <div className="min-h-screen flex flex-col bg-white text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-6 h-[72px] flex items-center justify-between">
-          <div className="flex items-center gap-10">
-            <Link to="/" className="flex items-center gap-2.5 font-bold text-lg">
-              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-white text-sm font-bold">TS</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-[72px] flex items-center justify-between">
+          <div className="flex items-center gap-6 sm:gap-10">
+            <Link to="/" className="flex items-center gap-2 sm:gap-2.5 font-bold text-base sm:text-lg">
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+                <span className="text-white text-[11px] sm:text-sm font-bold">TS</span>
               </div>
-              TrackSmart Retail
+              <span className="hidden xs:inline">TrackSmart Retail</span>
             </Link>
             <nav className="hidden lg:flex items-center gap-7 text-sm text-muted-foreground">
               <a href="#features" className="hover:text-foreground transition-colors">Fonctionnalités</a>
@@ -45,12 +45,12 @@ export default function Landing() {
               <Link to="/about" className="hover:text-foreground transition-colors">À propos</Link>
             </nav>
           </div>
-          <div className="flex items-center gap-3">
-            <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link to="/login" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:inline">
               Déjà un compte ?
             </Link>
             <Link to="/register">
-              <Button size="sm" className="rounded-lg">Créer un compte</Button>
+              <Button size="sm" className="rounded-lg text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4">Créer un compte</Button>
             </Link>
           </div>
         </div>
@@ -60,51 +60,51 @@ export default function Landing() {
       <div className="bg-gradient-to-b from-orange-50/60 via-orange-50/30 to-white">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 pt-16 pb-20 lg:pt-20 lg:pb-28">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-28">
+            <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
               {/* Left Column */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6">
-                  <Check className="w-4 h-4" />
+                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+                  <Check className="w-3 h-3 sm:w-4 sm:h-4" />
                   LA SOLUTION DES COMMERÇANTS MALINS
                 </div>
-                <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-bold leading-[1.12] tracking-tight mb-6">
+                <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-bold leading-[1.12] tracking-tight mb-4 sm:mb-6">
                   Gérez vos stocks.<br />
                   Évitez les pertes.<br />
                   <span className="text-primary">Développez</span> votre commerce.
                 </h1>
-                <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg">
+                <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed mb-6 sm:mb-8 max-w-lg">
                   TrackSmart Retail vous aide à suivre vos produits, leurs dates de péremption et vos stocks en temps réel pour ne plus perdre d'argent.
                 </p>
-                <div className="flex flex-col sm:flex-row items-start gap-3 mb-10">
-                  <Link to="/demo">
-                    <Button size="lg" className="text-base px-7 h-12 rounded-xl font-semibold shadow-md">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-2.5 sm:gap-3 mb-8 sm:mb-10">
+                  <Link to="/demo" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-5 sm:px-7 h-11 sm:h-12 rounded-xl font-semibold shadow-md">
                       Essayer gratuitement
-                      <ArrowRight className="w-4 h-4 ml-1.5" />
+                      <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
                     </Button>
                   </Link>
-                  <a href="#features">
-                    <Button variant="outline" size="lg" className="text-base px-7 h-12 rounded-xl font-medium">
-                      <Play className="w-4 h-4 mr-1.5" />
+                  <a href="#features" className="w-full sm:w-auto">
+                    <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-5 sm:px-7 h-11 sm:h-12 rounded-xl font-medium">
+                      <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
                       Voir comment ça marche
                     </Button>
                   </a>
                 </div>
-                <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-500" />
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                     Installation rapide
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-green-500" />
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                     Données 100% sécurisées
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-green-500" />
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
                     Support réactif
                   </div>
                 </div>
@@ -221,8 +221,8 @@ export default function Landing() {
         </section>
 
         {/* 98% Stat */}
-        <section className="pb-14">
-          <div className="max-w-7xl mx-auto px-6">
+        <section className="pb-10 sm:pb-14">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -230,32 +230,32 @@ export default function Landing() {
               transition={{ duration: 0.5 }}
               className="text-center"
             >
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Check className="w-6 h-6 text-green-500" />
-                <span className="text-4xl sm:text-5xl font-extrabold text-primary">98%</span>
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                <Check className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+                <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary">98%</span>
               </div>
-              <p className="text-muted-foreground text-lg">de nos clients réduisent leurs pertes produits</p>
+              <p className="text-muted-foreground text-sm sm:text-base md:text-lg">de nos clients réduisent leurs pertes produits</p>
             </motion.div>
           </div>
         </section>
       </div>
 
       {/* Features Grid */}
-      <section id="features" className="py-20 sm:py-28">
-        <div className="max-w-7xl mx-auto px-6">
+      <section id="features" className="py-14 sm:py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-14"
+            className="text-center mb-8 sm:mb-10 md:mb-14"
           >
-            <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 tracking-tight">
               Tout ce qu'il vous faut pour mieux gérer votre magasin
             </h2>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
             {[
               {
                 icon: Boxes,
@@ -295,13 +295,13 @@ export default function Landing() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
                 whileHover={{ y: -4 }}
-                className="group p-6 rounded-2xl border border-neutral-100 hover:border-primary/20 hover:shadow-lg transition-all duration-300 text-center"
+                className="group p-4 sm:p-5 md:p-6 rounded-2xl border border-neutral-100 hover:border-primary/20 hover:shadow-lg transition-all duration-300 text-center"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/15 transition-colors">
-                  <f.icon className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-primary/15 transition-colors">
+                  <f.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h3 className="font-bold mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                <h3 className="font-bold text-sm sm:text-base mb-1.5 sm:mb-2">{f.title}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -309,19 +309,19 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="py-10 border-t border-neutral-100 bg-neutral-50">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-white text-xs font-bold">TS</span>
+      <footer className="py-6 sm:py-8 md:py-10 border-t border-neutral-100 bg-neutral-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-primary flex items-center justify-center">
+              <span className="text-white text-[10px] sm:text-xs font-bold">TS</span>
             </div>
-            <span className="font-semibold text-sm">TrackSmart Retail</span>
+            <span className="font-semibold text-xs sm:text-sm">TrackSmart Retail</span>
           </div>
-          <div className="flex items-center gap-5 text-sm text-muted-foreground">
+          <div className="flex items-center gap-4 sm:gap-5 text-xs sm:text-sm text-muted-foreground">
             <Link to="/about" className="hover:text-foreground transition-colors">À propos</Link>
             <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
           </div>
-          <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} TNO Studio</span>
+          <span className="text-[10px] sm:text-xs text-muted-foreground">© {new Date().getFullYear()} TNO Studio</span>
         </div>
       </footer>
     </div>
