@@ -78,7 +78,7 @@ const AuthenticatedApp = () => {
     return children;
   };
 
-  const showBottomBar = isAuthenticated && user && !isAdmin(user) && location.pathname !== '/';
+  const showBottomBar = isAuthenticated && user && location.pathname !== '/';
 
   return (
     <>
@@ -120,7 +120,7 @@ const AuthenticatedApp = () => {
           </Route>
         </Routes>
       </AnimatePresence>
-      {showBottomBar && <BottomTabBar />}
+      {showBottomBar && <BottomTabBar userEmail={user?.email} />}
     </>
   );
 };

@@ -58,7 +58,7 @@ export default function Landing() {
       <div className="bg-gradient-to-b from-orange-50/60 via-orange-50/30 to-white">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-16 sm:pt-16 sm:pb-20 lg:pt-20 lg:pb-28">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
               {/* Left Column */}
               <motion.div
@@ -70,7 +70,7 @@ export default function Landing() {
                   <Check className="w-3 h-3 sm:w-4 sm:h-4" />
                   LA SOLUTION DES COMMERÇANTS MALINS
                 </div>
-                <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-bold leading-[1.12] tracking-tight mb-4 sm:mb-6">
+                <h1 className="text-[32px] sm:text-[44px] lg:text-[52px] font-bold leading-[1.12] tracking-tight mb-4 sm:mb-6">
                   Gérez vos stocks.<br />
                   Évitez les pertes.<br />
                   <span className="text-primary">Développez</span> votre commerce.
@@ -111,8 +111,13 @@ export default function Landing() {
               {/* Right Column — Phone Mockup like the reference */}
               <motion.div
                 initial={{ opacity: 0, x: 30, scale: 0.95 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
+                animate={{ opacity: 1, x: 0, scale: 1, y: [0, -6, 0] }}
+                transition={{ 
+                  opacity: { duration: 0.7, delay: 0.2 },
+                  x: { duration: 0.7, delay: 0.2 },
+                  scale: { duration: 0.7, delay: 0.2 },
+                  y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                }}
                 className="flex justify-center relative mt-6 lg:mt-0"
               >
                 {/* Phone frame */}
@@ -191,21 +196,30 @@ export default function Landing() {
                   </div>
 
                   {/* Floating evolution card */}
-                  <div className="absolute -right-24 top-[55%] -translate-y-1/2 bg-white rounded-xl shadow-lg border border-neutral-200 p-3 w-44 z-10">
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-[10px] font-semibold">Évolution</p>
-                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: [0, 4, 0], y: [0, -3, 0] }}
+                    transition={{ 
+                      opacity: { duration: 0.5, delay: 0.8 },
+                      x: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                      y: { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
+                    }}
+                    className="absolute -right-4 sm:-right-16 lg:-right-20 top-[68%] -translate-y-1/2 bg-white rounded-xl shadow-lg border border-neutral-200 p-2.5 sm:p-3 w-36 sm:w-44 z-10"
+                  >
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <p className="text-[9px] sm:text-[10px] font-semibold">Évolution</p>
+                      <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground" />
                     </div>
-                    <div className="h-12 flex items-end gap-[2px] mb-1">
+                    <div className="h-10 sm:h-12 flex items-end gap-[2px] mb-1">
                       {[30, 35, 28, 50, 45, 40, 60, 55, 65, 58, 70, 75, 68, 80, 85, 78, 90, 95].map((h, i) => (
                         <div key={i} className="flex-1 bg-primary/60 rounded-[1px]" style={{ height: `${h}%` }} />
                       ))}
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold">12 500 CHF</span>
-                      <span className="text-[9px] text-green-600 font-semibold">+18%</span>
+                      <span className="text-xs sm:text-sm font-bold">12 500 CHF</span>
+                      <span className="text-[8px] sm:text-[9px] text-green-600 font-semibold">+18%</span>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
@@ -232,7 +246,7 @@ export default function Landing() {
       </div>
 
       {/* Features Grid */}
-      <section id="features" className="py-14 sm:py-20 md:py-28">
+      <section id="features" className="py-16 sm:py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -298,7 +312,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Contact Section — soft orange / light tone */}
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-orange-50 via-amber-50/60 to-orange-100/40 text-foreground">
+      <section className="py-16 sm:py-24 bg-gradient-to-br from-orange-50 via-amber-50/60 to-orange-100/40 text-foreground mt-4 sm:mt-0">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -315,20 +329,20 @@ export default function Landing() {
               Contactez-nous directement, nous serons ravis d'échanger avec vous.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8">
               <motion.a
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 href="tel:+41772229764"
-                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group"
+                className="flex items-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group w-full sm:w-auto"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#25D366] flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#25D366] flex items-center justify-center flex-shrink-0">
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-muted-foreground">Par téléphone</p>
-                  <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">+41 77 222 97 64</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Par téléphone</p>
+                  <p className="text-sm sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors">+41 77 222 97 64</p>
                 </div>
               </motion.a>
 
@@ -337,14 +351,14 @@ export default function Landing() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.25 }}
                 href="mailto:contact@tracksmart.ch"
-                className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group"
+                className="flex items-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group w-full sm:w-auto"
               >
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div className="text-left">
-                  <p className="text-xs text-muted-foreground">Par email</p>
-                  <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">contact@tracksmart.ch</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Par email</p>
+                  <p className="text-sm sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors">contact@tracksmart.ch</p>
                 </div>
               </motion.a>
             </div>

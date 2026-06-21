@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, BarChart2, ShoppingCart, Menu, X, FileText, Folder, Users, Activity, ChevronDown } from 'lucide-react';
+import { LogOut, User, BarChart2, ShoppingCart, Menu, X, FileText, Folder, Users, Activity, ChevronDown, Shield } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { canAccessAnalytics, canManageTeam, canViewActivity } from '@/lib/productUtils';
 
@@ -18,11 +18,14 @@ export default function DashboardHeader() {
 
   const handleLogout = () => base44.auth.logout('/');
 
+  const isTaliaAdmin = user?.email === 'talia.odjou@gmail.com';
+
   // Primary nav items shown inline
   const primaryNavItems = [
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
     ...(canAccessAnalytics(user) ? [{ to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> }] : []),
     { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
+    ...(isTaliaAdmin ? [{ to: '/admin-portal', label: 'Admin', icon: <Shield className="w-3.5 h-3.5" /> }] : []),
   ];
 
   // Secondary nav items in "Plus" dropdown
@@ -34,7 +37,7 @@ export default function DashboardHeader() {
     { to: '/reports', label: 'Rapports', icon: <FileText className="w-3.5 h-3.5" /> },
   ];
 
-  // Keep navItems for mobile menu (all items)
+  // Keep navItems for mobile menu (all items) — primaryNavItems already includes admin if applicable
   const navItems = [...primaryNavItems, ...secondaryNavItems];
 
   const navLink = (to, label, icon) => {
