@@ -8,7 +8,7 @@ import {
   Search, X, ScanLine, Sparkles, Package, AlertTriangle, XCircle,
   ChevronRight, ChevronDown, CheckCircle2, Tag, Layers, RefreshCw,
   TrendingDown, TrendingUp, PackageX, Flame, BarChart2, ShoppingCart,
-  FileText, Download, Send, Building2, Mail, Phone,
+  FileText, Download, Send, Building2, Mail, Phone, Printer,
   LayoutDashboard, BarChart3, Folder, Users, Crown,
   ShieldCheck, User as UserIcon, Upload, FolderPlus, ChevronLeft,
   FileText as DocIcon, Trash2, MoreVertical, Edit2, UserPlus
@@ -259,6 +259,38 @@ function DashboardTab({ products, addProduct, deleteProduct, handleProductAction
   const thrownProducts = active.filter(p=>p.discarded&&p.action==='jeter'&&p.quantity_thrown>0&&p.price_chf>0);
   const lossTotal = thrownProducts.reduce((s,p)=>s+((p.quantity_thrown||0)*(p.price_chf||0)),0);
 
+  // Print & Export
+  const handlePrint = () => {
+    const printable = active.filter(p => ['expired','urgent','soon'].includes(getProductStatus(p.expiration_date)));
+    const rows = printable.map(p => {
+      const s = getProductStatus(p.expiration_date);
+      const days = getDaysRemaining(p.expiration_date);
+      const sl = s==='expired'?'Expiré':s==='urgent'?'Urgent (J-3)':s==='soon'?`Bientôt (${days}j)`:'OK';
+      return `<tr><td>${p.name}</td><td>${categoryKeys[p.category]||'—'}</td><td>${p.rayon?'Rayon '+p.rayon:'—'}</td><td>${p.expiration_date||'—'}</td><td>${days}j</td><td>${sl}</td></tr>`;
+    }).join('');
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>TrackSmart Démo — Produits à surveiller</title>
+<style>body{font-family:Arial,sans-serif;font-size:12px}h1{font-size:16px;margin-bottom:8px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f5f5f5;font-weight:bold}</style></head><body>
+<h1>TrackSmart — Produits expirés / bientôt expirés (${format(new Date(), 'dd/MM/yyyy')})</h1>
+<table><thead><tr><th>Produit</th><th>Catégorie</th><th>Rayon</th><th>Expiration</th><th>Jours</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    const w = window.open('', '_blank'); w.document.write(html); w.document.close(); w.print();
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['Produit','Marque','Catégorie','Date réception','DLC','Rayon','Jours restants','Statut','Action','Qté jetée','Prix CHF','Total CHF'];
+    const rows = active.map(p => {
+      const s = getProductStatus(p.expiration_date);
+      const days = getDaysRemaining(p.expiration_date);
+      const total = (p.quantity_thrown||0)*(p.price_chf||0);
+      const sl = s==='expired'?'Expiré':s==='urgent'?'Urgent (J-3)':s==='soon'?`Bientôt (${days}j)`:'OK';
+      const al = {jeter:'Jeter',a_recommander:'À recommander',commande:'Commandé',en_transition:'En transition',recu:'Reçu'};
+      return [p.name||'',p.marque||'',categoryKeys[p.category]||'',p.reception_date||'',p.expiration_date||'',p.rayon?'Rayon '+p.rayon:'',days,sl,al[p.action]||p.action||'',p.quantity_thrown||'',p.price_chf||'',total>0?total.toFixed(2):''];
+    });
+    const csv = [headers,...rows].map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+    const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');a.href=url;a.download=`tracksmart_demo_${format(new Date(),'yyyy-MM-dd')}.csv`;a.click();URL.revokeObjectURL(url);
+  };
+
   return (<div className="space-y-4 sm:space-y-6">
     <StatsCards products={active}/>
     {showForm&&<motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}} className="bg-white rounded-2xl p-5 shadow-sm border space-y-4"><h3 className="font-bold">Ajouter un produit</h3><div className="grid sm:grid-cols-3 gap-3"><Input placeholder="Nom du produit *" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="rounded-xl h-10 text-sm"/><Input placeholder="Marque" value={form.marque} onChange={e=>setForm({...form,marque:e.target.value})} className="rounded-xl h-10 text-sm"/><Input type="date" value={form.expiration_date} onChange={e=>setForm({...form,expiration_date:e.target.value})} className="rounded-xl h-10 text-sm"/><Select value={form.category} onValueChange={v=>setForm({...form,category:v})}><SelectTrigger className="rounded-xl h-10 text-sm"><SelectValue placeholder="Catégorie"/></SelectTrigger><SelectContent>{CATEGORIES.map(c=><SelectItem key={c} value={c}>{categoryKeys[c]}</SelectItem>)}</SelectContent></Select><Select value={form.rayon} onValueChange={v=>setForm({...form,rayon:v})}><SelectTrigger className="rounded-xl h-10 text-sm"><SelectValue placeholder="Rayon"/></SelectTrigger><SelectContent>{Object.entries(rayonKeys).map(([v,l])=><SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select><div className="flex gap-2"><Input type="number" placeholder="Prix CHF" value={form.price_chf} onChange={e=>setForm({...form,price_chf:e.target.value})} className="rounded-xl h-10 text-sm" step="0.01"/><Button onClick={addManual} className="rounded-xl h-10">Ajouter</Button></div></div></motion.div>}
@@ -267,7 +299,13 @@ function DashboardTab({ products, addProduct, deleteProduct, handleProductAction
 
     <WeeklyAlert products={active} onProductAction={handleProductAction} onEditDlc={editProductDlc}/>
     <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border space-y-3"><div className="flex gap-2 items-center"><div className="relative flex-1 max-w-sm"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"/><Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher un produit..." className="pl-9 rounded-full h-9 text-xs"/></div><Button variant="outline" size="sm" className={`rounded-full gap-1.5 ${afc>0?'border-primary text-primary':''}`} onClick={()=>setShowFilters(f=>!f)}>Filtres {afc>0&&<span className="bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-xs">{afc}</span>}</Button>{afc>0&&<Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground" onClick={()=>{setStatusFilter('all');setCategoryFilter('all');setRayonFilter('all')}}><X className="w-3.5 h-3.5"/></Button>}</div>{showFilters&&<div className="space-y-3 pt-2 border-t"><div className="flex flex-wrap gap-1.5">{[{key:'all',label:'Tous'},{key:'expired',label:'Expirés'},{key:'urgent',label:'Urgents'},{key:'soon',label:'Bientôt'},{key:'ok',label:'OK'}].map(f=><button key={f.key} onClick={()=>setStatusFilter(f.key)} className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${statusFilter===f.key?'bg-primary text-primary-foreground border-primary':'border-neutral-200 text-muted-foreground hover:border-primary/50'}`}>{f.label}</button>)}</div><div className="flex gap-2 flex-wrap"><Select value={categoryFilter} onValueChange={setCategoryFilter}><SelectTrigger className="w-44 rounded-full text-xs h-9"><SelectValue placeholder="Catégorie"/></SelectTrigger><SelectContent><SelectItem value="all">Toutes les catégories</SelectItem>{CATEGORIES.map(c=><SelectItem key={c} value={c}>{categoryKeys[c]}</SelectItem>)}</SelectContent></Select><Select value={rayonFilter} onValueChange={setRayonFilter}><SelectTrigger className="w-36 rounded-full text-xs h-9"><SelectValue placeholder="Rayon"/></SelectTrigger><SelectContent><SelectItem value="all">Tous les rayons</SelectItem>{Object.entries(rayonKeys).map(([v,l])=><SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select></div></div>}</div>
-    <div className="flex items-center justify-end gap-2"><button onClick={()=>setGroupByRayon(false)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!groupByRayon?'bg-primary text-primary-foreground border-primary':'border-neutral-200 text-muted-foreground hover:border-primary/50'}`}>Liste</button><button onClick={()=>setGroupByRayon(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${groupByRayon?'bg-primary text-primary-foreground border-primary':'border-neutral-200 text-muted-foreground hover:border-primary/50'}`}>Par rayon</button></div>
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
+        <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs h-8" onClick={handlePrint}><Printer className="w-3.5 h-3.5"/>Imprimer</Button>
+        <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-xs h-8" onClick={handleExportCSV}><Download className="w-3.5 h-3.5"/>Exporter CSV</Button>
+      </div>
+      <div className="flex items-center gap-2"><button onClick={()=>setGroupByRayon(false)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!groupByRayon?'bg-primary text-primary-foreground border-primary':'border-neutral-200 text-muted-foreground hover:border-primary/50'}`}>Liste</button><button onClick={()=>setGroupByRayon(true)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${groupByRayon?'bg-primary text-primary-foreground border-primary':'border-neutral-200 text-muted-foreground hover:border-primary/50'}`}>Par rayon</button></div>
+    </div>
     {groupByRayon?<RayonGroupedTable products={filtered} onDelete={deleteProduct} onEdit={handleEdit}/>:<ProductTable products={filtered} onDelete={deleteProduct} onEdit={handleEdit}/>}
 
     {/* Loss recap */}
