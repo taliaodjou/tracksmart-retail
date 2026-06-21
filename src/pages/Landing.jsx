@@ -66,19 +66,37 @@ export default function Landing() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+                <motion.div
+                  animate={{ scale: [1, 1.02, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs sm:text-sm font-medium mb-4 sm:mb-6"
+                >
                   <Check className="w-3 h-3 sm:w-4 sm:h-4" />
                   LA SOLUTION DES COMMERÇANTS MALINS
-                </div>
+                </motion.div>
                 <h1 className="text-3xl sm:text-4xl lg:text-[52px] font-bold leading-[1.12] tracking-tight mb-4 sm:mb-6">
                   Gérez vos stocks.<br />
                   Évitez les pertes.<br />
                   <span className="text-primary">Développez</span> votre commerce.
                 </h1>
-                <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed mb-6 sm:mb-8 max-w-lg">
+                <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed mb-5 sm:mb-6 max-w-lg">
                   TrackSmart Retail vous aide à suivre vos produits, leurs dates de péremption et vos stocks en temps réel pour ne plus perdre d'argent.
                 </p>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-2.5 sm:gap-3 mb-8 sm:mb-10">
+                <div className="flex items-center justify-center sm:justify-start gap-3 sm:gap-5 text-xs sm:text-sm mb-5 sm:mb-6">
+                  <div className="flex items-center gap-1.5 bg-white rounded-lg px-2.5 py-1.5 shadow-sm border border-neutral-100">
+                    <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                    <span className="font-medium">Installation rapide</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-white rounded-lg px-2.5 py-1.5 shadow-sm border border-neutral-100">
+                    <Lock className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                    <span className="font-medium">Données sécurisées</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-white rounded-lg px-2.5 py-1.5 shadow-sm border border-neutral-100">
+                    <Phone className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                    <span className="font-medium">Support réactif</span>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-2.5 sm:gap-3 mb-0">
                   <Link to="/demo" className="w-full sm:w-auto">
                     <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-5 sm:px-7 h-11 sm:h-12 rounded-xl font-semibold shadow-md">
                       Essayer gratuitement
@@ -92,31 +110,17 @@ export default function Landing() {
                     </Button>
                   </a>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
-                    Installation rapide
-                  </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
-                    Données 100% sécurisées
-                  </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2">
-                    <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
-                    Support réactif
-                  </div>
-                </div>
               </motion.div>
 
               {/* Right Column — Phone Mockup like the reference */}
               <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, x: 30, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                className="hidden lg:flex justify-center relative"
+                className="flex justify-center relative mt-6 lg:mt-0"
               >
                 {/* Phone frame */}
-                <div className="relative w-[300px]">
+                <div className="relative w-[240px] sm:w-[280px] lg:w-[300px]">
                   <div className="bg-white rounded-[2.5rem] shadow-2xl border-[3px] border-neutral-800 overflow-hidden">
                     {/* Notch */}
                     <div className="bg-neutral-800 h-7 flex items-center justify-center">
@@ -320,7 +324,11 @@ export default function Landing() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
-              <a
+              <motion.a
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
                 href="tel:+41772229764"
                 className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group"
               >
@@ -331,9 +339,13 @@ export default function Landing() {
                   <p className="text-xs text-muted-foreground">Par téléphone</p>
                   <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">+41 77 222 97 64</p>
                 </div>
-              </a>
+              </motion.a>
 
-              <a
+              <motion.a
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.25 }}
                 href="mailto:contact@tracksmart.ch"
                 className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group"
               >
@@ -344,11 +356,11 @@ export default function Landing() {
                   <p className="text-xs text-muted-foreground">Par email</p>
                   <p className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">contact@tracksmart.ch</p>
                 </div>
-              </a>
+              </motion.a>
             </div>
 
             <p className="text-xs text-muted-foreground mt-8">
-              Disponible du lundi au vendredi · Réponse sous 24h
+              Disponible 7j/7 · Réponse sous 24h
             </p>
           </motion.div>
         </div>
