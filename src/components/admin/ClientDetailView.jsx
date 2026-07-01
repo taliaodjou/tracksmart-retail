@@ -38,10 +38,70 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
   };
 
   const handlePaymentReminder = async () => {
+    const displayName = client.shop_name || client.full_name || 'votre boutique';
+    const body = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rappel de paiement TrackSmart</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f1e8;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1e8;padding:36px 14px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border-radius:22px;overflow:hidden;box-shadow:0 18px 50px rgba(17,24,39,0.12);">
+          <tr>
+            <td style="background:#111111;padding:28px 34px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <div style="display:inline-block;background:#C9A646;color:#111111;font-weight:800;font-size:16px;letter-spacing:.3px;padding:10px 14px;border-radius:12px;">TrackSmart</div>
+                    <div style="color:rgba(255,255,255,.55);font-size:12px;margin-top:8px;">Gestion intelligente de votre commerce</div>
+                  </td>
+                  <td align="right" style="color:#C9A646;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Rappel paiement</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr><td style="height:5px;background:linear-gradient(90deg,#C9A646,#f2d57d,#C9A646);"></td></tr>
+          <tr>
+            <td style="padding:38px 34px 28px;">
+              <div style="display:inline-block;background:#fff7db;color:#8a6a12;border:1px solid #f0d37a;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;margin-bottom:18px;">Action requise</div>
+              <h1 style="margin:0 0 14px;font-size:24px;line-height:1.25;color:#111111;">Renouvellement de votre abonnement</h1>
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#4b5563;">Bonjour <strong style="color:#111111;">${displayName}</strong>,</p>
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.7;color:#4b5563;">Nous vous informons que votre abonnement <strong>TrackSmart Retail</strong> arrive à échéance ou nécessite une confirmation de paiement afin de maintenir l'accès à votre espace.</p>
+              <div style="background:#faf7ee;border:1px solid #ead89c;border-radius:16px;padding:18px 20px;margin:24px 0;">
+                <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#111111;">Pour éviter toute interruption :</p>
+                <p style="margin:0;font-size:14px;line-height:1.65;color:#555555;">Merci de procéder au règlement de votre abonnement ou de nous envoyer une confirmation de paiement. Dès réception, votre accès sera réactivé ou prolongé rapidement.</p>
+              </div>
+              <table cellpadding="0" cellspacing="0" style="margin:26px 0 8px;">
+                <tr>
+                  <td style="background:#C9A646;border-radius:12px;padding:13px 24px;">
+                    <a href="mailto:support@tracksmart.com" style="color:#111111;text-decoration:none;font-weight:800;font-size:14px;">Contacter TrackSmart</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#777777;">Si votre paiement a déjà été effectué, vous pouvez ignorer ce message ou nous transmettre le justificatif pour validation.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#111111;padding:22px 34px;text-align:center;">
+              <p style="margin:0;color:rgba(255,255,255,.75);font-size:12px;line-height:1.6;">TrackSmart Retail · TNO Studio<br />Merci pour votre confiance.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
     await base44.integrations.Core.SendEmail({
       to: client.email,
-      subject: 'TrackSmart — Rappel de paiement',
-      body: `Bonjour,\n\nNous vous rappelons que votre abonnement TrackSmart nécessite un renouvellement.\n\nMerci de contacter TNO Studio pour régulariser votre situation.\n\nCordialement,\nL'équipe TNO Studio`,
+      subject: 'TrackSmart — Rappel de renouvellement de votre abonnement',
+      body,
     });
     toast.success('Rappel de paiement envoyé');
   };
