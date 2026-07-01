@@ -3,12 +3,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys } from '@/lib/productUtils';
 import { toast } from 'sonner';
-import { ArrowLeft, UserCheck, UserX, Mail, Send, Package, AlertTriangle, TrendingDown, Calendar } from 'lucide-react';
+import { ArrowLeft, UserCheck, UserX, Mail, Send, CheckCircle } from 'lucide-react';
 import { differenceInDays, format, startOfDay } from 'date-fns';
 
 export default function ClientDetailView({ client, products, onBack, onToggle }) {
   const [emailMsg, setEmailMsg] = useState('');
   const [sending, setSending] = useState(false);
+  const [reminderSending, setReminderSending] = useState(false);
+  const [reminderSentPopup, setReminderSentPopup] = useState(false);
   const [tab, setTab] = useState('overview');
   const queryClient = useQueryClient();
 
@@ -98,16 +100,36 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
 </body>
 </html>`;
 
-    await base44.integrations.Core.SendEmail({
-      to: client.email,
-      subject: 'TrackSmart — Rappel de renouvellement de votre abonnement',
-      body,
-    });
-    toast.success('Rappel de paiement envoyé');
+    setReminderSending(true);
+    try {
+      await base44.integrations.Core.SendEmail({
+        to: client.email,
+        subject: 'TrackSmart — Rappel de renouvellement de votre abonnement',
+        body,
+      });
+      toast.success('Rappel de paiement envoyé');
+      setReminderSentPopup(true);
+      setTimeout(() => setReminderSentPopup(false), 3500);
+    } finally {
+      setReminderSending(false);
+    }
   };
 
   return (
     <div className="p-6 lg:p-8 pt-16 lg:pt-8 space-y-6">
+      {reminderSentPopup && (
+        <div className="fixed top-6 right-6 z-[120] max-w-sm rounded-2xl border border-emerald-500/30 bg-[#111111] p-4 shadow-2xl shadow-black/40">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm">Rappel paiement envoyé</p>
+              <p className="text-white/50 text-xs mt-1">L'email a bien été envoyé à {client.email}.</p>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Back */}
       <button onClick={onBack} className="flex items-center gap-2 text-white/50 hover:text-white text-sm transition-colors">
         <ArrowLeft className="w-4 h-4" /> Retour aux clients
@@ -140,9 +162,10 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
             </button>
             <button
               onClick={handlePaymentReminder}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all"
+              disabled={reminderSending}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-all disabled:opacity-50"
             >
-              <Mail className="w-3 h-3" /> Rappel paiement
+              <Mail className="w-3 h-3" /> {reminderSending ? 'Envoi...' : 'Rappel paiement'}
             </button>
           </div>
         </div>
