@@ -107,7 +107,14 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
 
   const handleToggle = async (u) => {
     const newStatus = u.subscription_status === 'active' ? 'inactive' : 'active';
-    await updateMutation.mutateAsync({ id: u.id, data: { subscription_status: newStatus, ...(newStatus === 'active' && !u.subscription_start_date ? { subscription_start_date: new Date().toISOString().split('T')[0] } : {}) } });
+    const today = new Date().toISOString().split('T')[0];
+    await updateMutation.mutateAsync({
+      id: u.id,
+      data: {
+        subscription_status: newStatus,
+        ...(newStatus === 'active' ? { subscription_start_date: today, access_approved: true } : {}),
+      },
+    });
 
     const shopName = u.shop_name || u.full_name || 'votre boutique';
 
@@ -139,7 +146,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
       subject: newStatus === 'active' ? 'TrackSmart — Abonnement activé 🎉' : 'TrackSmart — Accès suspendu',
       body,
     });
-    toast.success(newStatus === 'active' ? 'Client activé' : 'Client désactivé');
+    toast.success(newStatus === 'active' ? 'Paiement confirmé — accès réactivé pour 30 jours' : 'Client désactivé');
   };
 
   const handleSendEmail = async (u) => {
@@ -303,7 +310,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
                   className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg transition-all ${isActive ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
                 >
                   {isActive ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
-                  {isActive ? 'Désactiver' : 'Activer'}
+                  {isActive ? 'Désactiver' : 'Paiement reçu — réactiver'}
                 </button>
                 <button
                   onClick={() => setShowEmailFor(showEmailFor === u.id ? null : u.id)}

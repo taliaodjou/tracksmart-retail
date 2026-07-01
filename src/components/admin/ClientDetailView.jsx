@@ -71,7 +71,7 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
               onClick={() => onToggle(client)}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${isActive ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20'}`}
             >
-              {isActive ? <><UserX className="w-3 h-3" /> Désactiver</> : <><UserCheck className="w-3 h-3" /> Activer</>}
+              {isActive ? <><UserX className="w-3 h-3" /> Désactiver</> : <><UserCheck className="w-3 h-3" /> Paiement reçu — réactiver</>}
             </button>
             <button
               onClick={handlePaymentReminder}
