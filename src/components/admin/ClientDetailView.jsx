@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { getProductStatus, getDaysRemaining, statusConfig, categoryKeys } from '@/lib/productUtils';
 import { toast } from 'sonner';
 import { ArrowLeft, UserCheck, UserX, Mail, Send, Package, AlertTriangle, TrendingDown, Calendar } from 'lucide-react';
-import { format } from 'date-fns';
+import { differenceInDays, format, startOfDay } from 'date-fns';
 
 export default function ClientDetailView({ client, products, onBack, onToggle }) {
   const [emailMsg, setEmailMsg] = useState('');
@@ -17,7 +17,12 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin_users'] }),
   });
 
-  const isActive = client.subscription_status === 'active';
+  const subscriptionAgeDays = client.subscription_start_date
+    ? differenceInDays(startOfDay(new Date()), startOfDay(new Date(client.subscription_start_date)))
+    : 999;
+  const showPaymentConfirm = client.subscription_status !== 'active' || subscriptionAgeDays >= 20;
+  const isExpiredSubscription = client.subscription_status === 'active' && subscriptionAgeDays >= 30;
+  const isActive = client.subscription_status === 'active' && !isExpiredSubscription;
   const expired = products.filter(p => getProductStatus(p.expiration_date) === 'expired');
   const urgent = products.filter(p => getProductStatus(p.expiration_date) === 'urgent');
   const ok = products.filter(p => getProductStatus(p.expiration_date) === 'ok');
@@ -61,7 +66,7 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
               {client.phone && <div className="text-white/40 text-sm">{client.phone}</div>}
               <div className="mt-1">
                 <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
-                  {isActive ? '● Actif' : '● Inactif'}
+                  {isActive ? '● Actif' : isExpiredSubscription ? '● À renouveler' : '● Inactif'}
                 </span>
               </div>
             </div>
@@ -69,9 +74,9 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
           <div className="flex flex-wrap gap-1.5">
             <button
               onClick={() => onToggle(client)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${isActive ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20'}`}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${showPaymentConfirm ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20'}`}
             >
-              {isActive ? <><UserX className="w-3 h-3" /> Désactiver</> : <><UserCheck className="w-3 h-3" /> Paiement reçu — réactiver</>}
+              {showPaymentConfirm ? <><UserCheck className="w-3 h-3" /> Paiement reçu — réactiver</> : <><UserX className="w-3 h-3" /> Désactiver</>}
             </button>
             <button
               onClick={handlePaymentReminder}

@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { getProductStatus } from '@/lib/productUtils';
 import { toast } from 'sonner';
 import { Search, UserCheck, UserX, Mail, Send, ChevronRight, Package, AlertTriangle, Eye, Users } from 'lucide-react';
+import { differenceInDays, startOfDay } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useSupportMode } from '@/lib/SupportModeContext';
 import ClientDetailView from './ClientDetailView';
@@ -40,10 +41,19 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
   const getEmployeeCount = (ownerEmail) =>
     users.filter(u => u.store_owner_email === ownerEmail && (u.role === 'employee' || u.role === 'manager')).length;
 
+  const getSubscriptionAgeDays = (u) => {
+    if (!u.subscription_start_date) return 999;
+    return differenceInDays(startOfDay(new Date()), startOfDay(new Date(u.subscription_start_date)));
+  };
+
+  const shouldShowPaymentConfirm = (u) => u.subscription_status !== 'active' || getSubscriptionAgeDays(u) >= 20;
+  const isSubscriptionExpired = (u) => u.subscription_status === 'active' && getSubscriptionAgeDays(u) >= 30;
+
   const filtered = clients.filter(u => {
     const q = search.toLowerCase();
     const matchSearch = !q || u.email?.toLowerCase().includes(q) || u.full_name?.toLowerCase().includes(q) || u.shop_name?.toLowerCase().includes(q);
-    const matchStatus = statusFilter === 'all' || (statusFilter === 'active' ? u.subscription_status === 'active' : u.subscription_status !== 'active');
+    const effectivelyActive = u.subscription_status === 'active' && !isSubscriptionExpired(u);
+    const matchStatus = statusFilter === 'all' || (statusFilter === 'active' ? effectivelyActive : !effectivelyActive);
     return matchSearch && matchStatus;
   });
 
@@ -106,13 +116,14 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
 </html>`;
 
   const handleToggle = async (u) => {
-    const newStatus = u.subscription_status === 'active' ? 'inactive' : 'active';
+    const confirmPayment = shouldShowPaymentConfirm(u);
+    const newStatus = confirmPayment ? 'active' : 'inactive';
     const today = new Date().toISOString().split('T')[0];
     await updateMutation.mutateAsync({
       id: u.id,
       data: {
         subscription_status: newStatus,
-        ...(newStatus === 'active' ? { subscription_start_date: today, access_approved: true } : {}),
+        ...(confirmPayment ? { subscription_start_date: today, access_approved: true } : {}),
       },
     });
 
@@ -262,7 +273,8 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
         ) : filtered.map(u => {
           const userProducts = products.filter(p => p.created_by === u.email);
           const expired = userProducts.filter(p => getProductStatus(p.expiration_date) === 'expired');
-          const isActive = u.subscription_status === 'active';
+          const isActive = u.subscription_status === 'active' && !isSubscriptionExpired(u);
+          const showPaymentConfirm = shouldShowPaymentConfirm(u);
           const employeeCount = getEmployeeCount(u.email);
           const planTier = employeeCount === 0 ? null : employeeCount <= 2 ? { label: 'Classic', color: 'text-amber-400', bg: 'bg-amber-500/10' } : employeeCount <= 9 ? { label: 'Premium', color: 'text-blue-400', bg: 'bg-blue-500/10' } : { label: 'Business', color: 'text-purple-400', bg: 'bg-purple-500/10' };
 
@@ -297,7 +309,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
                     <span className="hidden sm:inline px-2 py-0.5 rounded-full text-xs font-medium bg-orange-500/15 text-orange-400" title="Ne reçoit plus les emails">📵</span>
                   )}
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
-                    {isActive ? 'Actif' : 'Inactif'}
+                    {isActive ? 'Actif' : isSubscriptionExpired(u) ? 'À renouveler' : 'Inactif'}
                   </span>
                   <ChevronRight className="w-3.5 h-3.5 text-white/20" />
                 </div>
@@ -307,10 +319,10 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
               <div className="border-t border-white/5 px-3 py-1.5 flex gap-1.5 flex-wrap">
                 <button
                   onClick={() => handleToggle(u)}
-                  className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg transition-all ${isActive ? 'text-red-400 hover:bg-red-500/10' : 'text-emerald-400 hover:bg-emerald-500/10'}`}
+                  className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg transition-all ${showPaymentConfirm ? 'text-emerald-400 hover:bg-emerald-500/10' : 'text-red-400 hover:bg-red-500/10'}`}
                 >
-                  {isActive ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
-                  {isActive ? 'Désactiver' : 'Paiement reçu — réactiver'}
+                  {showPaymentConfirm ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
+                  {showPaymentConfirm ? 'Paiement reçu — réactiver' : 'Désactiver'}
                 </button>
                 <button
                   onClick={() => setShowEmailFor(showEmailFor === u.id ? null : u.id)}
