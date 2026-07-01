@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useSupportMode } from '@/lib/SupportModeContext';
@@ -9,15 +10,22 @@ import { Package, AlertTriangle, TrendingDown, CheckCircle, ArrowLeft } from 'lu
 
 export default function ClientSupportView() {
   const { supportClient, exitSupportMode } = useSupportMode();
+  const navigate = useNavigate();
 
-  const { data: allProducts = [] } = useQuery({
-    queryKey: ['all_products'],
-    queryFn: () => base44.entities.Product.list(),
+  const { data: allProductsRes = {} } = useQuery({
+    queryKey: ['support_all_products'],
+    queryFn: () => base44.functions.invoke('adminGetAllProducts', {}),
+    enabled: !!supportClient,
   });
+  const allProducts = allProductsRes?.data?.products || [];
 
   const products = useMemo(() => {
     if (!supportClient) return [];
-    return allProducts.filter(p => p.created_by === supportClient.email);
+    return allProducts.filter(p =>
+      p.store_owner_email === supportClient.email ||
+      p.created_by === supportClient.email ||
+      p.created_by_id === supportClient.id
+    );
   }, [allProducts, supportClient]);
 
   if (!supportClient) {
@@ -54,7 +62,7 @@ export default function ClientSupportView() {
               </div>
             </div>
             <button
-              onClick={exitSupportMode}
+              onClick={() => { exitSupportMode(); navigate('/admin-portal'); }}
               className="flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-sm font-semibold hover:bg-amber-200 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />

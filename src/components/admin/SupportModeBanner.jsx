@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSupportMode } from '@/lib/SupportModeContext';
 import { Shield, X, ArrowLeft } from 'lucide-react';
 
 export default function SupportModeBanner() {
   const { supportClient, exitSupportMode } = useSupportMode();
+  const navigate = useNavigate();
   if (!supportClient) return null;
 
   return (
@@ -16,7 +18,7 @@ export default function SupportModeBanner() {
         </span>
       </div>
       <button
-        onClick={exitSupportMode}
+        onClick={() => { exitSupportMode(); navigate('/admin-portal'); }}
         className="flex items-center gap-2 bg-black/15 hover:bg-black/25 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
