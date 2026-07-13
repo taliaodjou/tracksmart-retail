@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
   ArrowRight, Play, Check, Lock, Phone, Search, Clock, Mail,
   Boxes, AlertTriangle, Barcode, BarChart3, Smartphone,
-  LayoutDashboard, Package, ChevronDown
+  LayoutDashboard, Package, ChevronDown, Bell, FileText, FolderOpen, TrendingDown
 } from 'lucide-react';
 
 export default function Landing() {
@@ -37,10 +37,10 @@ export default function Landing() {
               <span className="hidden xs:inline">TrackSmart Retail</span>
             </Link>
             <nav className="hidden lg:flex items-center gap-7 text-sm text-muted-foreground">
+              <a href="#problem" className="hover:text-foreground transition-colors">Le problème</a>
+              <a href="#solution" className="hover:text-foreground transition-colors">La solution</a>
               <a href="#features" className="hover:text-foreground transition-colors">Fonctionnalités</a>
-              <span className="text-neutral-200">Pour qui ?</span>
-              <span className="text-neutral-200">Tarifs</span>
-              <span className="text-neutral-200">Ressources</span>
+              <Link to="/offres" className="hover:text-foreground transition-colors">Les offres</Link>
             </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -99,7 +99,7 @@ export default function Landing() {
                       <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1" />
                     </Button>
                   </Link>
-                  <a href="#features" className="w-full sm:w-auto">
+                  <a href="#how-it-works" className="w-full sm:w-auto">
                     <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-5 sm:px-7 h-11 sm:h-12 rounded-xl font-medium">
                       <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5" />
                       Voir comment ça marche
@@ -245,6 +245,115 @@ export default function Landing() {
         </section>
       </div>
 
+      {/* Problem Section */}
+      <section id="problem" className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
+            <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">Le problème</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
+              Les pertes alimentaires coûtent du temps et de l’argent aux commerces.
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              Entre le suivi manuel, les oublis et les dates à contrôler, la gestion quotidienne devient vite lourde et source de pertes.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: TrendingDown, title: 'Pertes alimentaires', desc: 'Des produits expirent avant d’être vendus et impactent directement la marge.' },
+              { icon: AlertTriangle, title: 'Oublis fréquents', desc: 'Les DLC proches passent inaperçues quand tout repose sur des contrôles manuels.' },
+              { icon: Clock, title: 'Temps perdu', desc: 'Les équipes passent trop de temps à vérifier les rayons et les frigos.' },
+              { icon: Search, title: 'Suivi compliqué', desc: 'Les informations sont dispersées entre carnets, feuilles Excel et habitudes internes.' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="rounded-2xl border border-neutral-100 bg-orange-50/40 p-5"
+              >
+                <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center mb-4 shadow-sm">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-bold mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Solution Section */}
+      <section id="solution" className="py-16 sm:py-20 bg-gradient-to-br from-neutral-50 to-orange-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
+            <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">La solution</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
+              Un outil central pour piloter vos produits, vos alertes et vos pertes.
+            </h2>
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
+              TrackSmart réunit le dashboard, le scan code-barres, les analytics, les rapports PDF et la gestion documentaire dans une interface claire.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {[
+              { icon: LayoutDashboard, title: 'Dashboard' },
+              { icon: Barcode, title: 'Barcode' },
+              { icon: BarChart3, title: 'Analytics' },
+              { icon: FileText, title: 'Rapports PDF' },
+              { icon: FolderOpen, title: 'Gestion documentaire' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="rounded-2xl bg-white border border-neutral-100 p-5 text-center shadow-sm"
+              >
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-bold text-sm">{item.title}</h3>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
+            <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">Comment ça fonctionne</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+              Un processus simple pour reprendre le contrôle de vos pertes.
+            </h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: Barcode, title: 'Scanner', desc: 'Ajoutez rapidement vos produits avec le scan code-barres.' },
+              { icon: Clock, title: 'Suivre les DLC', desc: 'Centralisez les dates limites et l’état de chaque produit.' },
+              { icon: Bell, title: 'Recevoir les alertes', desc: 'Identifiez les produits à traiter avant qu’il ne soit trop tard.' },
+              { icon: TrendingDown, title: 'Réduire les pertes', desc: 'Agissez plus tôt et suivez l’impact dans vos analyses.' },
+            ].map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="relative rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm"
+              >
+                <span className="absolute top-4 right-4 text-3xl font-extrabold text-primary/10">0{i + 1}</span>
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <step.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-bold mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Grid */}
       <section id="features" className="py-16 sm:py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -254,6 +363,7 @@ export default function Landing() {
             transition={{ duration: 0.5 }}
             className="text-center mb-8 sm:mb-10 md:mb-14"
           >
+            <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">Les fonctionnalités</p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-3 sm:mb-4 tracking-tight">
               Tout ce qu'il vous faut pour mieux gérer votre magasin
             </h2>
@@ -262,29 +372,29 @@ export default function Landing() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
             {[
               {
-                icon: Boxes,
-                title: 'Suivi des stocks',
-                desc: 'Suivez vos entrées, sorties et quantités disponibles en temps réel.',
-              },
-              {
-                icon: AlertTriangle,
-                title: 'Gestion des DLC',
-                desc: 'Soyez alerté avant la date de péremption et évitez les pertes.',
-              },
-              {
-                icon: Clock,
-                title: 'Gain de temps',
-                desc: 'Économisez 3 à 4 heures par semaine par rapport à un checking manuel des dates.',
+                icon: LayoutDashboard,
+                title: 'Dashboard clair',
+                desc: 'Visualisez votre stock, vos alertes DLC et vos pertes depuis un seul écran.',
               },
               {
                 icon: Barcode,
-                title: 'Scan de produits',
-                desc: 'Scannez les codes-barres et gagnez du temps au quotidien.',
+                title: 'Scan code-barres',
+                desc: 'Ajoutez ou retrouvez rapidement vos produits sans saisie compliquée.',
               },
               {
                 icon: BarChart3,
-                title: 'Rapports et analyses',
-                desc: 'Prenez de meilleures décisions avec des données claires.',
+                title: 'Analytics',
+                desc: 'Analysez vos pertes, vos catégories sensibles et vos tendances de stock.',
+              },
+              {
+                icon: FileText,
+                title: 'Rapports PDF',
+                desc: 'Générez des rapports propres pour vos suivis internes ou votre fiduciaire.',
+              },
+              {
+                icon: FolderOpen,
+                title: 'Gestion documentaire',
+                desc: 'Centralisez factures, bons de livraison et documents importants.',
               },
               {
                 icon: Smartphone,
@@ -328,6 +438,13 @@ export default function Landing() {
             <p className="text-sm text-muted-foreground mb-6">
               Contactez-nous directement, nous serons ravis d'échanger avec vous.
             </p>
+
+            <Link to="/offres" className="inline-flex mb-8">
+              <Button className="rounded-xl px-6 h-11 font-semibold gap-2">
+                Voir les offres
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8">
               <motion.a
@@ -379,9 +496,10 @@ export default function Landing() {
             </div>
             <span className="font-semibold text-xs sm:text-sm">TrackSmart Retail</span>
           </div>
-          <div className="flex items-center gap-4 sm:gap-5 text-xs sm:text-sm text-muted-foreground">
-            <Link to="/about" className="hover:text-foreground transition-colors">À propos</Link>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-5 text-xs sm:text-sm text-muted-foreground">
             <Link to="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+            <Link to="/mentions-legales" className="hover:text-foreground transition-colors">Mentions légales</Link>
+            <Link to="/politique-confidentialite" className="hover:text-foreground transition-colors">Politique de confidentialité</Link>
           </div>
           <span className="text-[10px] sm:text-xs text-muted-foreground">© {new Date().getFullYear()} TNO Studio</span>
         </div>

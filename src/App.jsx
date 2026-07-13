@@ -21,6 +21,9 @@ import Landing from '@/pages/Landing';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import Demo from '@/pages/Demo';
+import Offers from '@/pages/Offers';
+import LegalNotice from '@/pages/LegalNotice';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
 import Profile from '@/pages/Profile';
@@ -89,6 +92,9 @@ const AuthenticatedApp = () => {
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/demo" element={<PageTransition><Demo /></PageTransition>} />
+          <Route path="/offres" element={<PageTransition><Offers /></PageTransition>} />
+          <Route path="/mentions-legales" element={<PageTransition><LegalNotice /></PageTransition>} />
+          <Route path="/politique-confidentialite" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
 
           {/* Public auth routes */}
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
