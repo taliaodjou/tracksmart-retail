@@ -166,9 +166,9 @@ export default function Welcome() {
           transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
           className="w-24 h-24 rounded-3xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center mb-6 shadow-lg shadow-primary/10 relative"
         >
-          {user?.shop_name ? (
+          {user?.shop_name || user?.contact_name ? (
             <span className="text-4xl font-extrabold text-primary">
-              {user.shop_name.charAt(0).toUpperCase()}
+              {(user.shop_name || user.contact_name).charAt(0).toUpperCase()}
             </span>
           ) : (
             <Clock className="w-12 h-12 text-primary" />
@@ -191,8 +191,8 @@ export default function Welcome() {
         >
           <p className="text-sm font-medium text-muted-foreground mb-1">{greeting} 👋</p>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-2 leading-tight">
-            {user?.shop_name ? (
-              <span className="text-primary">{user.shop_name}</span>
+            {user?.shop_name || user?.contact_name ? (
+              <span className="text-primary">{user.shop_name || user.contact_name}</span>
             ) : (
               <span className="text-primary">TrackSmart Retail</span>
             )}

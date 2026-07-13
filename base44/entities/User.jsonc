@@ -18,6 +18,10 @@
       "type": "string",
       "description": "Email of the store owner this user belongs to. Null for owners themselves."
     },
+    "contact_name": {
+      "type": "string",
+      "description": "Nom complet saisi pendant le questionnaire d'inscription"
+    },
     "shop_name": {
       "type": "string",
       "description": "Nom de la boutique"

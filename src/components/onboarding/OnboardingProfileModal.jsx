@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { base44 } from '@/api/base44Client';
-import { Globe, Building2, User, ChevronRight, Sparkles } from 'lucide-react';
+
+const STORY_BG = 'https://media.base44.com/images/public/69ecf4cdab87a3e47f86d732/e22ffdbb6_generated_image.png';
 
 const COUNTRIES = [
   'Afghanistan','Afrique du Sud','Albanie','Algérie','Allemagne','Andorre','Angola','Antigua-et-Barbuda',
@@ -83,6 +84,7 @@ const i18n = {
     btn_finish: 'Commencer',
     btn_back: 'Retour',
     required: 'Veuillez remplir tous les champs.',
+    saved: 'Vos données sont bien enregistrées, bienvenue sur votre compte',
     step_of: 'Étape',
     of: 'sur',
   },
@@ -101,10 +103,21 @@ const i18n = {
     btn_finish: 'Get started',
     btn_back: 'Back',
     required: 'Please fill in all required fields.',
+    saved: 'Your information has been saved, welcome to your account',
     step_of: 'Step',
     of: 'of',
   },
 };
+
+const ProgressBars = ({ step }) => (
+  <div className="flex gap-2 px-1">
+    {[1, 2].map(s => (
+      <div key={s} className="h-1.5 flex-1 rounded-full bg-[#D8D8D8] overflow-hidden">
+        <div className={`h-full rounded-full bg-[#D5AD3C] transition-all duration-500 ${s <= step ? 'w-full' : 'w-0'}`} />
+      </div>
+    ))}
+  </div>
+);
 
 export default function OnboardingProfileModal({ onComplete }) {
   const [step, setStep] = useState(1);
@@ -112,6 +125,7 @@ export default function OnboardingProfileModal({ onComplete }) {
   const [form, setForm] = useState({ full_name: '', user_position: '', business_type: '', country: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const tx = i18n[lang];
 
@@ -130,98 +144,121 @@ export default function OnboardingProfileModal({ onComplete }) {
       return;
     }
     setSaving(true);
-    await base44.auth.updateMe({
-      preferred_lang: lang,
-      full_name: form.full_name.trim(),
-      user_position: form.user_position,
-      business_type: form.business_type,
-      country: form.country,
-      onboarding_complete: true,
-    });
-    setSaving(false);
-    onComplete(lang);
+    try {
+      await base44.auth.updateMe({
+        preferred_lang: lang,
+        contact_name: form.full_name.trim(),
+        user_position: form.user_position,
+        business_type: form.business_type,
+        country: form.country,
+        onboarding_complete: true,
+      });
+      setSaved(true);
+      setTimeout(() => onComplete(lang), 1600);
+    } catch (err) {
+      setError(err.message || tx.required);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl shadow-2xl flex flex-col max-h-[92vh]"
-      >
-        {/* Header — compact */}
-        <div className="bg-[#111111] px-6 py-5 sm:rounded-t-3xl rounded-t-3xl flex-shrink-0">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-white" />
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-white/90 px-5 py-6 backdrop-blur-sm">
+      <AnimatePresence mode="wait">
+        {saved ? (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, x: 80, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -80, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="relative flex h-[78vh] max-h-[620px] min-h-[520px] w-full max-w-[350px] items-center justify-center overflow-hidden rounded-[28px] px-10 text-center shadow-2xl shadow-black/20"
+            style={{ backgroundImage: `url(${STORY_BG})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          >
+            <p className="text-[24px] font-semibold leading-tight text-[#0E0B05]">{tx.saved}</p>
+          </motion.div>
+        ) : step === 1 ? (
+          <motion.div
+            key="language"
+            initial={{ opacity: 0, x: 80, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -80, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="relative flex h-[78vh] max-h-[620px] min-h-[520px] w-full max-w-[350px] flex-col overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-black/20"
+          >
+            <div
+              className="px-7 pb-9 pt-7"
+              style={{ backgroundImage: `url(${STORY_BG})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+            >
+              <ProgressBars step={step} />
+              <div className="mt-12">
+                <h2 className="text-[29px] font-extrabold leading-tight text-[#8A6508]">{tx.title}</h2>
+                <p className="mt-2 max-w-[240px] text-[16px] leading-snug text-[#15110A]">{tx.subtitle}</p>
               </div>
-              <span className="font-bold text-white text-sm">TrackSmart Retail</span>
             </div>
-            <span className="text-xs text-white/40">{tx.step_of} {step} {tx.of} 2</span>
-          </div>
-          <h2 className="text-lg font-bold text-white">{tx.title}</h2>
-          <p className="text-xs text-white/50 mt-0.5">{tx.subtitle}</p>
-          {/* Progress */}
-          <div className="flex gap-1.5 mt-3">
-            {[1, 2].map(s => (
-              <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= step ? 'bg-primary' : 'bg-white/20'}`} />
-            ))}
-          </div>
-        </div>
 
-        {/* Scrollable body */}
-        <div className="overflow-y-auto flex-1 px-6 py-5">
-          <AnimatePresence mode="wait">
-            {step === 1 && (
-              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <Globe className="w-4 h-4 text-primary" />
-                  <p className="font-semibold text-foreground text-sm">{tx.step1_title}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  {[{ val: 'fr', label: 'Français', flag: '🇫🇷' }, { val: 'en', label: 'English', flag: '🇬🇧' }].map(l => (
-                    <button
-                      key={l.val}
-                      onClick={() => setLangState(l.val)}
-                      className={`flex flex-col items-center gap-2 p-5 rounded-2xl border-2 transition-all active:scale-95 ${lang === l.val ? 'border-primary bg-primary/5' : 'border-border'}`}
-                    >
-                      <span className="text-3xl">{l.flag}</span>
-                      <span className={`font-semibold text-sm ${lang === l.val ? 'text-primary' : 'text-foreground'}`}>{l.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
+            <div className="-mt-7 flex flex-1 flex-col rounded-t-[28px] bg-white px-7 pb-7 pt-8">
+              <p className="text-[13px] font-medium text-[#121212]">{tx.step_of} 1 {tx.of} 2</p>
+              <h3 className="mt-1 text-[22px] font-bold leading-tight text-[#0B0B0B]">{tx.step1_title}</h3>
 
-            {step === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-5">
-                {/* Name */}
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                {[{ val: 'fr', label: 'Français' }, { val: 'en', label: 'English' }].map(l => (
+                  <button
+                    key={l.val}
+                    type="button"
+                    onClick={() => setLangState(l.val)}
+                    className={`flex h-[112px] flex-col items-center justify-center rounded-[14px] border text-[16px] font-semibold transition-all active:scale-95 ${lang === l.val ? 'border-[#C99D28] bg-[#FBF3DA] text-[#0D0D0D] shadow-lg shadow-[#C99D28]/25' : 'border-[#DADADA] bg-white text-[#0D0D0D]'}`}
+                  >
+                    <span className={`mb-4 h-7 w-7 rounded-full border-[3px] ${lang === l.val ? 'border-[#C99D28] bg-[#F1D98A] shadow-inner' : 'border-[#C99D28] bg-white'}`} />
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+
+              {error && <p className="mt-3 text-[12px] font-medium text-[#7A4D00]">{error}</p>}
+
+              <Button
+                onClick={next}
+                className="mt-auto h-14 w-full rounded-full bg-[#D5AD3C] text-[17px] font-semibold text-white shadow-xl shadow-[#D5AD3C]/35 hover:bg-[#C89E2E]"
+              >
+                {tx.btn_next}
+              </Button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="profile"
+            initial={{ opacity: 0, x: 80, scale: 0.98 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -80, scale: 0.98 }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="relative flex h-[78vh] max-h-[620px] min-h-[520px] w-full max-w-[350px] flex-col overflow-hidden rounded-[28px] bg-white px-7 py-7 shadow-2xl shadow-black/20"
+          >
+            <ProgressBars step={step} />
+            <div className="mt-10 flex-1 overflow-y-auto pr-1">
+              <p className="text-[13px] font-medium text-[#121212]">{tx.step_of} 2 {tx.of} 2</p>
+              <h3 className="mt-1 text-[22px] font-bold leading-tight text-[#0B0B0B]">{tx.step2_title}</h3>
+
+              <div className="mt-6 space-y-4">
                 <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <User className="w-4 h-4 text-primary" />
-                    <p className="font-semibold text-foreground text-sm">{tx.step2_title}</p>
-                  </div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.full_name_label}</label>
+                  <label className="mb-1.5 block text-[15px] font-medium text-[#0C0C0C]">{tx.full_name_label.replace(' *', '')} <span className="text-[#A35A00]">*</span></label>
                   <Input
                     placeholder={tx.full_name_placeholder}
                     value={form.full_name}
                     onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
-                    className="rounded-xl h-11 text-base"
+                    className="h-10 rounded-lg border-[#C99D28] px-3 text-[14px] shadow-none focus-visible:ring-[#C99D28]"
                   />
                 </div>
 
-                {/* Role */}
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-2 block">{tx.position_label}</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <label className="mb-1.5 block text-[15px] font-medium text-[#0C0C0C]">{tx.position_label.replace(' *', '')} <span className="text-[#A35A00]">*</span></label>
+                  <div className="grid grid-cols-2 gap-2 rounded-lg border border-[#C99D28] p-1.5">
                     {POSITIONS[lang].map(pos => (
                       <button
                         key={pos.value}
                         type="button"
                         onClick={() => setForm(f => ({ ...f, user_position: pos.value }))}
-                        className={`text-center px-3 py-3.5 rounded-xl border-2 text-sm font-medium transition-all active:scale-95 ${form.user_position === pos.value ? 'border-primary bg-primary/5 text-primary' : 'border-border text-foreground'}`}
+                        className={`rounded-md px-2 py-1.5 text-[12px] font-medium transition-all ${form.user_position === pos.value ? 'bg-[#D5AD3C] text-white' : 'bg-white text-[#191919]'}`}
                       >
                         {pos.label}
                       </button>
@@ -229,19 +266,15 @@ export default function OnboardingProfileModal({ onComplete }) {
                   </div>
                 </div>
 
-                {/* Business type */}
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="w-3.5 h-3.5 text-primary" />
-                    <label className="text-xs font-medium text-muted-foreground">{tx.business_type_label}</label>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <label className="mb-1.5 block text-[15px] font-medium text-[#0C0C0C]">{tx.business_type_label.replace(' *', '')} <span className="text-[#A35A00]">*</span></label>
+                  <div className="flex flex-wrap gap-1.5 rounded-lg border border-[#C99D28] p-2">
                     {BUSINESS_TYPES[lang].map(bt => (
                       <button
                         key={bt.value}
                         type="button"
                         onClick={() => setForm(f => ({ ...f, business_type: bt.value }))}
-                        className={`text-left px-3 py-2.5 rounded-xl border-2 text-xs font-medium transition-all active:scale-95 ${form.business_type === bt.value ? 'border-primary bg-primary/5 text-primary' : 'border-border text-foreground'}`}
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-all ${form.business_type === bt.value ? 'bg-[#D5AD3C] text-white' : 'bg-[#F8F1DC] text-[#1A1A1A]'}`}
                       >
                         {bt.label}
                       </button>
@@ -249,11 +282,10 @@ export default function OnboardingProfileModal({ onComplete }) {
                   </div>
                 </div>
 
-                {/* Country */}
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{tx.country_label}</label>
+                  <label className="mb-1.5 block text-[15px] font-medium text-[#0C0C0C]">{tx.country_label.replace(' *', '')} <span className="text-[#A35A00]">*</span></label>
                   <Select value={form.country} onValueChange={v => setForm(f => ({ ...f, country: v }))}>
-                    <SelectTrigger className="rounded-xl h-11 text-base w-full">
+                    <SelectTrigger className="h-10 rounded-lg border-[#C99D28] px-3 text-[14px] shadow-none focus:ring-[#C99D28]">
                       <SelectValue placeholder={tx.country_placeholder} />
                     </SelectTrigger>
                     <SelectContent className="max-h-60">
@@ -264,30 +296,29 @@ export default function OnboardingProfileModal({ onComplete }) {
                   </Select>
                 </div>
 
-                {error && <p className="text-xs text-destructive">{error}</p>}
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {error && <p className="text-[13px] font-medium text-[#7A4D00]">{error}</p>}
+              </div>
+            </div>
 
-          {step === 1 && error && <p className="text-xs text-destructive mt-3">{error}</p>}
-        </div>
-
-        {/* Footer — always visible, safe area */}
-        <div className="px-6 pb-6 pt-3 flex items-center justify-between flex-shrink-0 border-t border-border/30" style={{ paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}>
-          {step > 1 ? (
-            <button
-              onClick={() => { setError(''); setStep(s => s - 1); }}
-              className="text-sm text-muted-foreground active:text-foreground transition-colors py-2 px-1"
-            >
-              ← {tx.btn_back}
-            </button>
-          ) : <div />}
-          <Button onClick={next} disabled={saving} className="rounded-full px-7 gap-2 h-11">
-            {saving ? '...' : step === 2 ? tx.btn_finish : tx.btn_next}
-            {!saving && <ChevronRight className="w-4 h-4" />}
-          </Button>
-        </div>
-      </motion.div>
+            <div className="mt-5 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => { setError(''); setStep(s => s - 1); }}
+                className="px-3 py-2 text-[15px] font-medium text-[#6D4A00] transition-colors active:scale-95"
+              >
+                {tx.btn_back}
+              </button>
+              <Button
+                onClick={next}
+                disabled={saving}
+                className="h-12 rounded-full bg-[#D5AD3C] px-7 text-[15px] font-semibold text-white shadow-lg shadow-[#D5AD3C]/25 hover:bg-[#C89E2E] disabled:opacity-60"
+              >
+                {saving ? '...' : tx.btn_finish}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
