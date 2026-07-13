@@ -245,76 +245,66 @@ export default function Landing() {
         </section>
       </div>
 
-      {/* Problem Section */}
-      <section id="problem" className="py-16 sm:py-20 bg-white">
+      {/* Problem + Solution Section */}
+      <section id="problem" className="py-16 sm:py-24 bg-gradient-to-br from-white via-orange-50/50 to-emerald-50/40 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
-            <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">Le problème</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-              Les pertes alimentaires coûtent du temps et de l’argent aux commerces.
-            </h2>
-            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Entre le suivi manuel, les oublis et les dates à contrôler, la gestion quotidienne devient vite lourde et source de pertes.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { icon: TrendingDown, title: 'Pertes alimentaires', desc: 'Des produits expirent avant d’être vendus et impactent directement la marge.' },
-              { icon: AlertTriangle, title: 'Oublis fréquents', desc: 'Les DLC proches passent inaperçues quand tout repose sur des contrôles manuels.' },
-              { icon: Clock, title: 'Temps perdu', desc: 'Les équipes passent trop de temps à vérifier les rayons et les frigos.' },
-              { icon: Search, title: 'Suivi compliqué', desc: 'Les informations sont dispersées entre carnets, feuilles Excel et habitudes internes.' },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="rounded-2xl border border-neutral-100 bg-orange-50/40 p-5"
-              >
-                <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center mb-4 shadow-sm">
-                  <item.icon className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-bold mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-8 lg:gap-12 items-center">
+            <div>
+              <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">Le problème</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
+                Trop de produits suivis à la main, trop de pertes invisibles.
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6">
+                TrackSmart remplace les carnets, les oublis et les contrôles dispersés par une vue claire de vos DLC, alertes, documents et pertes.
+              </p>
+              <Link to="/offres" className="inline-flex">
+                <Button className="rounded-xl px-5 h-11 font-semibold gap-2 shadow-md">
+                  Découvrir les offres
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
 
-      {/* Solution Section */}
-      <section id="solution" className="py-16 sm:py-20 bg-gradient-to-br from-neutral-50 to-orange-50/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto text-center mb-10 sm:mb-12">
-            <p className="text-sm font-semibold text-primary uppercase tracking-wide mb-2">La solution</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
-              Un outil central pour piloter vos produits, vos alertes et vos pertes.
-            </h2>
-            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              TrackSmart réunit le dashboard, le scan code-barres, les analytics, les rapports PDF et la gestion documentaire dans une interface claire.
-            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { icon: TrendingDown, title: 'Marge protégée', desc: 'Repérez les produits à risque avant qu’ils ne deviennent une perte.', bg: 'bg-red-50', text: 'text-red-500', border: 'border-red-100' },
+                { icon: Bell, title: 'Alertes utiles', desc: 'Les DLC importantes remontent au bon moment, sans vérification permanente.', bg: 'bg-amber-50', text: 'text-amber-500', border: 'border-amber-100' },
+                { icon: Barcode, title: 'Ajout rapide', desc: 'Scannez, complétez, suivez : moins de saisie, plus de fiabilité.', bg: 'bg-blue-50', text: 'text-blue-500', border: 'border-blue-100' },
+                { icon: FolderOpen, title: 'Tout centralisé', desc: 'Stock, analyses, PDF et documents restent au même endroit.', bg: 'bg-emerald-50', text: 'text-emerald-500', border: 'border-emerald-100' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, delay: i * 0.07 }}
+                  whileHover={{ y: -5, rotate: i % 2 === 0 ? -1 : 1 }}
+                  className={`rounded-3xl border ${item.border} ${item.bg} p-5 shadow-sm`}
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-4 shadow-sm">
+                    <item.icon className={`w-6 h-6 ${item.text}`} />
+                  </div>
+                  <h3 className="font-extrabold mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {[
-              { icon: LayoutDashboard, title: 'Dashboard' },
-              { icon: Barcode, title: 'Barcode' },
-              { icon: BarChart3, title: 'Analytics' },
-              { icon: FileText, title: 'Rapports PDF' },
-              { icon: FolderOpen, title: 'Gestion documentaire' },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="rounded-2xl bg-white border border-neutral-100 p-5 text-center shadow-sm"
-              >
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-5 h-5 text-primary" />
+
+          <div id="solution" className="mt-10 sm:mt-14 rounded-3xl bg-white border border-neutral-100 shadow-sm p-4 sm:p-6">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                { icon: LayoutDashboard, title: 'Dashboard', color: 'bg-blue-50 text-blue-600' },
+                { icon: Barcode, title: 'Barcode', color: 'bg-amber-50 text-amber-600' },
+                { icon: BarChart3, title: 'Analytics', color: 'bg-purple-50 text-purple-600' },
+                { icon: FileText, title: 'Rapports PDF', color: 'bg-red-50 text-red-600' },
+                { icon: FolderOpen, title: 'Documents', color: 'bg-emerald-50 text-emerald-600' },
+              ].map((item) => (
+                <div key={item.title} className={`flex items-center gap-2 rounded-2xl px-4 py-3 ${item.color}`}>
+                  <item.icon className="w-4 h-4" />
+                  <span className="text-sm font-bold">{item.title}</span>
                 </div>
-                <h3 className="font-bold text-sm">{item.title}</h3>
-              </motion.div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -330,21 +320,22 @@ export default function Landing() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: Barcode, title: 'Scanner', desc: 'Ajoutez rapidement vos produits avec le scan code-barres.' },
-              { icon: Clock, title: 'Suivre les DLC', desc: 'Centralisez les dates limites et l’état de chaque produit.' },
-              { icon: Bell, title: 'Recevoir les alertes', desc: 'Identifiez les produits à traiter avant qu’il ne soit trop tard.' },
-              { icon: TrendingDown, title: 'Réduire les pertes', desc: 'Agissez plus tôt et suivez l’impact dans vos analyses.' },
+              { icon: Barcode, title: 'Scanner', desc: 'Ajoutez un produit en quelques secondes.', bg: 'bg-blue-50', text: 'text-blue-500', accent: 'text-blue-100' },
+              { icon: Clock, title: 'Planifier', desc: 'Gardez les dates importantes visibles.', bg: 'bg-amber-50', text: 'text-amber-500', accent: 'text-amber-100' },
+              { icon: Bell, title: 'Agir', desc: 'Traitez les alertes avant expiration.', bg: 'bg-red-50', text: 'text-red-500', accent: 'text-red-100' },
+              { icon: TrendingDown, title: 'Optimiser', desc: 'Mesurez les pertes évitées et progressez.', bg: 'bg-emerald-50', text: 'text-emerald-500', accent: 'text-emerald-100' },
             ].map((step, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
-                className="relative rounded-2xl border border-neutral-100 bg-white p-5 shadow-sm"
+                whileHover={{ y: -5 }}
+                className={`relative rounded-3xl border border-neutral-100 ${step.bg} p-5 shadow-sm overflow-hidden`}
               >
-                <span className="absolute top-4 right-4 text-3xl font-extrabold text-primary/10">0{i + 1}</span>
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                  <step.icon className="w-5 h-5 text-primary" />
+                <span className={`absolute top-3 right-4 text-5xl font-extrabold ${step.accent}`}>0{i + 1}</span>
+                <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center mb-4 shadow-sm">
+                  <step.icon className={`w-5 h-5 ${step.text}`} />
                 </div>
                 <h3 className="font-bold mb-2">{step.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
@@ -373,33 +364,39 @@ export default function Landing() {
             {[
               {
                 icon: LayoutDashboard,
-                title: 'Dashboard clair',
-                desc: 'Visualisez votre stock, vos alertes DLC et vos pertes depuis un seul écran.',
+                title: 'Vue stock',
+                desc: 'Toutes les priorités du magasin visibles en un coup d’œil.',
+                color: 'bg-blue-50 text-blue-500 border-blue-100',
               },
               {
                 icon: Barcode,
-                title: 'Scan code-barres',
-                desc: 'Ajoutez ou retrouvez rapidement vos produits sans saisie compliquée.',
+                title: 'Scan rapide',
+                desc: 'Moins de saisie, plus de précision au quotidien.',
+                color: 'bg-amber-50 text-amber-500 border-amber-100',
               },
               {
                 icon: BarChart3,
-                title: 'Analytics',
-                desc: 'Analysez vos pertes, vos catégories sensibles et vos tendances de stock.',
+                title: 'Pilotage',
+                desc: 'Repérez les rayons sensibles et les tendances de pertes.',
+                color: 'bg-purple-50 text-purple-500 border-purple-100',
               },
               {
                 icon: FileText,
-                title: 'Rapports PDF',
-                desc: 'Générez des rapports propres pour vos suivis internes ou votre fiduciaire.',
+                title: 'PDF prêts',
+                desc: 'Des rapports propres pour les suivis et la comptabilité.',
+                color: 'bg-red-50 text-red-500 border-red-100',
               },
               {
                 icon: FolderOpen,
-                title: 'Gestion documentaire',
-                desc: 'Centralisez factures, bons de livraison et documents importants.',
+                title: 'Documents',
+                desc: 'Factures et bons de livraison gardés au bon endroit.',
+                color: 'bg-emerald-50 text-emerald-500 border-emerald-100',
               },
               {
                 icon: Smartphone,
-                title: 'Accessible partout',
-                desc: 'Utilisez TrackSmart sur mobile, tablette ou ordinateur.',
+                title: 'Multi-écran',
+                desc: 'Une utilisation fluide sur mobile, tablette et ordinateur.',
+                color: 'bg-cyan-50 text-cyan-500 border-cyan-100',
               },
             ].map((f, i) => (
               <motion.div
@@ -408,10 +405,10 @@ export default function Landing() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
                 whileHover={{ y: -4 }}
-                className="group p-4 sm:p-5 md:p-6 rounded-2xl border border-neutral-100 hover:border-primary/20 hover:shadow-lg transition-all duration-300 text-center"
+                className={`group p-4 sm:p-5 md:p-6 rounded-3xl border ${f.color} hover:shadow-lg transition-all duration-300 text-center bg-white`}
               >
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:bg-primary/15 transition-colors">
-                  <f.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-sm group-hover:scale-105 transition-transform">
+                  <f.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <h3 className="font-bold text-sm sm:text-base mb-1.5 sm:mb-2">{f.title}</h3>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
