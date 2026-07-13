@@ -25,11 +25,13 @@ export default function Welcome() {
   const navigate = useNavigate();
   const canAccess = hasActiveSubscription(user);
   const userIsAdmin = isAdmin(user);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   // Show onboarding modal if profile not complete
-  const showOnboarding = user && !userIsAdmin && !user.onboarding_complete;
+  const showOnboarding = user && !userIsAdmin && !user.onboarding_complete && !onboardingCompleted;
 
   const handleOnboardingComplete = (chosenLang) => {
+    setOnboardingCompleted(true);
     setLang(chosenLang);
     // Trigger admin notification after onboarding
     if (!user.admin_notified) {

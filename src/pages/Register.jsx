@@ -22,13 +22,23 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      setError("Veuillez renseigner votre email");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Les mots de passe ne correspondent pas");
       return;
     }
     setLoading(true);
     try {
-      await base44.auth.register({ email, password });
+      await base44.auth.register({ email: normalizedEmail, password });
+      setEmail(normalizedEmail);
       setShowOtp(true);
     } catch (err) {
       setError(err.message || "Échec de l'inscription");
@@ -41,11 +51,12 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      const result = await base44.auth.verifyOtp({ email, otpCode });
-      if (result?.access_token) {
-        base44.auth.setToken(result.access_token);
+      const result = await base44.auth.verifyOtp({ email: email.trim().toLowerCase(), otpCode });
+      if (!result?.access_token) {
+        throw new Error("Code de vérification invalide");
       }
-      window.location.href = "/";
+      base44.auth.setToken(result.access_token);
+      window.location.href = "/welcome";
     } catch (err) {
       setError(err.message || "Code de vérification invalide");
     } finally {
@@ -56,7 +67,7 @@ export default function Register() {
   const handleResend = async () => {
     setError("");
     try {
-      await base44.auth.resendOtp(email);
+      await base44.auth.resendOtp(email.trim().toLowerCase());
       toast({
         title: "Code envoyé",
         description: "Vérifiez votre email pour le nouveau code.",
@@ -67,15 +78,15 @@ export default function Register() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", "/");
+    base44.auth.loginWithProvider("google", "/welcome");
   };
 
   const handleMicrosoft = () => {
-    base44.auth.loginWithProvider("microsoft", "/");
+    base44.auth.loginWithProvider("microsoft", "/welcome");
   };
 
   const handleApple = () => {
-    base44.auth.loginWithProvider("apple", "/");
+    base44.auth.loginWithProvider("apple", "/welcome");
   };
 
   if (showOtp) {
@@ -124,7 +135,7 @@ export default function Register() {
         </Button>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Vous n'avez pas reçu le code ?{" "}
-          <button onClick={handleResend} className="text-primary font-medium hover:underline">
+          <button type="button" onClick={handleResend} disabled={loading} className="text-primary font-medium hover:underline disabled:opacity-50">
             Renvoyer
           </button>
         </p>
@@ -148,6 +159,7 @@ export default function Register() {
     >
       <div className="space-y-3 mb-6">
         <Button
+          type="button"
           variant="outline"
           className="w-full h-12 text-sm font-medium"
           onClick={handleGoogle}
@@ -156,6 +168,7 @@ export default function Register() {
           Continuer avec Google
         </Button>
         <Button
+          type="button"
           variant="outline"
           className="w-full h-12 text-sm font-medium"
           onClick={handleMicrosoft}
@@ -169,6 +182,7 @@ export default function Register() {
           Continuer avec Microsoft
         </Button>
         <Button
+          type="button"
           variant="outline"
           className="w-full h-12 text-sm font-medium"
           onClick={handleApple}
@@ -208,6 +222,7 @@ export default function Register() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={() => setEmail((value) => value.trim().toLowerCase())}
               className="pl-10 h-12"
               required
             />
@@ -225,9 +240,11 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="pl-10 h-12"
+              minLength={8}
               required
             />
           </div>
+          <p className="text-xs text-muted-foreground">Minimum 8 caractères.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirmer le mot de passe</Label>
@@ -241,6 +258,7 @@ export default function Register() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="pl-10 h-12"
+              minLength={8}
               required
             />
           </div>
