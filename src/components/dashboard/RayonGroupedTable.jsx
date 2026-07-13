@@ -72,7 +72,7 @@ function RayonHeader({ rayon, products, open, onClick }) {
   );
 }
 
-export default function RayonGroupedTable({ products, onEdit, onDelete, onInlineSave }) {
+export default function RayonGroupedTable({ products, totalProducts = products, onEdit, onDelete, onInlineSave }) {
   const [showLossRecap, setShowLossRecap] = useState(false);
 
   // Group products by rayon — only include rayons that actually exist in the data
@@ -148,6 +148,7 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
             <div className="ml-0 animate-in slide-in-from-top-1 duration-150">
               <ProductTable
                 products={rayonProducts}
+                hideLossFooter={true}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onInlineSave={onInlineSave}
@@ -159,7 +160,7 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
 
       {/* Grand total losses across all rayons */}
       {(() => {
-        const grandTotal = calculateTotalLoss(products);
+        const grandTotal = calculateTotalLoss(totalProducts);
         if (grandTotal <= 0) return null;
         return (
           <button
@@ -177,7 +178,7 @@ export default function RayonGroupedTable({ products, onEdit, onDelete, onInline
       })()}
 
       {showLossRecap && (
-        <LossRecapModal products={products} onClose={() => setShowLossRecap(false)} />
+        <LossRecapModal products={totalProducts} onClose={() => setShowLossRecap(false)} />
       )}
     </div>
   );

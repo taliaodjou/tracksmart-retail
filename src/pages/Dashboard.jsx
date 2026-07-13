@@ -105,8 +105,11 @@ export default function Dashboard() {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
+      const savedData = data.action === 'jeter'
+        ? { ...data, discarded: true, discarded_at: new Date().toISOString().split('T')[0] }
+        : data;
       const product = await base44.entities.Product.create({
-        ...data,
+        ...savedData,
         store_owner_email: storeOwnerEmail,
         added_by_name: user.full_name || user.email
       });
@@ -126,7 +129,14 @@ export default function Dashboard() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      const product = await base44.entities.Product.update(id, data);
+      const savedData = { ...data };
+      if (data.action === 'jeter') {
+        savedData.discarded = true;
+        savedData.discarded_at = new Date().toISOString().split('T')[0];
+      } else if (data.expiration_date && getProductStatus(data.expiration_date) !== 'expired') {
+        savedData.discarded = false;
+      }
+      const product = await base44.entities.Product.update(id, savedData);
       const actionType = data.action === 'jeter' ? 'product_thrown' :
       data.action ? 'product_status_changed' :
       'product_edited';
@@ -525,6 +535,7 @@ export default function Dashboard() {
             {groupByRayon ?
           <RayonGroupedTable
             products={filteredProducts}
+            totalProducts={activeProducts}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onInlineSave={(id, data) => updateMutation.mutate({ id, data })} /> :
@@ -532,6 +543,7 @@ export default function Dashboard() {
 
           <ProductTable
             products={filteredProducts}
+            totalProducts={activeProducts}
             onEdit={handleEdit}
             onDelete={handleDelete}
             onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />

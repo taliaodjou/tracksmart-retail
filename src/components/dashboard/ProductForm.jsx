@@ -59,6 +59,10 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isExpired && form.action === 'jeter' && ((Number(form.quantity_thrown) || 0) <= 0 || (Number(form.price_chf) || 0) <= 0)) {
+      window.alert('Merci de renseigner une quantité jetée et un prix supérieurs à 0.');
+      return;
+    }
     const data = {
       name: form.name,
       expiration_date: form.expiration_date,
@@ -235,12 +239,12 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
               <>
                 <div className="space-y-1">
                   <Label className="text-xs">{t('form_qty_thrown')}</Label>
-                  <Input type="number" min="0" value={form.quantity_thrown} onChange={set('quantity_thrown')} placeholder="0" className="h-8 text-sm" />
+                  <Input type="number" min="1" value={form.quantity_thrown} onChange={set('quantity_thrown')} placeholder="0" className="h-8 text-sm" />
                 </div>
 
                 <div className="space-y-1">
                   <Label className="text-xs">{t('form_price_chf')}</Label>
-                  <Input type="number" min="0" step="0.01" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" className="h-8 text-sm" />
+                  <Input type="number" min="0.01" step="0.01" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" className="h-8 text-sm" />
                 </div>
 
                 {(form.quantity_thrown || form.price_chf) && (

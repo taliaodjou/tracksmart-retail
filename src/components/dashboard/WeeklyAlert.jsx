@@ -24,7 +24,7 @@ function ProductActionPanel({ product, onUpdate, lang }) {
   const cfg = statusConfig[status];
 
   const handleJeter = async () => {
-    if (!qty || !price) return;
+    if ((Number(qty) || 0) <= 0 || (Number(price) || 0) <= 0) return;
     setSaving(true);
     await onUpdate(product.id, {
       action: 'jeter',
@@ -112,7 +112,7 @@ function ProductActionPanel({ product, onUpdate, lang }) {
               <label className="text-xs font-semibold text-foreground mb-1 block">{isFr ? 'Quantité jetée' : 'Qty discarded'}</label>
               <Input
                 type="number"
-                min="0"
+                min="1"
                 value={qty}
                 onChange={e => setQty(e.target.value)}
                 placeholder="0"
@@ -124,7 +124,7 @@ function ProductActionPanel({ product, onUpdate, lang }) {
               <label className="text-xs font-semibold text-foreground mb-1 block">{isFr ? 'Prix vente CHF' : 'Sale price CHF'}</label>
               <Input
                 type="number"
-                min="0"
+                min="0.01"
                 step="0.05"
                 value={price}
                 onChange={e => setPrice(e.target.value)}
@@ -141,7 +141,7 @@ function ProductActionPanel({ product, onUpdate, lang }) {
           )}
           <Button
             className="w-full bg-red-500 hover:bg-red-600 text-white rounded-xl"
-            disabled={!qty || !price || saving}
+            disabled={(Number(qty) || 0) <= 0 || (Number(price) || 0) <= 0 || saving}
             onClick={handleJeter}
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Trash2 className="w-4 h-4" /> {isFr ? 'Confirmer le jet' : 'Confirm discard'}</>}

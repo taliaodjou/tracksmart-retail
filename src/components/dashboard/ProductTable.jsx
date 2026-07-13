@@ -125,7 +125,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
         {isExpired && form.action === 'jeter' ? (
           <Input
             type="number"
-            min="0"
+            min="1"
             value={form.quantity_thrown}
             onChange={e => setForm(f => ({ ...f, quantity_thrown: e.target.value }))}
             className="h-7 text-xs w-16"
@@ -139,7 +139,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
           <div className="space-y-1">
             <Input
               type="number"
-              min="0"
+              min="0.01"
               step="0.01"
               value={form.price_chf}
               onChange={e => setForm(f => ({ ...f, price_chf: e.target.value }))}
@@ -162,6 +162,10 @@ function InlineEditRow({ product, onSave, onCancel }) {
             className="h-7 w-7 bg-green-600 hover:bg-green-700"
             onClick={() => {
               const isJeter = form.action === 'jeter';
+              if (isJeter && ((Number(form.quantity_thrown) || 0) <= 0 || (Number(form.price_chf) || 0) <= 0)) {
+                window.alert('Merci de renseigner une quantité jetée et un prix supérieurs à 0.');
+                return;
+              }
               onSave({
                 name: form.name,
                 marque: form.marque || undefined,
@@ -187,7 +191,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
   );
 }
 
-export default function ProductTable({ products, onEdit, onDelete, onInlineSave }) {
+export default function ProductTable({ products, totalProducts = products, hideLossFooter = false, onEdit, onDelete, onInlineSave }) {
   const { t } = useLanguage();
   const [editingId, setEditingId] = useState(null);
   const [showLossRecap, setShowLossRecap] = useState(false);
@@ -347,8 +351,8 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
             })}
           </tbody>
           {/* Total losses footer */}
-          {(() => {
-            const totalLoss = calculateTotalLoss(products);
+          {!hideLossFooter && (() => {
+            const totalLoss = calculateTotalLoss(totalProducts);
             if (totalLoss <= 0) return null;
             return (
               <tfoot>
@@ -374,7 +378,7 @@ export default function ProductTable({ products, onEdit, onDelete, onInlineSave 
       </div>
 
       {showLossRecap && (
-        <LossRecapModal products={products} onClose={() => setShowLossRecap(false)} />
+        <LossRecapModal products={totalProducts} onClose={() => setShowLossRecap(false)} />
       )}
     </>
   );

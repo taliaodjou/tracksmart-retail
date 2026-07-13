@@ -1,11 +1,11 @@
 import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Package, AlertTriangle, XCircle } from 'lucide-react';
-import { getProductStatus } from '@/lib/productUtils';
+import { getProductStatus, getDisplayStatus } from '@/lib/productUtils';
 
 export default function StatsCards({ products }) {
   const { t } = useLanguage();
-  const activeProducts = products.filter(p => !p.discarded);
+  const activeProducts = products.filter(p => getDisplayStatus(p) !== 'archived');
   const total = activeProducts.length;
   const expired = activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length;
   const urgent = activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length;
