@@ -84,7 +84,7 @@ const i18n = {
     btn_finish: 'Commencer',
     btn_back: 'Retour',
     required: 'Veuillez remplir tous les champs.',
-    saved: 'Vos données sont bien enregistrées, bienvenue sur votre compte',
+    saved: 'Vos informations ont bien été enregistrées. Bienvenue sur votre espace TrackSmart.',
     step_of: 'Étape',
     of: 'sur',
   },
@@ -103,7 +103,7 @@ const i18n = {
     btn_finish: 'Get started',
     btn_back: 'Back',
     required: 'Please fill in all required fields.',
-    saved: 'Your information has been saved, welcome to your account',
+    saved: 'Your information has been saved. Welcome to your TrackSmart account.',
     step_of: 'Step',
     of: 'of',
   },
@@ -172,10 +172,10 @@ export default function OnboardingProfileModal({ onComplete }) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -80, scale: 0.98 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
-            className="relative flex h-[78vh] max-h-[620px] min-h-[520px] w-full max-w-[350px] items-center justify-center overflow-hidden rounded-[28px] px-10 text-center shadow-2xl shadow-black/20"
+            className="relative flex h-[78vh] max-h-[620px] min-h-[520px] w-full max-w-[350px] items-center justify-center overflow-hidden rounded-[28px] px-9 text-center shadow-2xl shadow-black/20"
             style={{ backgroundImage: `url(${STORY_BG})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
           >
-            <p className="text-[24px] font-semibold leading-tight text-[#0E0B05]">{tx.saved}</p>
+            <p className="max-w-[260px] -translate-y-3 text-[22px] font-semibold leading-snug text-[#0E0B05]">{tx.saved}</p>
           </motion.div>
         ) : step === 1 ? (
           <motion.div
