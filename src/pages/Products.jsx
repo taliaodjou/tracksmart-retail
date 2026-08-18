@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LayoutList, Layers, Search, X, Plus, ScanLine } from 'lucide-react';
-import { categoryKeys, rayonKeys, getProductStatus, getStoreOwnerEmail, isAdmin } from '@/lib/productUtils';
+import { categoryKeys, getProductStatus, getStoreOwnerEmail, isAdmin } from '@/lib/productUtils';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import ProductForm from '@/components/dashboard/ProductForm';
 import ProductTable from '@/components/dashboard/ProductTable';
@@ -124,6 +124,11 @@ export default function Products() {
     if (rayonFilter !== 'all' && product.rayon !== rayonFilter) return false;
     return true;
   }), [products, search, statusFilter, categoryFilter, rayonFilter]);
+
+  const availableRayons = useMemo(() => {
+    return Array.from(new Set(products.map((product) => product.rayon).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' }));
+  }, [products]);
 
   const activeFilterCount = [statusFilter !== 'all', categoryFilter !== 'all', rayonFilter !== 'all'].filter(Boolean).length;
   const statusFilters = [
@@ -301,7 +306,7 @@ export default function Products() {
                   <SelectTrigger className="w-36 rounded-full text-xs h-9"><SelectValue placeholder={t('dash_filter_rayon')} /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t('all')} — {t('dash_filter_rayon')}</SelectItem>
-                    {Object.keys(rayonKeys).map((rayon) => <SelectItem key={rayon} value={rayon}>Rayon {rayon}</SelectItem>)}
+                    {availableRayons.map((rayon) => <SelectItem key={rayon} value={rayon}>{rayon}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

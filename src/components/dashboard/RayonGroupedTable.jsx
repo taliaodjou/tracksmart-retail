@@ -7,8 +7,8 @@ import { getProductStatus } from '@/lib/productUtils';
 // Rayon display labels
 function rayonLabel(rayon) {
   if (!rayon) return 'Sans rayon';
-  if (rayon.startsWith('Frigo') || rayon.startsWith('Cong')) return rayon;
-  return `Rayon ${rayon}`;
+  if (/^\d+$/.test(rayon)) return `Rayon ${rayon}`;
+  return rayon;
 }
 
 // Status dot colors for the summary pill

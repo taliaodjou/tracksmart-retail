@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys } from '@/lib/productUtils';
+import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys } from '@/lib/productUtils';
 import ProductDetailModal from './ProductDetailModal';
 
 const ACTION_KEYS = {
@@ -76,15 +76,12 @@ function InlineEditRow({ product, onSave, onCancel }) {
       </td>
       {/* Rayon */}
       <td className="px-3 py-2">
-        <Select value={form.rayon || '__none__'} onValueChange={v => setForm(f => ({ ...f, rayon: v === '__none__' ? '' : v }))}>
-          <SelectTrigger className="h-7 text-xs w-20"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__none__">—</SelectItem>
-            {Object.keys(rayonKeys).map(r => (
-              <SelectItem key={r} value={r}>R{r}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          value={form.rayon}
+          onChange={e => setForm(f => ({ ...f, rayon: e.target.value }))}
+          className="h-7 text-xs min-w-[120px]"
+          placeholder="Rayon"
+        />
       </td>
       {/* DLC */}
       <td className="px-3 py-2">
@@ -250,7 +247,7 @@ export default function ProductTable({ products, totalProducts = products, hideL
                       {format(new Date(p.expiration_date), 'dd/MM/yy')}{!compactView && ` (${days}j)`}
                     </span>
                   )}
-                  {p.rayon && <span>R{p.rayon}</span>}
+                  {p.rayon && <span>{p.rayon}</span>}
                   {!compactView && isExpired && total > 0 && <span className="text-red-600 font-semibold">CHF {total.toFixed(2)}</span>}
                 </div>
               </div>
@@ -322,7 +319,7 @@ export default function ProductTable({ products, totalProducts = products, hideL
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
                     {p.category ? t(categoryKeys[p.category] || p.category) : '—'}
                   </td>
-                  {!compactView && <td className="px-4 py-3 text-muted-foreground">{p.rayon ? `R${p.rayon}` : '—'}</td>}
+                  {!compactView && <td className="px-4 py-3 text-muted-foreground">{p.rayon || '—'}</td>}
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'}
                   </td>

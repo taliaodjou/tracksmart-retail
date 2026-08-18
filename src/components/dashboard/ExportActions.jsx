@@ -3,7 +3,7 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Printer, Download } from 'lucide-react';
 import { format } from 'date-fns';
-import { getProductStatus, getDaysRemaining, categoryKeys, rayonKeys, orderStatusKeys } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, categoryKeys, orderStatusKeys } from '@/lib/productUtils';
 
 export default function ExportActions({ products }) {
   const { t } = useLanguage();
@@ -21,7 +21,7 @@ export default function ExportActions({ products }) {
       return `<tr>
         <td>${p.name}</td>
         <td>${t(categoryKeys[p.category] || p.category)}</td>
-        <td>${p.rayon ? 'Rayon ' + p.rayon : '—'}</td>
+        <td>${p.rayon || '—'}</td>
         <td>${format(new Date(p.expiration_date), 'dd/MM/yyyy')}</td>
         <td>${days}j</td>
         <td>${t('status_' + s)}</td>
@@ -72,7 +72,7 @@ th { background: #f5f5f5; font-weight: bold; }
         p.category ? t(categoryKeys[p.category] || p.category) : '',
         p.reception_date ? format(new Date(p.reception_date), 'dd/MM/yyyy') : '',
         p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '',
-        p.rayon ? `Rayon ${p.rayon}` : '',
+        p.rayon || '',
         days,
         t(`status_${status}`),
         p.action ? (actionLabels[p.action] || p.action) : '',

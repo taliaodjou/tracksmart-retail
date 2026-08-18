@@ -12,7 +12,7 @@ import { Plus, Search, ScanLine, X, LayoutList, Layers } from 'lucide-react';
 const XlsIcon = () =>
 <span className="text-[10px] font-bold hidden">XLS</span>;
 
-import { getProductStatus, hasActiveSubscription, categoryKeys, rayonKeys, getStoreOwnerEmail, isDiscarded } from '@/lib/productUtils';
+import { getProductStatus, hasActiveSubscription, categoryKeys, getStoreOwnerEmail, isDiscarded } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 import { logActivity } from '@/lib/activityLogger';
 
@@ -351,6 +351,11 @@ export default function Dashboard() {
   categoryFilter !== 'all',
   rayonFilter !== 'all'].
   filter(Boolean).length;
+
+  const availableRayons = useMemo(() => {
+    return Array.from(new Set(products.map((product) => product.rayon).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' }));
+  }, [products]);
 
   if (!canAccess) {
     return (

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, ScanLine, Loader2 } from 'lucide-react';
-import { categoryKeys, rayonKeys, getProductStatus } from '@/lib/productUtils';
+import { categoryKeys, getProductStatus } from '@/lib/productUtils';
 import BarcodeScanner from './BarcodeScanner';
 import ProductHistorySection from './ProductHistorySection';
 import { base44 } from '@/api/base44Client';
@@ -191,14 +191,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         {/* Rayon */}
         <div className="space-y-1">
           <Label className="text-xs">{t('form_rayon')}</Label>
-          <Select value={form.rayon} onValueChange={v => setForm({ ...form, rayon: v })}>
-            <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('form_rayon')} /></SelectTrigger>
-            <SelectContent>
-              {Object.keys(rayonKeys).map(r => (
-                <SelectItem key={r} value={r}>{t('dash_filter_rayon')} {r}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input value={form.rayon} onChange={set('rayon')} placeholder={lang === 'fr' ? 'Ex: Boissons fraîches, Réserve, Vitrine' : 'Ex: Fresh drinks, Storage, Display'} className="h-8 text-sm" />
         </div>
 
         {/* Date réception */}

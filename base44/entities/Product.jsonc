@@ -44,32 +44,7 @@
     },
     "rayon": {
       "type": "string",
-      "enum": [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "13",
-        "14",
-        "15",
-        "Frigo 1",
-        "Frigo 2",
-        "Frigo 3",
-        "Frigo 4",
-        "Frigo 5",
-        "Cong\u00e9lateur 1",
-        "Cong\u00e9lateur 2",
-        "Cong\u00e9lateur 3"
-      ],
-      "description": "Rayon / Section"
+      "description": "Rayon / Section personnalis\u00e9e"
     },
     "store_owner_email": {
       "type": "string",

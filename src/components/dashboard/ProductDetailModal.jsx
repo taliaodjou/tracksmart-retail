@@ -95,7 +95,7 @@ export default function ProductDetailModal({ product, onClose, onEdit }) {
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="rounded-2xl border border-border/50 p-4">
               <h3 className="font-bold text-sm mb-2">Localisation & dates</h3>
-              <InfoRow label="Rayon" value={product.rayon ? `Rayon ${product.rayon}` : '—'} />
+              <InfoRow label="Rayon" value={product.rayon || '—'} />
               <InfoRow label="Étagère" value={product.etagere} />
               <InfoRow label="Date de réception" value={formatDate(product.reception_date)} />
               <InfoRow label="DLC" value={formatDate(product.expiration_date)} />
