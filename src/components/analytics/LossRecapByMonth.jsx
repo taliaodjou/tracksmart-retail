@@ -1,21 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
-import { categoryKeys } from '@/lib/productUtils';
+import { categoryKeys, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
 
 export default function LossRecapByMonth({ products, lang = 'fr' }) {
   const [expandedMonth, setExpandedMonth] = useState(null);
 
   const monthlyGroups = React.useMemo(() => {
     const map = {};
-    const thrown = products.filter(p =>
-      p.discarded && p.action === 'jeter' && p.quantity_thrown > 0 && p.price_chf > 0
-    );
+    const thrown = products.filter(p => getProductLoss(p) > 0);
     thrown.forEach(p => {
-      if (!p.discarded_at) return;
-      const key = p.discarded_at.substring(0, 7); // "YYYY-MM"
+      const refDate = getLossReferenceDate(p);
+      if (!refDate) return;
+      const key = refDate.substring(0, 7); // "YYYY-MM"
       if (!map[key]) map[key] = { products: [], totalLoss: 0 };
-      const loss = (p.quantity_thrown || 0) * (p.price_chf || 0);
-      map[key].products.push({ ...p, loss });
+      const loss = getProductLoss(p);
+      map[key].products.push({ ...p, loss, loss_date: refDate });
       map[key].totalLoss += loss;
     });
     // Sort by month descending
@@ -99,7 +98,7 @@ export default function LossRecapByMonth({ products, lang = 'fr' }) {
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {p.quantity_thrown} unité{p.quantity_thrown > 1 ? 's' : ''} × CHF {Number(p.price_chf).toFixed(2)}
-                        {' · '}🗑 {p.discarded_at || '—'}
+                        {' · '}🗑 {p.loss_date || '—'}
                       </p>
                     </div>
                   ))}

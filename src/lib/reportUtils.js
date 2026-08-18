@@ -1,5 +1,6 @@
 import { startOfMonth, endOfMonth, subMonths, format, isWithinInterval, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
 
 // Given a quarter start month index (0=Jan) and year, compute the 3-month period
 export function getQuarterPeriod(quarterStartMonth, year) {
@@ -58,20 +59,16 @@ export function formatQuarterLabel(start, end) {
 
 export function computeReportData(products, periodStart, periodEnd, prevQuarterLoss = 0, shopName = '') {
   const thrown = products.filter(p => {
-    if (p.action !== 'jeter') return false;
-    const qty = Number(p.quantity_thrown) || 0;
-    const price = Number(p.price_chf) || 0;
-    if (qty === 0 || price === 0) return false;
-    // Use updated_date or order_date to determine when it was thrown
-    const actionDate = p.order_date || p.updated_date || p.created_date;
-    if (!actionDate) return true; // include if no date
+    if (getProductLoss(p) <= 0) return false;
+    const actionDate = getLossReferenceDate(p);
+    if (!actionDate) return true;
     try {
       const d = new Date(actionDate);
       return d >= periodStart && d <= periodEnd;
     } catch { return false; }
   });
 
-  const totalLoss = thrown.reduce((sum, p) => sum + (Number(p.quantity_thrown) || 0) * (Number(p.price_chf) || 0), 0);
+  const totalLoss = thrown.reduce((sum, p) => sum + getProductLoss(p), 0);
   const totalThrown = thrown.reduce((sum, p) => sum + (Number(p.quantity_thrown) || 0), 0);
 
   // Monthly breakdown
@@ -80,10 +77,10 @@ export function computeReportData(products, periodStart, periodEnd, prevQuarterL
     const mStart = startOfMonth(new Date(periodStart.getFullYear(), periodStart.getMonth() + i, 1));
     const mEnd = endOfMonth(mStart);
     const mProducts = thrown.filter(p => {
-      const d = new Date(p.order_date || p.updated_date || p.created_date || periodStart);
+      const d = new Date(getLossReferenceDate(p) || periodStart);
       return d >= mStart && d <= mEnd;
     });
-    const mLoss = mProducts.reduce((sum, p) => sum + (Number(p.quantity_thrown) || 0) * (Number(p.price_chf) || 0), 0);
+    const mLoss = mProducts.reduce((sum, p) => sum + getProductLoss(p), 0);
     months.push({ month: format(mStart, 'MMM', { locale: fr }), loss: mLoss, count: mProducts.length });
   }
 
@@ -91,7 +88,7 @@ export function computeReportData(products, periodStart, periodEnd, prevQuarterL
   const catMap = {};
   thrown.forEach(p => {
     const cat = p.category || 'autre';
-    catMap[cat] = (catMap[cat] || 0) + (Number(p.quantity_thrown) || 0) * (Number(p.price_chf) || 0);
+    catMap[cat] = (catMap[cat] || 0) + getProductLoss(p);
   });
   const topCategories = Object.entries(catMap)
     .map(([name, loss]) => ({ name, loss }))
@@ -101,7 +98,7 @@ export function computeReportData(products, periodStart, periodEnd, prevQuarterL
   const rayonMap = {};
   thrown.forEach(p => {
     const r = p.rayon || '?';
-    rayonMap[r] = (rayonMap[r] || 0) + (Number(p.quantity_thrown) || 0) * (Number(p.price_chf) || 0);
+    rayonMap[r] = (rayonMap[r] || 0) + getProductLoss(p);
   });
   const topRayons = Object.entries(rayonMap)
     .map(([name, loss]) => ({ name, loss }))
@@ -127,9 +124,9 @@ export function computeReportData(products, periodStart, periodEnd, prevQuarterL
     }
   }
   if (thrown.length > 3) {
-    const sortedByLoss = [...thrown].sort((a, b) => ((Number(b.quantity_thrown)||0)*(Number(b.price_chf)||0)) - ((Number(a.quantity_thrown)||0)*(Number(a.price_chf)||0)));
+    const sortedByLoss = [...thrown].sort((a, b) => getProductLoss(b) - getProductLoss(a));
     const topProduct = sortedByLoss[0];
-    const topLoss = (Number(topProduct.quantity_thrown)||0) * (Number(topProduct.price_chf)||0);
+    const topLoss = getProductLoss(topProduct);
     insights.push(`"${topProduct.name}" est le produit le plus coûteux à éliminer (CHF ${topLoss.toFixed(2)}).`);
   }
   if (totalThrown > 0 && totalLoss > 0) {
@@ -139,14 +136,14 @@ export function computeReportData(products, periodStart, periodEnd, prevQuarterL
 
   const thrownWithTotal = thrown.map(p => ({
     ...p,
-    total: (Number(p.quantity_thrown) || 0) * (Number(p.price_chf) || 0)
+    total: getProductLoss(p)
   }));
 
   return {
     total_loss_chf: totalLoss,
     total_products_thrown: totalThrown,
     total_products_tracked: products.length,
-    total_expired: products.filter(p => p.action === 'jeter').length,
+    total_expired: thrown.length,
     previous_quarter_loss_chf: prevQuarterLoss,
     top_categories: JSON.stringify(topCategories),
     top_rayons: JSON.stringify(topRayons),

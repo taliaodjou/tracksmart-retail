@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingDown } from 'lucide-react';
 import { BarChart, Bar, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
-import { getProductStatus, getDaysRemaining, isDiscarded } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, isDiscarded, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
 
 const monthsFr = ['jan', 'fév', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sep', 'oct', 'nov', 'déc'];
 
@@ -15,9 +15,9 @@ export default function CockpitOverview({ products }) {
     });
 
     products.forEach((product) => {
-      const loss = (product.quantity_thrown || 0) * (product.price_chf || 0);
+      const loss = getProductLoss(product);
       if (loss <= 0) return;
-      const rawDate = product.discarded_at || product.updated_date || product.expiration_date;
+      const rawDate = getLossReferenceDate(product);
       const date = rawDate ? new Date(rawDate) : now;
       const key = `${date.getFullYear()}-${date.getMonth()}`;
       const entry = months.find((m) => m.key === key);
@@ -42,9 +42,9 @@ export default function CockpitOverview({ products }) {
         <section className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 min-h-[210px]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold text-lg text-foreground">Pertes</h2>
-            <button className="text-xs font-medium text-foreground hover:text-primary inline-flex items-center gap-1">
+            <Link to="/analytics" className="text-xs font-medium text-foreground hover:text-primary inline-flex items-center gap-1">
               Voir détails <ArrowRight className="w-3 h-3" />
-            </button>
+            </Link>
           </div>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={data}>

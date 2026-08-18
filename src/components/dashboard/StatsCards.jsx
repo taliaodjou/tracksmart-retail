@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Package, AlertTriangle, XCircle, TrendingDown } from 'lucide-react';
-import { getProductStatus, getDisplayStatus, calculateTotalLoss } from '@/lib/productUtils';
+import { getCoreProductMetrics } from '@/lib/productUtils';
 import LossRecapModal from './LossRecapModal';
 
 export default function StatsCards({ products }) {
   const { t } = useLanguage();
   const [showLossRecap, setShowLossRecap] = useState(false);
-  const activeProducts = products.filter(p => getDisplayStatus(p) !== 'archived');
-  const total = activeProducts.length;
-  const expired = activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length;
-  const urgent = activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length;
-  const totalLoss = calculateTotalLoss(products);
+  const { totalProducts: total, expiredProducts: expired, urgentProducts: urgent, totalLoss } = getCoreProductMetrics(products);
 
   const cards = [
     { label: t('dash_total_products'), value: total, icon: Package, bg: 'bg-primary/10', iconColor: 'text-primary' },

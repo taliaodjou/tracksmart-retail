@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
-import { getProductStatus, getDaysRemaining, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin, calculateTotalLoss, isDiscarded } from '@/lib/productUtils';
+import { getProductStatus, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin, getCoreProductMetrics, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
 import { format, startOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -56,7 +56,7 @@ export default function Analytics() {
     enabled: canAccess && !!user?.email,
   });
 
-  // Build monthly data for the last MONTHS_BACK months
+  // Build monthly data with the same loss formula used everywhere else
   const monthlyData = useMemo(() => {
     const months = [];
     for (let i = MONTHS_BACK - 1; i >= 0; i--) {
@@ -68,22 +68,26 @@ export default function Analytics() {
       const [y, m] = monthKey.split('-');
       const monthDate = new Date(parseInt(y), parseInt(m) - 1, 1);
 
-      // Products that expired OR were discarded in this month
-      const expiredInMonth = products.filter(p => {
-        if (!p.expiration_date && !p.discarded_at) return false;
-        // Discarded: use discarded_at date if available, otherwise expiration_date
-        const dateToCheck = p.discarded_at ? new Date(p.discarded_at) : (p.expiration_date ? new Date(p.expiration_date) : null);
-        if (!dateToCheck) return false;
-        return isSameMonth(dateToCheck, monthDate);
+      const lossProducts = products.filter(p => {
+        if (getProductLoss(p) <= 0) return false;
+        const ref = getLossReferenceDate(p);
+        if (!ref) return false;
+        return isSameMonth(new Date(ref), monthDate);
       });
 
-      const totalLoss = expiredInMonth.reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
-      const totalThrown = expiredInMonth.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
+      const expiredInMonth = products.filter(p => {
+        if (!p.expiration_date) return false;
+        return isSameMonth(new Date(p.expiration_date), monthDate) && getProductStatus(p.expiration_date) === 'expired';
+      });
+
+      const totalLoss = lossProducts.reduce((sum, p) => sum + getProductLoss(p), 0);
+      const totalThrown = lossProducts.reduce((sum, p) => sum + (Number(p.quantity_thrown) || 0), 0);
 
       return {
         month: monthKey,
         label: getMonthLabel(monthKey, lang),
         expiredCount: expiredInMonth.length,
+        lossProductCount: lossProducts.length,
         totalLoss: parseFloat(totalLoss.toFixed(2)),
         totalThrown,
       };
@@ -100,17 +104,16 @@ export default function Analytics() {
     ? currentMonth?.expiredCount - prevMonth.expiredCount
     : null;
 
-  // Category analysis — includes discarded products
+  // Category analysis — based on recorded losses only
   const categoryStats = useMemo(() => {
     const map = {};
     products.forEach(p => {
-      if (!p.category) return;
+      const loss = getProductLoss(p);
+      if (!p.category || loss <= 0) return;
       if (!map[p.category]) map[p.category] = { count: 0, loss: 0, thrown: 0 };
-      if (isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired') {
-        map[p.category].count++;
-        map[p.category].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
-        map[p.category].thrown += (p.quantity_thrown || 0);
-      }
+      map[p.category].count++;
+      map[p.category].loss += loss;
+      map[p.category].thrown += (Number(p.quantity_thrown) || 0);
     });
     return Object.entries(map)
       .map(([cat, data]) => ({ cat, label: t(categoryKeys[cat] || cat), ...data }))
@@ -118,16 +121,15 @@ export default function Analytics() {
       .slice(0, 6);
   }, [products, t]);
 
-  // Rayon analysis — includes discarded products
+  // Rayon analysis — based on recorded losses only
   const rayonStats = useMemo(() => {
     const map = {};
     products.forEach(p => {
-      if (!p.rayon) return;
+      const loss = getProductLoss(p);
+      if (!p.rayon || loss <= 0) return;
       if (!map[p.rayon]) map[p.rayon] = { count: 0, loss: 0 };
-      if (isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired') {
-        map[p.rayon].count++;
-        map[p.rayon].loss += (p.quantity_thrown || 0) * (p.price_chf || 0);
-      }
+      map[p.rayon].count++;
+      map[p.rayon].loss += loss;
     });
     return Object.entries(map)
       .map(([rayon, data]) => ({ rayon: `R${rayon}`, ...data }))
@@ -135,11 +137,11 @@ export default function Analytics() {
       .slice(0, 8);
   }, [products]);
 
-  // Most problematic products — includes discarded
+  // Most problematic products — based on recorded losses only
   const topProblematicProducts = useMemo(() => {
     return products
-      .filter(p => (isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired') && p.price_chf)
-      .sort((a, b) => ((b.quantity_thrown || 0) * (b.price_chf || 0)) - ((a.quantity_thrown || 0) * (a.price_chf || 0)))
+      .filter(p => getProductLoss(p) > 0)
+      .sort((a, b) => getProductLoss(b) - getProductLoss(a))
       .slice(0, 5);
   }, [products]);
 
@@ -156,10 +158,8 @@ export default function Analytics() {
     );
   }
 
-  // Include discarded products in loss calculations — they are archived, not deleted
-  const totalLossAll = calculateTotalLoss(products);
-  const totalExpired = products.filter(p => isDiscarded(p) || getProductStatus(p.expiration_date) === 'expired').length;
-  const totalThrown = products.reduce((sum, p) => sum + (p.quantity_thrown || 0), 0);
+  // Same top metrics as Dashboard / Produits
+  const { totalProducts, expiredProducts, urgentProducts, totalLoss } = getCoreProductMetrics(products);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
@@ -184,28 +184,28 @@ export default function Analytics() {
         {/* Summary KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <KpiCard
-            icon={<TrendingDown className="w-5 h-5 text-primary" />}
-            value={`CHF ${totalLossAll.toFixed(2)}`}
-            label={lang === 'fr' ? 'Pertes totales' : 'Total losses'}
+            icon={<BarChart2 className="w-5 h-5 text-primary" />}
+            value={totalProducts}
+            label={lang === 'fr' ? 'Total produits' : 'Total products'}
             bg="bg-primary/10"
           />
           <KpiCard
             icon={<PackageX className="w-5 h-5 text-red-500" />}
-            value={totalExpired}
+            value={expiredProducts}
             label={lang === 'fr' ? 'Produits expirés' : 'Expired products'}
             bg="bg-red-50"
           />
           <KpiCard
             icon={<Flame className="w-5 h-5 text-orange-500" />}
-            value={totalThrown}
-            label={lang === 'fr' ? 'Quantité jetée' : 'Quantity thrown'}
+            value={urgentProducts}
+            label={lang === 'fr' ? 'Produits urgents' : 'Urgent products'}
             bg="bg-orange-50"
           />
           <KpiCard
-            icon={<AlertTriangle className="w-5 h-5 text-yellow-500" />}
-            value={products.filter(p => getProductStatus(p.expiration_date) === 'urgent').length}
-            label={lang === 'fr' ? 'Urgents maintenant' : 'Urgent now'}
-            bg="bg-yellow-50"
+            icon={<TrendingDown className="w-5 h-5 text-red-600" />}
+            value={`CHF ${totalLoss.toFixed(2)}`}
+            label={lang === 'fr' ? 'Total pertes' : 'Total losses'}
+            bg="bg-red-50"
           />
         </div>
 
@@ -346,7 +346,7 @@ export default function Analytics() {
             ) : (
               <div className="space-y-2">
                 {topProblematicProducts.map((p, i) => {
-                  const loss = (p.quantity_thrown || 0) * (p.price_chf || 0);
+                  const loss = getProductLoss(p);
                   return (
                     <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
                       <div className="flex items-center gap-3">
@@ -360,7 +360,7 @@ export default function Analytics() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-red-600">CHF {loss.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">{p.quantity_thrown} {lang === 'fr' ? 'jetés' : 'thrown'}</p>
+                        <p className="text-xs text-muted-foreground">{Number(p.quantity_thrown) || 0} {lang === 'fr' ? 'jetés' : 'thrown'}</p>
                       </div>
                     </div>
                   );

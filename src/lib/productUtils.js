@@ -125,8 +125,31 @@ export function getStoreOwnerEmail(user) {
  * Formule unique utilisée partout dans l'app : somme de (quantity_thrown * price_chf) pour chaque produit.
  * Ne dépend pas du statut d'expiration — un produit jeté est une perte, peu importe quand.
  */
+export function getProductLoss(product) {
+  return (Number(product?.quantity_thrown) || 0) * (Number(product?.price_chf) || 0);
+}
+
 export function calculateTotalLoss(products) {
-  return (products || []).reduce((sum, p) => sum + ((p.quantity_thrown || 0) * (p.price_chf || 0)), 0);
+  return (products || []).reduce((sum, p) => sum + getProductLoss(p), 0);
+}
+
+export function getLossReferenceDate(product) {
+  return product?.discarded_at || product?.updated_date || product?.expiration_date || product?.created_date || null;
+}
+
+export function getActiveProducts(products) {
+  return (products || []).filter(p => getDisplayStatus(p) !== 'archived');
+}
+
+export function getCoreProductMetrics(products) {
+  const activeProducts = getActiveProducts(products);
+  return {
+    activeProducts,
+    totalProducts: activeProducts.length,
+    expiredProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length,
+    urgentProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length,
+    totalLoss: calculateTotalLoss(products)
+  };
 }
 
 export function hasActiveSubscription(user) {
