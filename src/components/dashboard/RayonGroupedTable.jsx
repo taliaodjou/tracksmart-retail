@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { ChevronDown, ChevronRight, TrendingDown } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import ProductTable from './ProductTable';
-import LossRecapModal from './LossRecapModal';
-import { getProductStatus, calculateTotalLoss } from '@/lib/productUtils';
+import { getProductStatus } from '@/lib/productUtils';
 
 // Rayon display labels
 function rayonLabel(rayon) {
@@ -73,8 +72,6 @@ function RayonHeader({ rayon, products, open, onClick }) {
 }
 
 export default function RayonGroupedTable({ products, totalProducts = products, onEdit, onDelete, onInlineSave }) {
-  const [showLossRecap, setShowLossRecap] = useState(false);
-
   // Group products by rayon — only include rayons that actually exist in the data
   const groups = useMemo(() => {
     const map = {};
@@ -159,28 +156,6 @@ export default function RayonGroupedTable({ products, totalProducts = products, 
         </div>
       ))}
 
-      {/* Grand total losses across all rayons */}
-      {(() => {
-        const grandTotal = calculateTotalLoss(totalProducts);
-        if (grandTotal <= 0) return null;
-        return (
-          <button
-            onClick={() => setShowLossRecap(true)}
-            className="mt-4 w-full flex items-center justify-between bg-red-50 border-2 border-red-200 rounded-2xl px-4 py-3 hover:bg-red-100 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <TrendingDown className="w-4 h-4 text-red-600 flex-shrink-0" />
-              <span className="font-semibold text-red-800 text-xs">Total pertes — tous rayons</span>
-              <span className="text-xs text-red-500 underline">Voir le détail</span>
-            </div>
-            <span className="text-base font-bold text-red-700">CHF {grandTotal.toFixed(2)}</span>
-          </button>
-        );
-      })()}
-
-      {showLossRecap && (
-        <LossRecapModal products={totalProducts} onClose={() => setShowLossRecap(false)} />
-      )}
     </div>
   );
 }

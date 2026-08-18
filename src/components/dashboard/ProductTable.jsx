@@ -5,8 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
-import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, calculateTotalLoss } from '@/lib/productUtils';
-import LossRecapModal from './LossRecapModal';
+import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys } from '@/lib/productUtils';
 import ProductDetailModal from './ProductDetailModal';
 
 const ACTION_KEYS = {
@@ -195,7 +194,6 @@ function InlineEditRow({ product, onSave, onCancel }) {
 export default function ProductTable({ products, totalProducts = products, hideLossFooter = false, compactView = false, onEdit, onDelete, onInlineSave }) {
   const { t } = useLanguage();
   const [editingId, setEditingId] = useState(null);
-  const [showLossRecap, setShowLossRecap] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const handleSave = (product, data) => {
@@ -378,36 +376,11 @@ export default function ProductTable({ products, totalProducts = products, hideL
               );
             })}
           </tbody>
-          {/* Total losses footer */}
-          {!hideLossFooter && (() => {
-            const totalLoss = calculateTotalLoss(totalProducts);
-            if (totalLoss <= 0) return null;
-            return (
-              <tfoot>
-                <tr
-                  className="border-t-2 border-red-200 bg-red-50/60 cursor-pointer hover:bg-red-100 transition-colors"
-                  onClick={() => setShowLossRecap(true)}
-                  title="Voir le détail des pertes"
-                >
-                  <td colSpan={10} className="px-4 py-3 text-xs font-semibold text-red-700 text-right">
-                    Total pertes enregistrées
-                    <span className="ml-2 text-red-500 underline font-normal">Voir le détail</span>
-                  </td>
-                  <td className="px-4 py-3 font-bold text-red-700 text-base whitespace-nowrap">
-                    CHF {totalLoss.toFixed(2)}
-                  </td>
-                  <td colSpan={2} />
-                </tr>
-              </tfoot>
-            );
-          })()}
+
         </table>
         </div>
       </div>
 
-      {showLossRecap && (
-        <LossRecapModal products={totalProducts} onClose={() => setShowLossRecap(false)} />
-      )}
       {selectedProduct && (
         <ProductDetailModal
           product={selectedProduct}
