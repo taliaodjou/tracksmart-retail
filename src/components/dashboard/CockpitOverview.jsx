@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, TrendingDown, List, AlertTriangle, ClipboardCheck, ChevronRight } from 'lucide-react';
+import { ArrowRight, TrendingDown, List, ClipboardCheck, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { getProductStatus, getDaysRemaining, isDiscarded, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
 
@@ -32,7 +32,6 @@ export default function CockpitOverview({ products }) {
   }, [products]);
 
   const activeProducts = products.filter((product) => !isDiscarded(product));
-  const urgentActionCount = activeProducts.filter((product) => ['expired', 'urgent'].includes(getProductStatus(product.expiration_date))).length;
   const urgentProducts = activeProducts
     .filter((product) => ['expired', 'urgent'].includes(getProductStatus(product.expiration_date)))
     .sort((a, b) => new Date(a.expiration_date) - new Date(b.expiration_date))
@@ -118,20 +117,18 @@ export default function CockpitOverview({ products }) {
             </div>
             <div className="pl-2">
               <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Ouvrir la liste produits</h3>
-              <p className="text-xl font-bold text-slate-700 leading-none">{activeProducts.length}</p>
-              <p className="text-xs text-slate-500 mt-1">produits en stock</p>
+              <p className="text-xs text-slate-500">Accéder au stock complet</p>
             </div>
           </Link>
-          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
+          <Link to="/analytics" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
             <span className="absolute inset-y-0 left-0 w-1.5 bg-[#EF4444]" />
             <div className="flex items-start justify-between gap-3 pl-2">
-              <AlertTriangle className="w-7 h-7 text-[#EF4444] fill-[#EF4444]/10" />
+              <TrendingDown className="w-7 h-7 text-[#EF4444]" />
               <ChevronRight className="w-5 h-5 text-slate-400 mt-7 group-hover:text-[#EF4444]" />
             </div>
             <div className="pl-2">
-              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Vérifier les produits urgents</h3>
-              <p className="text-xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
-              <p className="text-xs text-slate-500 mt-1">produits urgents</p>
+              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Analyser les pertes</h3>
+              <p className="text-xs text-slate-500">Repérer les rayons à risque</p>
             </div>
           </Link>
           <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -142,8 +139,7 @@ export default function CockpitOverview({ products }) {
             </div>
             <div className="pl-2">
               <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Valider les stocks urgents</h3>
-              <p className="text-xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
-              <p className="text-xs text-slate-500 mt-1">à valider</p>
+              <p className="text-xs text-slate-500">Contrôler les produits à traiter</p>
             </div>
           </Link>
         </div>
