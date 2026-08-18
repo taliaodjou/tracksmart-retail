@@ -7,6 +7,7 @@ import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys } from '@/lib/productUtils';
 import ProductDetailModal from './ProductDetailModal';
+import RayonInput from './RayonInput';
 
 const ACTION_KEYS = {
   jeter: 'action_jeter',
@@ -76,11 +77,12 @@ function InlineEditRow({ product, onSave, onCancel }) {
       </td>
       {/* Rayon */}
       <td className="px-3 py-2">
-        <Input
+        <RayonInput
           value={form.rayon}
-          onChange={e => setForm(f => ({ ...f, rayon: e.target.value }))}
+          onChangeValue={value => setForm(f => ({ ...f, rayon: value }))}
           className="h-7 text-xs min-w-[120px]"
           placeholder="Rayon"
+          listId={`inline-rayons-${product.id}`}
         />
       </td>
       {/* DLC */}

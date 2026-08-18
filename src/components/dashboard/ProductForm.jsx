@@ -8,6 +8,7 @@ import { X, ScanLine, Loader2 } from 'lucide-react';
 import { categoryKeys, getProductStatus } from '@/lib/productUtils';
 import BarcodeScanner from './BarcodeScanner';
 import ProductHistorySection from './ProductHistorySection';
+import RayonInput from './RayonInput';
 import { base44 } from '@/api/base44Client';
 
 const ACTION_KEYS = {
@@ -191,7 +192,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         {/* Rayon */}
         <div className="space-y-1">
           <Label className="text-xs">{t('form_rayon')}</Label>
-          <Input value={form.rayon} onChange={set('rayon')} placeholder={lang === 'fr' ? 'Ex: Boissons fraîches, Réserve, Vitrine' : 'Ex: Fresh drinks, Storage, Display'} className="h-8 text-sm" />
+          <RayonInput value={form.rayon} onChangeValue={(value) => setForm({ ...form, rayon: value })} listId="product-form-rayons" placeholder={lang === 'fr' ? 'Choisir un rayon ou écrire un nom personnalisé' : 'Choose a section or type a custom name'} className="h-8 text-sm" />
         </div>
 
         {/* Date réception */}

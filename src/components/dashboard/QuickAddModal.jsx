@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, CheckCircle2, Loader2, Package, Tag, Layers, AlertTriangle, RefreshCw } from 'lucide-react';
-import { rayonKeys, categoryKeys } from '@/lib/productUtils';
+import { categoryKeys } from '@/lib/productUtils';
 import { useLanguage } from '@/lib/LanguageContext';
+import RayonInput from './RayonInput';
 
 /**
  * QuickAddModal — shown after barcode scan + product lookup
@@ -171,17 +172,13 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
               <Layers className="w-4 h-4 text-primary" />
               {isFr ? 'Rayon *' : 'Section *'}
             </label>
-            <Select value={form.rayon || '__none__'} onValueChange={v => set('rayon', v === '__none__' ? '' : v)}>
-              <SelectTrigger className="h-12 text-base rounded-xl">
-                <SelectValue placeholder={isFr ? 'Choisir un rayon…' : 'Choose a section…'} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">— {isFr ? 'Non défini' : 'Not set'} —</SelectItem>
-                {Object.entries(rayonKeys).map(([v, label]) => (
-                  <SelectItem key={v} value={v}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <RayonInput
+              value={form.rayon}
+              onChangeValue={(value) => set('rayon', value)}
+              listId="quick-add-rayons"
+              placeholder={isFr ? 'Choisir un rayon ou écrire un nom personnalisé' : 'Choose a section or type a custom name'}
+              className="h-12 text-base rounded-xl"
+            />
           </div>
 
           {/* Category */}
