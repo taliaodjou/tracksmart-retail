@@ -6,17 +6,23 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LayoutList, Layers, Search, X } from 'lucide-react';
+import { LayoutList, Layers, Search, X, Plus, ScanLine } from 'lucide-react';
 import { categoryKeys, rayonKeys, getProductStatus, getStoreOwnerEmail, isAdmin } from '@/lib/productUtils';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import ProductForm from '@/components/dashboard/ProductForm';
 import ProductTable from '@/components/dashboard/ProductTable';
 import RayonGroupedTable from '@/components/dashboard/RayonGroupedTable';
+import ExportActions from '@/components/dashboard/ExportActions';
+import ImportModal from '@/components/dashboard/ImportModal';
+import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
+import QuickAddModal from '@/components/dashboard/QuickAddModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import { logActivity } from '@/lib/activityLogger';
 
+const XlsIcon = () => <span className="text-[10px] font-bold hidden">XLS</span>;
+
 export default function Products() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -27,6 +33,9 @@ export default function Products() {
   const [groupByRayon, setGroupByRayon] = useState(true);
   const [editProduct, setEditProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [quickAdd, setQuickAdd] = useState(null);
 
   const storeOwnerEmail = getStoreOwnerEmail(user);
   const isOwnerOrManager = user?.role === 'owner' || user?.role === 'user' || user?.role === 'manager' || isAdmin(user);
@@ -51,6 +60,12 @@ export default function Products() {
     enabled: !!user?.email
   });
 
+  const { data: barcodeDB = [] } = useQuery({
+    queryKey: ['barcodes'],
+    queryFn: () => base44.entities.BarcodeProduct.list('barcode', 1000),
+    enabled: !!user?.email
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const savedData = data.action === 'jeter'
@@ -66,6 +81,7 @@ export default function Products() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setShowForm(false);
       setEditProduct(null);
+      setQuickAdd(null);
     }
   });
 
@@ -80,6 +96,7 @@ export default function Products() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       setShowForm(false);
       setEditProduct(null);
+      setQuickAdd(null);
     }
   });
 
@@ -118,26 +135,131 @@ export default function Products() {
     { key: 'archived', label: 'Archivé' }
   ];
 
+  const handleSave = (data) => {
+    if (editProduct) {
+      updateMutation.mutate({ id: editProduct.id, data });
+    } else {
+      createMutation.mutate(data);
+    }
+  };
+
   const handleEdit = (product) => {
     setEditProduct(product);
     setShowForm(true);
+  };
+
+  const OFF_CATEGORY_MAP = {
+    snack: 'snacks', crisp: 'snacks', chip: 'snacks', biscuit: 'snacks', cracker: 'snacks', gâteau: 'snacks', cake: 'snacks', cookie: 'snacks', galette: 'snacks',
+    beverage: 'boissons', drink: 'boissons', water: 'boissons', juice: 'boissons', soda: 'boissons', milk: 'boissons', lait: 'boissons', eau: 'boissons', jus: 'boissons', boisson: 'boissons', nectar: 'boissons', limonade: 'boissons', sirop: 'boissons', thé: 'boissons', café: 'boissons', tea: 'boissons', coffee: 'boissons', infusion: 'boissons',
+    fish: 'congeles_poisson', seafood: 'congeles_poisson', poisson: 'congeles_poisson', crevette: 'congeles_poisson', thon: 'congeles_poisson', sardine: 'congeles_poisson',
+    chicken: 'congeles_poulet', poultry: 'congeles_poulet', poulet: 'congeles_poulet', volaille: 'congeles_poulet', dinde: 'congeles_poulet',
+    dairy: 'produits_frais', yogurt: 'produits_frais', cheese: 'produits_frais', fresh: 'produits_frais', yaourt: 'produits_frais', fromage: 'produits_frais', beurre: 'produits_frais', butter: 'produits_frais', crème: 'produits_frais', cream: 'produits_frais', oeuf: 'produits_frais', egg: 'produits_frais',
+    pasta: 'epicerie_seche', rice: 'epicerie_seche', flour: 'epicerie_seche', cereal: 'epicerie_seche', grain: 'epicerie_seche', riz: 'epicerie_seche', farine: 'epicerie_seche', sucre: 'epicerie_seche', sugar: 'epicerie_seche', sel: 'epicerie_seche', huile: 'epicerie_seche', oil: 'epicerie_seche', pâte: 'epicerie_seche', semoule: 'epicerie_seche', couscous: 'epicerie_seche', légumineuse: 'epicerie_seche', lentille: 'epicerie_seche', haricot: 'epicerie_seche', pois: 'epicerie_seche', épice: 'epicerie_seche', spice: 'epicerie_seche', condiment: 'epicerie_seche', sauce: 'epicerie_seche',
+    candy: 'confiseries', chocolate: 'confiseries', sweet: 'confiseries', confectionery: 'confiseries', chocolat: 'confiseries', bonbon: 'confiseries', caramel: 'confiseries', nougat: 'confiseries',
+    canned: 'conserves', tinned: 'conserves', preserve: 'conserves', conserve: 'conserves', tomate: 'conserves', confiture: 'conserves', jam: 'conserves', miel: 'conserves', honey: 'conserves',
+    hygiene: 'hygiene_beaute', beauty: 'hygiene_beaute', soap: 'hygiene_beaute', shampoo: 'hygiene_beaute', cosmetic: 'hygiene_beaute', savon: 'hygiene_beaute', dentifrice: 'hygiene_beaute', déodorant: 'hygiene_beaute', parfum: 'hygiene_beaute', lotion: 'hygiene_beaute', rasoir: 'hygiene_beaute',
+    cleaning: 'entretien_maison', detergent: 'entretien_maison', household: 'entretien_maison', lessive: 'entretien_maison', nettoyant: 'entretien_maison', désinfectant: 'entretien_maison', vaisselle: 'entretien_maison', balai: 'entretien_maison',
+    baby: 'bebe', infant: 'bebe', bébé: 'bebe', couche: 'bebe', diaper: 'bebe', biberon: 'bebe', pet: 'animaux', dog: 'animaux', cat: 'animaux', chien: 'animaux', chat: 'animaux',
+    alcohol: 'alcool', wine: 'alcool', beer: 'alcool', spirit: 'alcool', bière: 'alcool', vin: 'alcool', whisky: 'alcool', rhum: 'alcool', liqueur: 'alcool', tobacco: 'tabac', cigarette: 'tabac', cigare: 'tabac'
+  };
+
+  const matchCategory = (tags = []) => {
+    const allTags = Array.isArray(tags) ? tags : [tags];
+    for (const tag of allTags) {
+      const clean = (tag || '').replace(/^[a-z]{2}:/, '').toLowerCase().replace(/[-_]/g, ' ');
+      for (const [keyword, cat] of Object.entries(OFF_CATEGORY_MAP)) {
+        if (clean.includes(keyword)) return cat;
+      }
+    }
+    return '';
+  };
+
+  const findExistingProduct = (name, brand) => {
+    if (!name) return null;
+    const normalize = (value) => (value || '').toLowerCase().trim();
+    return products.find((product) => normalize(product.name) === normalize(name) && normalize(product.marque) === normalize(brand)) || null;
+  };
+
+  const handleBarcodeDetected = async (code) => {
+    setShowScanner(false);
+    logActivity(user, 'barcode_scanned', `${user.full_name || user.email} a scanné le code-barres ${code}`, { entity_name: code });
+
+    const match = barcodeDB.find((barcode) => barcode.barcode === code);
+    if (match) {
+      setQuickAdd({ barcode: code, prefill: match, existingProduct: findExistingProduct(match.name, match.brand || match.marque) });
+      return;
+    }
+
+    const applyPrefill = (productData, defaultCategory = '') => {
+      const name = productData.product_name_fr || productData.product_name || productData.generic_name || '';
+      const brand = productData.brands || '';
+      const category = matchCategory(productData.categories_tags || []) || defaultCategory;
+      setQuickAdd({
+        barcode: code,
+        prefill: { name, brand, category, image_url: productData.image_front_url || productData.image_url || '' },
+        existingProduct: findExistingProduct(name, brand)
+      });
+    };
+
+    try {
+      const foodData = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then((response) => response.json());
+      if (foodData?.status === 1 && foodData?.product) { applyPrefill(foodData.product); return; }
+    } catch (_) {}
+
+    try {
+      const beautyData = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then((response) => response.json());
+      if (beautyData?.status === 1 && beautyData?.product) { applyPrefill(beautyData.product, 'hygiene_beaute'); return; }
+    } catch (_) {}
+
+    try {
+      const opData = await fetch(`https://world.openproductsfacts.org/api/v0/product/${code}.json`).then((response) => response.json());
+      if (opData?.status === 1 && opData?.product) { applyPrefill(opData.product); return; }
+    } catch (_) {}
+
+    try {
+      const upcData = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`).then((response) => response.json());
+      if (upcData?.code === 'OK' && upcData?.items?.length > 0) {
+        const item = upcData.items[0];
+        const name = item.title || '';
+        const brand = item.brand || '';
+        const category = matchCategory((item.category || '').toLowerCase().split(/[,/]/).map((value) => value.trim()));
+        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: item.images?.[0] || '' }, existingProduct: findExistingProduct(name, brand) });
+        return;
+      }
+    } catch (_) {}
+
+    setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
   };
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0 pt-16 sm:pt-20" style={{ backgroundColor: '#f5f3ef', color: '#1a1a1a' }}>
       <DashboardHeader />
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 pb-8 space-y-5">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Produits</h1>
             <p className="text-sm text-muted-foreground mt-1">Liste complète de vos produits en stock</p>
           </div>
-          <Button onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full">Ajouter un produit</Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportActions products={filteredProducts} />
+            <Button variant="outline" onClick={() => setShowImport(true)} className="rounded-full gap-2">
+              <XlsIcon />
+              {lang === 'fr' ? 'Importer' : 'Import'}
+            </Button>
+            <Button variant="outline" onClick={() => setShowScanner(true)} className="rounded-full gap-2">
+              <ScanLine className="w-4 h-4" />
+              {t('btn_scanner')}
+            </Button>
+            <Button onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full gap-2">
+              <Plus className="w-4 h-4" />
+              {t('dash_add_product')}
+            </Button>
+          </div>
         </div>
 
         {showForm && (
           <ProductForm
-            onSave={(data) => editProduct ? updateMutation.mutate({ id: editProduct.id, data }) : createMutation.mutate(data)}
+            onSave={handleSave}
             onCancel={() => { setShowForm(false); setEditProduct(null); }}
             editProduct={editProduct}
           />
@@ -204,6 +326,37 @@ export default function Products() {
           <ProductTable products={filteredProducts} totalProducts={products} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
         )}
       </main>
+
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
+          onImported={(count) => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            logActivity(user, 'excel_imported', `${user.full_name || user.email} a importé un fichier Excel${count ? ` (${count} produits)` : ''}`);
+          }}
+        />
+      )}
+
+      {showScanner && (
+        <BarcodeScanner
+          lang={lang}
+          onDetected={handleBarcodeDetected}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
+      {quickAdd && (
+        <QuickAddModal
+          barcode={quickAdd.barcode}
+          prefill={quickAdd.prefill}
+          existingProduct={quickAdd.existingProduct}
+          onSave={(data) => createMutation.mutate(data)}
+          onUpdate={(id, data) => updateMutation.mutate({ id, data })}
+          onClose={() => setQuickAdd(null)}
+          saving={createMutation.isPending || updateMutation.isPending}
+        />
+      )}
+
       <DashboardFooter />
     </div>
   );
