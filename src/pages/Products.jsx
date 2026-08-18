@@ -20,7 +20,7 @@ export default function Products() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(() => new URLSearchParams(window.location.search).get('status') || 'all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [rayonFilter, setRayonFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);

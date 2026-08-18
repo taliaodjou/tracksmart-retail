@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, TrendingDown } from 'lucide-react';
+import { ArrowRight, TrendingDown } from 'lucide-react';
 import { BarChart, Bar, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
-import { calculateTotalLoss, getProductStatus, getDaysRemaining, isDiscarded } from '@/lib/productUtils';
+import { getProductStatus, getDaysRemaining, isDiscarded } from '@/lib/productUtils';
 
 const monthsFr = ['jan', 'fév', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sep', 'oct', 'nov', 'déc'];
 
@@ -36,9 +36,6 @@ export default function CockpitOverview({ products }) {
     .filter((product) => ['expired', 'urgent'].includes(getProductStatus(product.expiration_date)))
     .sort((a, b) => new Date(a.expiration_date) - new Date(b.expiration_date))
     .slice(0, 4);
-  const urgentCount = urgentProducts.length;
-  const totalLoss = calculateTotalLoss(products);
-
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -109,23 +106,17 @@ export default function CockpitOverview({ products }) {
         </section>
       </div>
 
-      <div className="bg-red-600 text-white rounded-xl px-4 py-3 flex items-center gap-2 shadow-sm">
-        <AlertTriangle className="w-4 h-4" />
-        <span className="text-sm font-semibold">Alerte : {urgentCount} produit{urgentCount > 1 ? 's' : ''} urgent{urgentCount > 1 ? 's' : ''}</span>
-        <span className="ml-auto text-sm font-bold">CHF {totalLoss.toFixed(2)} de pertes</span>
-      </div>
-
       <section className="space-y-3">
         <h2 className="font-bold text-lg text-foreground">Actions prioritaires</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link to="/products" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
-            Valider les stocks urgents
-          </Link>
-          <Link to="/products" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
-            Vérifier les produits bientôt expirés
-          </Link>
-          <Link to="/products" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
             Ouvrir la liste produits
+          </Link>
+          <Link to="/products?status=urgent" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
+            Vérifier les produits urgents
+          </Link>
+          <Link to="/products?status=urgent" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
+            Valider les stocks urgents
           </Link>
         </div>
       </section>
