@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, TrendingDown } from 'lucide-react';
+import { ArrowRight, TrendingDown, List, AlertTriangle, ClipboardCheck, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { getProductStatus, getDaysRemaining, isDiscarded, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
 
@@ -32,6 +32,7 @@ export default function CockpitOverview({ products }) {
   }, [products]);
 
   const activeProducts = products.filter((product) => !isDiscarded(product));
+  const urgentActionCount = activeProducts.filter((product) => ['expired', 'urgent'].includes(getProductStatus(product.expiration_date))).length;
   const urgentProducts = activeProducts
     .filter((product) => ['expired', 'urgent'].includes(getProductStatus(product.expiration_date)))
     .sort((a, b) => new Date(a.expiration_date) - new Date(b.expiration_date))
@@ -106,17 +107,44 @@ export default function CockpitOverview({ products }) {
         </section>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="font-bold text-lg text-foreground">Actions prioritaires</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link to="/products" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
-            Ouvrir la liste produits
+      <section className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-100 shadow-sm p-5 sm:p-7">
+        <h2 className="font-bold text-2xl text-slate-700 mb-6">Actions prioritaires</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <Link to="/products" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-md px-5 py-6 min-h-[170px] flex flex-col justify-between hover:shadow-lg transition-shadow">
+            <span className="absolute inset-y-0 left-0 w-2 bg-[#C9A646]" />
+            <div className="flex items-start justify-between gap-3 pl-2">
+              <List className="w-8 h-8 text-[#C9A646]" />
+              <ChevronRight className="w-6 h-6 text-slate-400 mt-10 group-hover:text-[#C9A646]" />
+            </div>
+            <div className="pl-2">
+              <h3 className="text-xl sm:text-2xl font-bold leading-tight text-slate-950 mb-4">Ouvrir la liste produits</h3>
+              <p className="text-2xl font-bold text-slate-700 leading-none">{activeProducts.length}</p>
+              <p className="text-sm text-slate-500 mt-1">produits en stock</p>
+            </div>
           </Link>
-          <Link to="/products?status=urgent" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
-            Vérifier les produits urgents
+          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-md px-5 py-6 min-h-[170px] flex flex-col justify-between hover:shadow-lg transition-shadow">
+            <span className="absolute inset-y-0 left-0 w-2 bg-[#EF4444]" />
+            <div className="flex items-start justify-between gap-3 pl-2">
+              <AlertTriangle className="w-8 h-8 text-[#EF4444] fill-[#EF4444]/10" />
+              <ChevronRight className="w-6 h-6 text-slate-400 mt-10 group-hover:text-[#EF4444]" />
+            </div>
+            <div className="pl-2">
+              <h3 className="text-xl sm:text-2xl font-bold leading-tight text-slate-950 mb-4">Vérifier les produits urgents</h3>
+              <p className="text-2xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
+              <p className="text-sm text-slate-500 mt-1">produits urgents</p>
+            </div>
           </Link>
-          <Link to="/products?status=urgent" className="bg-white rounded-xl border border-border/60 shadow-sm px-4 py-3 text-center text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition-colors">
-            Valider les stocks urgents
+          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-md px-5 py-6 min-h-[170px] flex flex-col justify-between hover:shadow-lg transition-shadow">
+            <span className="absolute inset-y-0 left-0 w-2 bg-[#F97316]" />
+            <div className="flex items-start justify-between gap-3 pl-2">
+              <ClipboardCheck className="w-8 h-8 text-[#F97316]" />
+              <ChevronRight className="w-6 h-6 text-slate-400 mt-10 group-hover:text-[#F97316]" />
+            </div>
+            <div className="pl-2">
+              <h3 className="text-xl sm:text-2xl font-bold leading-tight text-slate-950 mb-4">Valider les stocks urgents</h3>
+              <p className="text-2xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
+              <p className="text-sm text-slate-500 mt-1">à valider</p>
+            </div>
           </Link>
         </div>
       </section>
