@@ -29,6 +29,7 @@ import OnboardingModal from '@/components/dashboard/OnboardingModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
+import CockpitOverview from '@/components/dashboard/CockpitOverview';
 
 export default function Dashboard() {
   const { t, lang } = useLanguage();
@@ -428,127 +429,7 @@ export default function Dashboard() {
 
           }
 
-            <WeeklyAlert
-              products={activeProducts}
-              onUpdate={async (id, data) => {
-                const updateData = { ...data };
-                // When action is "jeter", mark as discarded to remove from active stock
-                if (data.action === 'jeter') {
-                  updateData.discarded = true;
-                  updateData.discarded_at = new Date().toISOString().split('T')[0];
-                }
-                updateMutation.mutate({ id, data: updateData });
-              }}
-            />
-
-            {/* Filters */}
-            <div className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-border/40 space-y-3">
-              <div className="flex gap-2 items-center">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t('dash_search')}
-                  className="pl-9 rounded-full h-9 text-xs" />
-                
-                </div>
-                <Button
-                variant="outline"
-                size="sm"
-                className={`rounded-full whitespace-nowrap gap-1.5 ${activeFilterCount > 0 ? 'border-primary text-primary' : ''}`}
-                onClick={() => setShowFilters((f) => !f)}>
-                
-                  {t('filter_label')} {activeFilterCount > 0 && <span className="bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-xs">{activeFilterCount}</span>}
-                </Button>
-                {activeFilterCount > 0 &&
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full text-muted-foreground"
-                onClick={() => {setStatusFilter('all');setCategoryFilter('all');setRayonFilter('all');}}>
-                
-                    <X className="w-3.5 h-3.5" />
-                  </Button>
-              }
-              </div>
-
-              {/* Filter panel */}
-              {showFilters &&
-            <div className="space-y-3 pt-2 border-t border-border/30">
-                  {/* Status filter pills */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {statusFilters.map((f) =>
-                <button
-                  key={f.key}
-                  onClick={() => setStatusFilter(f.key)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
-                  statusFilter === f.key ?
-                  'bg-primary text-primary-foreground border-primary' :
-                  'border-border text-muted-foreground hover:border-primary/50'}`
-                  }>
-                  
-                        {f.label}
-                      </button>
-                )}
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="w-44 rounded-full text-xs h-9">
-                        <SelectValue placeholder={t('dash_filter_category')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('all')} — {t('dash_filter_category')}</SelectItem>
-                        {Object.entries(categoryKeys).map(([v, k]) => <SelectItem key={v} value={v}>{t(k)}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <Select value={rayonFilter} onValueChange={setRayonFilter}>
-                      <SelectTrigger className="w-36 rounded-full text-xs h-9">
-                        <SelectValue placeholder={t('dash_filter_rayon')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('all')} — {t('dash_filter_rayon')}</SelectItem>
-                        {Object.keys(rayonKeys).map((r) => <SelectItem key={r} value={r}>Rayon {r}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-            }
-            </div>
-
-            {/* View toggle */}
-            <div className="flex items-center justify-end gap-2">
-              <button
-              onClick={() => setGroupByRayon(false)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${!groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}>
-              
-                <LayoutList className="w-3.5 h-3.5" /> Liste
-              </button>
-              <button
-              onClick={() => setGroupByRayon(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${groupByRayon ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:border-primary/50'}`}>
-              
-                <Layers className="w-3.5 h-3.5" /> Par rayon
-              </button>
-            </div>
-
-            {groupByRayon ?
-          <RayonGroupedTable
-            products={filteredProducts}
-            totalProducts={activeProducts}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onInlineSave={(id, data) => updateMutation.mutate({ id, data })} /> :
-
-
-          <ProductTable
-            products={filteredProducts}
-            totalProducts={activeProducts}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
-
-          }
+            <CockpitOverview products={activeProducts} />
           </div>
         }
       </main>

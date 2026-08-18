@@ -26,6 +26,7 @@ import LegalNotice from '@/pages/LegalNotice';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
+import Products from '@/pages/Products';
 import Profile from '@/pages/Profile';
 import Admin from '@/pages/Admin';
 import Welcome from '@/pages/Welcome';
@@ -108,6 +109,7 @@ const AuthenticatedApp = () => {
             {/* Client-facing routes */}
             <Route path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />
             <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+            <Route path="/products" element={<PageTransition><Products /></PageTransition>} />
             <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
             <Route path="/analytics" element={<PageTransition><Analytics /></PageTransition>} />
             <Route path="/orders" element={<PageTransition><Orders /></PageTransition>} />
