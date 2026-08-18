@@ -39,34 +39,34 @@ function InlineEditRow({ product, onSave, onCancel }) {
   return (
     <tr className="bg-amber-50/60 border-t border-amber-200">
       {/* Produit */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <Input
           value={form.name}
           onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-          className="h-7 text-xs min-w-[120px]"
+          className="h-6 text-xs min-w-[120px]"
         />
       </td>
       {/* Marque */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <Input
           value={form.marque}
           onChange={e => setForm(f => ({ ...f, marque: e.target.value }))}
-          className="h-7 text-xs min-w-[90px]"
+          className="h-6 text-xs min-w-[90px]"
         />
       </td>
       {/* Étagère */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <Input
           value={form.etagere}
           onChange={e => setForm(f => ({ ...f, etagere: e.target.value }))}
-          className="h-7 text-xs min-w-[80px]"
+          className="h-6 text-xs min-w-[80px]"
           placeholder="Étagère"
         />
       </td>
       {/* Catégorie */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <Select value={form.category || '__none__'} onValueChange={v => setForm(f => ({ ...f, category: v === '__none__' ? '' : v }))}>
-          <SelectTrigger className="h-7 text-xs min-w-[120px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-6 text-xs min-w-[120px]"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="__none__">—</SelectItem>
             {Object.entries(categoryKeys).map(([v, k]) => (
@@ -76,22 +76,22 @@ function InlineEditRow({ product, onSave, onCancel }) {
         </Select>
       </td>
       {/* Rayon */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <RayonInput
           value={form.rayon}
           onChangeValue={value => setForm(f => ({ ...f, rayon: value }))}
-          className="h-7 text-xs min-w-[120px]"
+          className="h-6 text-xs min-w-[120px]"
           placeholder="Rayon"
           listId={`inline-rayons-${product.id}`}
         />
       </td>
       {/* DLC */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <Input
           type="date"
           value={form.expiration_date}
           onChange={e => setForm(f => ({ ...f, expiration_date: e.target.value }))}
-          className="h-7 text-xs w-32"
+          className="h-6 text-xs w-32"
         />
       </td>
       {/* Jours */}
@@ -99,7 +99,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
         {form.expiration_date ? `${getDaysRemaining(form.expiration_date)}j` : '—'}
       </td>
       {/* Statut */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         {form.expiration_date ? (
           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${statusConfig[status]?.color}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[status]?.dot}`} />
@@ -108,10 +108,10 @@ function InlineEditRow({ product, onSave, onCancel }) {
         ) : '—'}
       </td>
       {/* Action */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         {isExpired ? (
           <Select value={form.action || '__none__'} onValueChange={v => setForm(f => ({ ...f, action: v === '__none__' ? '' : v, quantity_thrown: '', price_chf: '' }))}>
-            <SelectTrigger className="h-7 text-xs min-w-[100px]"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="h-6 text-xs min-w-[100px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="__none__">—</SelectItem>
               {actionOptions.map(o => <SelectItem key={o.value} value={o.value}>{t(o.key)}</SelectItem>)}
@@ -120,20 +120,20 @@ function InlineEditRow({ product, onSave, onCancel }) {
         ) : <span className="text-xs text-muted-foreground">—</span>}
       </td>
       {/* Qté */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         {isExpired && form.action === 'jeter' ? (
           <Input
             type="number"
             min="1"
             value={form.quantity_thrown}
             onChange={e => setForm(f => ({ ...f, quantity_thrown: e.target.value }))}
-            className="h-7 text-xs w-16"
+            className="h-6 text-xs w-16"
             placeholder="0"
           />
         ) : <span className="text-xs text-muted-foreground">—</span>}
       </td>
       {/* Prix / Total CHF */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         {isExpired && form.action === 'jeter' ? (
           <div className="space-y-1">
             <Input
@@ -142,7 +142,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
               step="0.01"
               value={form.price_chf}
               onChange={e => setForm(f => ({ ...f, price_chf: e.target.value }))}
-              className="h-7 text-xs w-20"
+              className="h-6 text-xs w-20"
               placeholder="CHF"
             />
             {form.quantity_thrown && form.price_chf && (
@@ -154,7 +154,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
         ) : <span className="text-xs text-muted-foreground">—</span>}
       </td>
       {/* Save/Cancel */}
-      <td className="px-3 py-2">
+      <td className="px-2 py-1.5">
         <div className="flex items-center gap-1">
           <Button
             size="icon"
@@ -280,7 +280,7 @@ export default function ProductTable({ products, totalProducts = products, hideL
                 ? [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_dlc'), t('col_status'), '']
                 : [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', '']
               ).map((h, i) => (
-                <th key={i} className="text-left px-4 py-3 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
+                <th key={i} className="text-left px-3 py-2 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
               ))}
             </tr>
           </thead>
@@ -309,28 +309,28 @@ export default function ProductTable({ products, totalProducts = products, hideL
                   onClick={() => compactView && setSelectedProduct(p)}
                   className={`border-t border-border/30 hover:bg-secondary/20 ${compactView ? 'cursor-pointer' : ''} ${status === 'archived' ? 'bg-blue-50/30' : isExpired ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/40' : status === 'soon' ? 'bg-yellow-50/20' : ''}`}
                 >
-                  <td className="px-4 py-3 font-medium text-foreground max-w-[190px] truncate">
+                  <td className="px-3 py-2 font-medium text-foreground max-w-[190px] truncate">
                     {compactView ? (
                       <button className="text-left hover:text-primary hover:underline truncate max-w-full" onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }}>
                         {p.name}
                       </button>
                     ) : p.name}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.marque || '—'}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.etagere || '—'}</td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
+                  <td className="px-3 py-2 text-muted-foreground">{p.marque || '—'}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{p.etagere || '—'}</td>
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap text-xs">
                     {p.category ? t(categoryKeys[p.category] || p.category) : '—'}
                   </td>
-                  {!compactView && <td className="px-4 py-3 text-muted-foreground">{p.rayon || '—'}</td>}
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                  {!compactView && <td className="px-3 py-2 text-muted-foreground">{p.rayon || '—'}</td>}
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
                     {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'}
                   </td>
                   {!compactView && (
-                    <td className="px-4 py-3 font-medium" style={{ color: isExpired ? '#dc2626' : days < 3 ? '#ea580c' : days < 14 ? '#ca8a04' : '#16a34a' }}>
+                    <td className="px-3 py-2 font-medium" style={{ color: isExpired ? '#dc2626' : days < 3 ? '#ea580c' : days < 14 ? '#ca8a04' : '#16a34a' }}>
                       {days}j
                     </td>
                   )}
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-1.5">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                       {status === 'archived' ? 'Archivé' : t('status_' + status)}
@@ -338,21 +338,21 @@ export default function ProductTable({ products, totalProducts = products, hideL
                   </td>
                   {!compactView && (
                     <>
-                      <td className="px-4 py-3 text-muted-foreground text-xs">
+                      <td className="px-3 py-2 text-muted-foreground text-xs">
                         {isExpired && p.action ? t(ACTION_KEYS[p.action] || p.action) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="px-3 py-2 text-muted-foreground">
                         {isExpired && p.quantity_thrown != null ? p.quantity_thrown : '—'}
                       </td>
-                      <td className="px-4 py-3 font-medium text-red-700">
+                      <td className="px-3 py-2 font-medium text-red-700">
                         {isExpired && total > 0 ? `${total.toFixed(2)}` : '—'}
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">
                         {p.added_by_name || '—'}
                       </td>
                     </>
                   )}
-                  <td className="px-4 py-3">
+                  <td className="px-2 py-1.5">
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
