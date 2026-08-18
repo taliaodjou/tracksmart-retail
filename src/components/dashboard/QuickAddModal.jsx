@@ -264,6 +264,8 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
               const data = {
                 name: form.name,
                 marque: form.marque || undefined,
+                barcode: barcode || undefined,
+                image_url: imageUrl || undefined,
                 etagere: form.etagere || undefined,
                 category: form.category || undefined,
                 rayon: form.rayon || undefined,

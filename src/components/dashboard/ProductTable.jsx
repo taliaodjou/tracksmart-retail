@@ -7,6 +7,7 @@ import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { getProductStatus, getDisplayStatus, getDaysRemaining, statusConfig, categoryKeys, rayonKeys, calculateTotalLoss } from '@/lib/productUtils';
 import LossRecapModal from './LossRecapModal';
+import ProductDetailModal from './ProductDetailModal';
 
 const ACTION_KEYS = {
   jeter: 'action_jeter',
@@ -191,10 +192,11 @@ function InlineEditRow({ product, onSave, onCancel }) {
   );
 }
 
-export default function ProductTable({ products, totalProducts = products, hideLossFooter = false, onEdit, onDelete, onInlineSave }) {
+export default function ProductTable({ products, totalProducts = products, hideLossFooter = false, compactView = false, onEdit, onDelete, onInlineSave }) {
   const { t } = useLanguage();
   const [editingId, setEditingId] = useState(null);
   const [showLossRecap, setShowLossRecap] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const handleSave = (product, data) => {
     if (onInlineSave) {
@@ -228,7 +230,11 @@ export default function ProductTable({ products, totalProducts = products, hideL
         const isExpired = getProductStatus(p.expiration_date) === 'expired';
 
         return (
-          <div key={p.id} className={`bg-white rounded-xl border px-3 py-2.5 shadow-sm ${status === 'archived' ? 'border-blue-200 bg-blue-50/20' : isExpired ? 'border-red-200 bg-red-50/30' : status === 'urgent' ? 'border-orange-200 bg-orange-50/20' : 'border-border/40'}`}>
+          <div
+            key={p.id}
+            onClick={() => compactView && setSelectedProduct(p)}
+            className={`bg-white rounded-xl border px-3 py-2.5 shadow-sm ${compactView ? 'cursor-pointer' : ''} ${status === 'archived' ? 'border-blue-200 bg-blue-50/20' : isExpired ? 'border-red-200 bg-red-50/30' : status === 'urgent' ? 'border-orange-200 bg-orange-50/20' : 'border-border/40'}`}
+          >
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -243,18 +249,18 @@ export default function ProductTable({ products, totalProducts = products, hideL
                   {p.etagere && <span>• {p.etagere}</span>}
                   {p.expiration_date && (
                     <span className={`font-medium ${isExpired ? 'text-red-600' : days < 3 ? 'text-orange-600' : days < 14 ? 'text-yellow-600' : 'text-green-600'}`}>
-                      {format(new Date(p.expiration_date), 'dd/MM/yy')} ({days}j)
+                      {format(new Date(p.expiration_date), 'dd/MM/yy')}{!compactView && ` (${days}j)`}
                     </span>
                   )}
                   {p.rayon && <span>R{p.rayon}</span>}
-                  {isExpired && total > 0 && <span className="text-red-600 font-semibold">CHF {total.toFixed(2)}</span>}
+                  {!compactView && isExpired && total > 0 && <span className="text-red-600 font-semibold">CHF {total.toFixed(2)}</span>}
                 </div>
               </div>
               <div className="flex items-center gap-0.5 flex-shrink-0">
-                <button onClick={() => handleMobileEdit(p)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); handleMobileEdit(p); }} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-secondary transition-colors">
                   <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
-                <button onClick={() => onDelete(p)} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); onDelete(p); }} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-red-50 transition-colors">
                   <Trash2 className="w-3.5 h-3.5 text-red-400" />
                 </button>
               </div>
@@ -273,14 +279,17 @@ export default function ProductTable({ products, totalProducts = products, hideL
         <table className="w-full text-sm">
           <thead className="bg-secondary/40">
             <tr>
-              {[t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', ''].map((h, i) => (
+              {(compactView
+                ? [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_dlc'), t('col_status'), '']
+                : [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', '']
+              ).map((h, i) => (
                 <th key={i} className="text-left px-4 py-3 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {products.map(p => {
-              if (editingId === p.id) {
+              if (!compactView && editingId === p.id) {
                 return (
                   <InlineEditRow
                     key={p.id}
@@ -298,50 +307,69 @@ export default function ProductTable({ products, totalProducts = products, hideL
               const isExpired = getProductStatus(p.expiration_date) === 'expired';
 
               return (
-                <tr key={p.id} className={`border-t border-border/30 hover:bg-secondary/20 ${status === 'archived' ? 'bg-blue-50/30' : isExpired ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/40' : status === 'soon' ? 'bg-yellow-50/20' : ''}`}>
-                  <td className="px-4 py-3 font-medium text-foreground max-w-[160px] truncate">{p.name}</td>
+                <tr
+                  key={p.id}
+                  onClick={() => compactView && setSelectedProduct(p)}
+                  className={`border-t border-border/30 hover:bg-secondary/20 ${compactView ? 'cursor-pointer' : ''} ${status === 'archived' ? 'bg-blue-50/30' : isExpired ? 'bg-red-50/40' : status === 'urgent' ? 'bg-orange-50/40' : status === 'soon' ? 'bg-yellow-50/20' : ''}`}
+                >
+                  <td className="px-4 py-3 font-medium text-foreground max-w-[190px] truncate">
+                    {compactView ? (
+                      <button className="text-left hover:text-primary hover:underline truncate max-w-full" onClick={(e) => { e.stopPropagation(); setSelectedProduct(p); }}>
+                        {p.name}
+                      </button>
+                    ) : p.name}
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{p.marque || '—'}</td>
                   <td className="px-4 py-3 text-muted-foreground">{p.etagere || '—'}</td>
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
                     {p.category ? t(categoryKeys[p.category] || p.category) : '—'}
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{p.rayon ? `R${p.rayon}` : '—'}</td>
+                  {!compactView && <td className="px-4 py-3 text-muted-foreground">{p.rayon ? `R${p.rayon}` : '—'}</td>}
                   <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'}
                   </td>
-                  <td className="px-4 py-3 font-medium" style={{ color: isExpired ? '#dc2626' : days < 3 ? '#ea580c' : days < 14 ? '#ca8a04' : '#16a34a' }}>
-                    {days}j
-                  </td>
+                  {!compactView && (
+                    <td className="px-4 py-3 font-medium" style={{ color: isExpired ? '#dc2626' : days < 3 ? '#ea580c' : days < 14 ? '#ca8a04' : '#16a34a' }}>
+                      {days}j
+                    </td>
+                  )}
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
                       {status === 'archived' ? 'Archivé' : t('status_' + status)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">
-                    {isExpired && p.action ? t(ACTION_KEYS[p.action] || p.action) : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {isExpired && p.quantity_thrown != null ? p.quantity_thrown : '—'}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-red-700">
-                    {isExpired && total > 0 ? `${total.toFixed(2)}` : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
-                    {p.added_by_name || '—'}
-                  </td>
+                  {!compactView && (
+                    <>
+                      <td className="px-4 py-3 text-muted-foreground text-xs">
+                        {isExpired && p.action ? t(ACTION_KEYS[p.action] || p.action) : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {isExpired && p.quantity_thrown != null ? p.quantity_thrown : '—'}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-red-700">
+                        {isExpired && total > 0 ? `${total.toFixed(2)}` : '—'}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                        {p.added_by_name || '—'}
+                      </td>
+                    </>
+                  )}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setEditingId(p.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          compactView ? onEdit(p) : setEditingId(p.id);
+                        }}
                         className="h-7 w-7"
-                        title="Modifier en ligne"
+                        title={compactView ? 'Modifier le produit' : 'Modifier en ligne'}
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => onDelete(p)} className="h-7 w-7 text-red-400 hover:text-red-600">
+                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); onDelete(p); }} className="h-7 w-7 text-red-400 hover:text-red-600">
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </div>
@@ -379,6 +407,16 @@ export default function ProductTable({ products, totalProducts = products, hideL
 
       {showLossRecap && (
         <LossRecapModal products={totalProducts} onClose={() => setShowLossRecap(false)} />
+      )}
+      {selectedProduct && (
+        <ProductDetailModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onEdit={(product) => {
+            setSelectedProduct(null);
+            onEdit(product);
+          }}
+        />
       )}
     </>
   );

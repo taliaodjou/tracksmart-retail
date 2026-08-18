@@ -149,6 +149,7 @@ export default function RayonGroupedTable({ products, totalProducts = products, 
               <ProductTable
                 products={rayonProducts}
                 hideLossFooter={true}
+                compactView={true}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onInlineSave={onInlineSave}

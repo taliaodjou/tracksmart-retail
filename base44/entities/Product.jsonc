@@ -10,6 +10,14 @@
       "type": "string",
       "description": "Marque"
     },
+    "barcode": {
+      "type": "string",
+      "description": "Code EAN / code-barres du produit"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL de la photo du produit"
+    },
     "etagere": {
       "type": "string",
       "description": "\u00c9tag\u00e8re (optionnel)"
