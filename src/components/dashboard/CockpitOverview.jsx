@@ -107,43 +107,43 @@ export default function CockpitOverview({ products }) {
         </section>
       </div>
 
-      <section className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-100 shadow-sm p-5 sm:p-7">
-        <h2 className="font-bold text-2xl text-slate-700 mb-6">Actions prioritaires</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          <Link to="/products" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-md px-5 py-6 min-h-[170px] flex flex-col justify-between hover:shadow-lg transition-shadow">
-            <span className="absolute inset-y-0 left-0 w-2 bg-[#C9A646]" />
+      <section className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-100 shadow-sm p-4 sm:p-5">
+        <h2 className="font-bold text-xl text-slate-700 mb-4">Actions prioritaires</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link to="/products" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
+            <span className="absolute inset-y-0 left-0 w-1.5 bg-[#C9A646]" />
             <div className="flex items-start justify-between gap-3 pl-2">
-              <List className="w-8 h-8 text-[#C9A646]" />
-              <ChevronRight className="w-6 h-6 text-slate-400 mt-10 group-hover:text-[#C9A646]" />
+              <List className="w-7 h-7 text-[#C9A646]" />
+              <ChevronRight className="w-5 h-5 text-slate-400 mt-7 group-hover:text-[#C9A646]" />
             </div>
             <div className="pl-2">
-              <h3 className="text-xl sm:text-2xl font-bold leading-tight text-slate-950 mb-4">Ouvrir la liste produits</h3>
-              <p className="text-2xl font-bold text-slate-700 leading-none">{activeProducts.length}</p>
-              <p className="text-sm text-slate-500 mt-1">produits en stock</p>
+              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Ouvrir la liste produits</h3>
+              <p className="text-xl font-bold text-slate-700 leading-none">{activeProducts.length}</p>
+              <p className="text-xs text-slate-500 mt-1">produits en stock</p>
             </div>
           </Link>
-          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-md px-5 py-6 min-h-[170px] flex flex-col justify-between hover:shadow-lg transition-shadow">
-            <span className="absolute inset-y-0 left-0 w-2 bg-[#EF4444]" />
+          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
+            <span className="absolute inset-y-0 left-0 w-1.5 bg-[#EF4444]" />
             <div className="flex items-start justify-between gap-3 pl-2">
-              <AlertTriangle className="w-8 h-8 text-[#EF4444] fill-[#EF4444]/10" />
-              <ChevronRight className="w-6 h-6 text-slate-400 mt-10 group-hover:text-[#EF4444]" />
+              <AlertTriangle className="w-7 h-7 text-[#EF4444] fill-[#EF4444]/10" />
+              <ChevronRight className="w-5 h-5 text-slate-400 mt-7 group-hover:text-[#EF4444]" />
             </div>
             <div className="pl-2">
-              <h3 className="text-xl sm:text-2xl font-bold leading-tight text-slate-950 mb-4">Vérifier les produits urgents</h3>
-              <p className="text-2xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
-              <p className="text-sm text-slate-500 mt-1">produits urgents</p>
+              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Vérifier les produits urgents</h3>
+              <p className="text-xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
+              <p className="text-xs text-slate-500 mt-1">produits urgents</p>
             </div>
           </Link>
-          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-md px-5 py-6 min-h-[170px] flex flex-col justify-between hover:shadow-lg transition-shadow">
-            <span className="absolute inset-y-0 left-0 w-2 bg-[#F97316]" />
+          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
+            <span className="absolute inset-y-0 left-0 w-1.5 bg-[#F97316]" />
             <div className="flex items-start justify-between gap-3 pl-2">
-              <ClipboardCheck className="w-8 h-8 text-[#F97316]" />
-              <ChevronRight className="w-6 h-6 text-slate-400 mt-10 group-hover:text-[#F97316]" />
+              <ClipboardCheck className="w-7 h-7 text-[#F97316]" />
+              <ChevronRight className="w-5 h-5 text-slate-400 mt-7 group-hover:text-[#F97316]" />
             </div>
             <div className="pl-2">
-              <h3 className="text-xl sm:text-2xl font-bold leading-tight text-slate-950 mb-4">Valider les stocks urgents</h3>
-              <p className="text-2xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
-              <p className="text-sm text-slate-500 mt-1">à valider</p>
+              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Valider les stocks urgents</h3>
+              <p className="text-xl font-bold text-slate-700 leading-none">{urgentActionCount}</p>
+              <p className="text-xs text-slate-500 mt-1">à valider</p>
             </div>
           </Link>
         </div>
