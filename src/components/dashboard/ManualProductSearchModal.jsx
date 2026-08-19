@@ -33,7 +33,7 @@ export default function ManualProductSearchModal({ products = [], onSelect, onCr
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Ajouter un produit</p>
-            <h2 className="text-lg font-bold text-foreground">Saisir manuellement</h2>
+            <h2 className="text-lg font-bold text-foreground">Rechercher par nom</h2>
           </div>
           <button onClick={onClose} className="w-9 h-9 rounded-full hover:bg-secondary flex items-center justify-center"><X className="w-5 h-5 text-muted-foreground" /></button>
         </div>
@@ -44,7 +44,7 @@ export default function ManualProductSearchModal({ products = [], onSelect, onCr
             <Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nom du produit" className="pl-10 h-12 rounded-xl text-base" autoFocus />
           </div>
 
-          {cleanQuery.length < 2 && <p className="text-sm text-muted-foreground">Tapez au moins 2 caractères pour rechercher dans votre stock.</p>}
+          {cleanQuery.length < 2 && <p className="text-sm text-muted-foreground">Tapez au moins 2 caractères pour retrouver un produit déjà enregistré.</p>}
 
           {suggestions.length > 0 && (
             <div className="rounded-2xl border border-border/50 overflow-hidden divide-y divide-border/40">
