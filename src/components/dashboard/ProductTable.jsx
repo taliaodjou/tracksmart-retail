@@ -238,7 +238,7 @@ export default function ProductTable({ products, totalProducts = products, hideL
                   <span className="font-semibold text-sm text-foreground">{p.name}</span>
                   <span className={`inline-flex items-center gap-1 px-1.5 py-0 rounded-full text-[10px] font-medium border ${cfg.color}`}>
                     <span className={`w-1 h-1 rounded-full ${cfg.dot}`} />
-                    {status === 'archived' ? 'Archivé' : t('status_' + status)}
+                    {t('status_' + status)}
                   </span>
                 </div>
                 <div className="flex gap-2 mt-0.5 text-[11px] text-muted-foreground flex-wrap">
@@ -333,7 +333,7 @@ export default function ProductTable({ products, totalProducts = products, hideL
                   <td className="px-2 py-1.5">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.color}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                      {status === 'archived' ? 'Archivé' : t('status_' + status)}
+                      {t('status_' + status)}
                     </span>
                   </td>
                   {!compactView && (

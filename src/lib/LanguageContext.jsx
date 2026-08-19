@@ -54,6 +54,7 @@ const translations = {
     status_urgent: 'Urgent',
     status_soon: 'Bientôt',
     status_ok: 'OK',
+    status_archived: 'Fin de stock',
 
     // Categories
     cat_snacks: 'Snacks',
@@ -276,6 +277,7 @@ const translations = {
     status_urgent: 'Urgent',
     status_soon: 'Soon',
     status_ok: 'OK',
+    status_archived: 'Out of stock',
 
     cat_snacks: 'Snacks',
     cat_boissons: 'Beverages',

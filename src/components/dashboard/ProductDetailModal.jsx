@@ -75,7 +75,7 @@ export default function ProductDetailModal({ product, onClose, onEdit }) {
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.color}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                  {status === 'archived' ? 'Archivé' : t('status_' + status)}
+                  {t('status_' + status)}
                 </span>
                 {barcode && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-neutral-100 text-neutral-700 border border-neutral-200">
