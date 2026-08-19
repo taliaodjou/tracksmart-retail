@@ -89,12 +89,12 @@ export default function Stock() {
   }
 
   return (
-    <div className="min-h-screen pb-20 sm:pb-0 pt-16 sm:pt-20" style={{ backgroundColor: '#f5f3ef', color: '#1a1a1a' }}>
+    <div className="min-h-screen pb-16 sm:pb-0 pt-14 sm:pt-20" style={{ backgroundColor: '#f5f3ef', color: '#1a1a1a' }}>
       <DashboardHeader />
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 pb-8 space-y-5">
+      <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-5 sm:pb-8 space-y-3 sm:space-y-5">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Gérer mon stock</h1>
-          <p className="text-sm text-muted-foreground mt-1">Recomptez vos produits et ajustez les écarts de stock depuis une page dédiée.</p>
+          <h1 className="text-lg sm:text-3xl font-bold text-foreground">Gérer mon stock</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">Recomptez vos produits et ajustez les écarts de stock depuis une page dédiée.</p>
         </div>
         {isLoading ? (
           <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>

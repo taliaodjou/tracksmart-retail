@@ -46,26 +46,26 @@ export default function InventoryCountPanel({ products = [], onSubmit, saving, m
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-border/40 shadow-sm overflow-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 sm:px-6 py-5 border-b border-border/40">
+    <div className="bg-white rounded-xl sm:rounded-3xl border border-border/40 shadow-sm overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 px-3 sm:px-6 py-3 sm:py-5 border-b border-border/40">
         <div>
-          <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Gestion de stock</p>
-          <h2 className="text-xl font-bold flex items-center gap-2"><ClipboardCheck className="w-5 h-5 text-primary" />Recomptage des produits</h2>
+          <p className="text-[10px] sm:text-xs uppercase tracking-wide text-muted-foreground font-semibold">Gestion de stock</p>
+          <h2 className="text-base sm:text-xl font-bold flex items-center gap-1.5 sm:gap-2"><ClipboardCheck className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />Recomptage des produits</h2>
         </div>
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un produit ou un EAN" className="pl-9 rounded-xl" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un produit ou un EAN" className="pl-9 rounded-lg sm:rounded-xl h-8 sm:h-9 text-xs sm:text-sm" />
         </div>
       </div>
 
-      <div className="p-5 sm:p-6 border-b border-border/40 bg-secondary/30">
-        <p className="text-sm text-muted-foreground">Renseignez la quantité réellement comptée. Si elle est inférieure au stock théorique, répartissez l’écart entre les unités vendues et les unités perdues.</p>
-        {message && <p className="mt-3 text-sm font-medium text-primary">{message}</p>}
+      <div className="p-3 sm:p-6 border-b border-border/40 bg-secondary/30">
+        <p className="text-xs sm:text-sm text-muted-foreground">Renseignez la quantité réellement comptée. Si elle est inférieure au stock théorique, répartissez l’écart entre les unités vendues et les unités perdues.</p>
+        {message && <p className="mt-2 sm:mt-3 text-xs sm:text-sm font-medium text-primary">{message}</p>}
       </div>
 
       <div className="overflow-x-auto">
-        <div className="min-w-[760px]">
-          <div className="grid grid-cols-[1fr_120px_150px_260px] gap-3 px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b border-border/40">
+        <div className="min-w-[620px] sm:min-w-[760px]">
+          <div className="grid grid-cols-[1fr_90px_120px_210px] sm:grid-cols-[1fr_120px_150px_260px] gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b border-border/40">
             <span>Produit</span><span>Théorique</span><span>Réel compté</span><span>Nature de l’écart</span>
           </div>
           <div className="divide-y divide-border/40">
@@ -74,13 +74,13 @@ export default function InventoryCountPanel({ products = [], onSubmit, saving, m
               const actual = counts[product.id] === '' || counts[product.id] == null ? null : Number(counts[product.id]);
               const hasLoss = actual !== null && !Number.isNaN(actual) && actual < theoretical;
               return (
-                <div key={product.id} className="grid grid-cols-[1fr_120px_150px_260px] gap-3 items-center px-6 py-4">
+                <div key={product.id} className="grid grid-cols-[1fr_90px_120px_210px] sm:grid-cols-[1fr_120px_150px_260px] gap-2 sm:gap-3 items-center px-3 sm:px-6 py-2.5 sm:py-4">
                   <div>
-                    <p className="text-sm font-bold text-foreground">{product.name}</p>
-                    <p className="text-xs text-muted-foreground">{product.marque || 'Sans marque'}{product.barcode ? ` · EAN ${product.barcode}` : ''}</p>
+                    <p className="text-xs sm:text-sm font-bold text-foreground">{product.name}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">{product.marque || 'Sans marque'}{product.barcode ? ` · EAN ${product.barcode}` : ''}</p>
                   </div>
-                  <div className="text-sm font-semibold text-muted-foreground">{theoretical}</div>
-                  <Input type="number" min="0" value={counts[product.id] || ''} onChange={(e) => setCounts((current) => ({ ...current, [product.id]: e.target.value }))} placeholder="Quantité" className="rounded-xl" />
+                  <div className="text-xs sm:text-sm font-semibold text-muted-foreground">{theoretical}</div>
+                  <Input type="number" min="0" value={counts[product.id] || ''} onChange={(e) => setCounts((current) => ({ ...current, [product.id]: e.target.value }))} placeholder="Quantité" className="rounded-lg sm:rounded-xl h-8 sm:h-9 text-xs sm:text-sm" />
                   {hasLoss ? (
                     <div className="space-y-2">
                       <div className="grid grid-cols-2 gap-1.5">
@@ -101,7 +101,7 @@ export default function InventoryCountPanel({ products = [], onSubmit, saving, m
 
       <div className="px-5 sm:px-6 py-4 border-t border-border/40 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <p className="text-xs text-muted-foreground">{countedEntries.length} produit{countedEntries.length > 1 ? 's' : ''} renseigné{countedEntries.length > 1 ? 's' : ''}{invalidSplitCount > 0 ? ` · ${invalidSplitCount} écart${invalidSplitCount > 1 ? 's' : ''} à répartir correctement` : ''}</p>
-        <Button disabled={countedEntries.length === 0 || invalidSplitCount > 0 || saving} onClick={submit} className="rounded-xl">Valider le recomptage</Button>
+        <Button disabled={countedEntries.length === 0 || invalidSplitCount > 0 || saving} onClick={submit} className="rounded-lg sm:rounded-xl h-8 sm:h-9 text-xs sm:text-sm">Valider le recomptage</Button>
       </div>
     </div>
   );
