@@ -447,13 +447,13 @@ export default function Dashboard() {
 
 
   return (
-    <div className="min-h-screen pb-20 sm:pb-0 pt-16 sm:pt-20" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
+    <div className="min-h-screen pb-16 sm:pb-0 pt-14 sm:pt-20" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
       {needsOnboarding && !onboardingDone &&
       <OnboardingModal user={user} onComplete={() => { setOnboardingDone(true); navigate('/welcome'); }} />
       }
       <DashboardHeader />
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 pb-6 sm:pt-10 sm:pb-8">
+      <main className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-3 pb-4 sm:pt-10 sm:pb-8">
 
         {/* Desktop header */}
         <div className="hidden sm:flex items-start sm:items-center justify-between gap-4 mb-8">
@@ -468,11 +468,11 @@ export default function Dashboard() {
         </div>
 
         {/* Mobile header */}
-        <div className="sm:hidden flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-foreground">{t('dash_title')}</h1>
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button size="sm" onClick={() => setShowAddOptions(true)} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
-              <Plus className="w-3.5 h-3.5" /> Ajouter un produit
+        <div className="sm:hidden flex items-center justify-between gap-2 mb-2.5">
+          <h1 className="text-base font-bold text-foreground truncate">{t('dash_title')}</h1>
+          <div className="flex flex-wrap justify-end gap-1.5">
+            <Button size="sm" onClick={() => setShowAddOptions(true)} className="rounded-full h-8 px-3 gap-1 text-[11px] font-semibold">
+              <Plus className="w-3 h-3" /> Ajouter
             </Button>
             <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
@@ -483,7 +483,7 @@ export default function Dashboard() {
             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
           </div> :
 
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-3 sm:space-y-6">
             <StatsCards products={activeProducts} movements={stockMovements} />
 
             <WeeklyAlert

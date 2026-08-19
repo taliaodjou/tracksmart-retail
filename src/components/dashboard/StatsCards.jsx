@@ -19,13 +19,13 @@ export default function StatsCards({ products, movements = [] }) {
 
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-4">
         {cards.map((card, i) => {
           const content = (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
               <div className="flex flex-col justify-between h-full min-w-0">
-                <p className="text-xs sm:text-sm text-muted-foreground leading-tight min-h-[2.5em]">{card.label}</p>
-                <p className={`text-xl sm:text-3xl font-bold mt-0.5 sm:mt-1 ${card.clickable ? 'text-red-700' : 'text-foreground'}`}>{card.value}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground leading-tight min-h-[2.3em]">{card.label}</p>
+                <p className={`text-base sm:text-3xl font-bold mt-0.5 sm:mt-1 leading-tight ${card.clickable ? 'text-red-700' : 'text-foreground'}`}>{card.value}</p>
               </div>
               <div className={`hidden sm:flex w-12 h-12 rounded-xl ${card.bg} items-center justify-center`}>
                 <card.icon className={`w-6 h-6 ${card.iconColor}`} />
@@ -38,13 +38,13 @@ export default function StatsCards({ products, movements = [] }) {
               key={i}
               type="button"
               onClick={() => setShowLossRecap(true)}
-              className="text-left bg-red-50 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm border border-red-200 hover:bg-red-100 transition-colors"
+              className="text-left bg-red-50 rounded-lg sm:rounded-2xl p-2 sm:p-6 shadow-sm border border-red-200 hover:bg-red-100 transition-colors"
               title="Voir le détail des pertes"
             >
               {content}
             </button>
           ) : (
-            <div key={i} className={`${card.cardBg || 'bg-white border-border/40'} rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-sm border`}>
+            <div key={i} className={`${card.cardBg || 'bg-white border-border/40'} rounded-lg sm:rounded-2xl p-2 sm:p-6 shadow-sm border`}>
               {content}
             </div>
           );

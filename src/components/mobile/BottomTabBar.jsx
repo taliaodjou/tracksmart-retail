@@ -25,13 +25,13 @@ export default function BottomTabBar() {
             <Link
               key={to}
               to={to}
-              className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
+              className={`flex-1 flex flex-col items-center justify-center py-1.5 gap-0.5 transition-colors ${
                 active ? 'text-primary' : 'text-gray-600'
               }`}
-              style={{ minHeight: '56px' }}
+              style={{ minHeight: '50px' }}
             >
-              <Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{label}</span>
+              <Icon className="w-4 h-4" />
+              <span className="text-[9px] font-medium">{label}</span>
             </Link>
           );
         })}

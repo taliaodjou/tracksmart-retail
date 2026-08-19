@@ -181,7 +181,7 @@ function ProductPill({ p, onClick }) {
   return (
     <button
       onClick={() => onClick(p)}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer hover:opacity-80 transition-opacity ${statusConfig[status].color}`}
+      className={`inline-flex items-center gap-1 px-2 py-1 sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-medium border cursor-pointer hover:opacity-80 transition-opacity ${statusConfig[status].color}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${statusConfig[status].dot}`} />
       {p.name} ({days}j)
@@ -198,20 +198,20 @@ function WatchBox({ title, products, icon, borderColor, bgColor, titleColor, onP
   if (products.length === 0) return null;
 
   return (
-    <div className={`${bgColor} border ${borderColor} rounded-2xl p-4`}>
-      <div className="flex items-center gap-2 mb-3">
+    <div className={`${bgColor} border ${borderColor} rounded-xl sm:rounded-2xl p-2.5 sm:p-4`}>
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
         {icon}
-        <h3 className={`font-semibold text-sm ${titleColor}`}>{title}</h3>
-        <span className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full ${bgColor} ${titleColor} border ${borderColor}`}>{products.length}</span>
+        <h3 className={`font-semibold text-xs sm:text-sm ${titleColor}`}>{title}</h3>
+        <span className={`ml-auto text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${bgColor} ${titleColor} border ${borderColor}`}>{products.length}</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {visible.map(p => (
           <ProductPill key={p.id} p={p} onClick={onProductClick} />
         ))}
         {!showAll && extra > 0 && (
           <button
             onClick={() => setShowAll(true)}
-            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold border ${borderColor} ${bgColor} ${titleColor} hover:opacity-80 transition-colors`}
+            className={`inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold border ${borderColor} ${bgColor} ${titleColor} hover:opacity-80 transition-colors`}
           >
             +{extra} <ChevronRight className="w-3 h-3" />
           </button>

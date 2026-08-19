@@ -37,17 +37,18 @@ export default function CockpitOverview({ products }) {
     .filter((product) => ['expired', 'urgent'].includes(getProductStatus(product.expiration_date)))
     .sort((a, b) => new Date(a.expiration_date) - new Date(b.expiration_date))
     .slice(0, 4);
+  const chartHeight = typeof window !== 'undefined' && window.innerWidth < 640 ? 110 : 140;
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <section className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 min-h-[210px]">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg text-foreground">Pertes</h2>
+    <div className="space-y-3 sm:space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+        <section className="bg-white rounded-xl sm:rounded-2xl border border-border/50 shadow-sm p-3 sm:p-5 sm:min-h-[210px]">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <h2 className="font-bold text-sm sm:text-lg text-foreground">Pertes</h2>
             <Link to="/analytics" className="text-xs font-medium text-foreground hover:text-primary inline-flex items-center gap-1">
               Voir détails <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <ResponsiveContainer width="100%" height={140}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <BarChart data={data}>
               <CartesianGrid vertical={false} stroke="#E8E0D3" />
               <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
@@ -58,10 +59,10 @@ export default function CockpitOverview({ products }) {
           </ResponsiveContainer>
         </section>
 
-        <section className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 min-h-[210px]">
-          <h2 className="font-bold text-lg text-foreground mb-4">Urgences</h2>
-          <div className="space-y-2">
-            <div className="grid grid-cols-[1fr_auto_auto] gap-3 text-xs font-semibold text-muted-foreground border-b border-border/40 pb-2">
+        <section className="bg-white rounded-xl sm:rounded-2xl border border-border/50 shadow-sm p-3 sm:p-5 sm:min-h-[210px]">
+          <h2 className="font-bold text-sm sm:text-lg text-foreground mb-2 sm:mb-4">Urgences</h2>
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="grid grid-cols-[1fr_auto_auto] gap-2 sm:gap-3 text-[10px] sm:text-xs font-semibold text-muted-foreground border-b border-border/40 pb-1.5 sm:pb-2">
               <span>Produit</span>
               <span>Statut</span>
               <span>DLC</span>
@@ -69,9 +70,9 @@ export default function CockpitOverview({ products }) {
             {urgentProducts.length > 0 ? urgentProducts.map((product) => {
               const status = getProductStatus(product.expiration_date);
               return (
-                <Link key={product.id} to="/products" className="grid grid-cols-[1fr_auto_auto] gap-3 items-center py-2 text-sm hover:bg-secondary/40 rounded-lg px-1">
+                <Link key={product.id} to="/products" className="grid grid-cols-[1fr_auto_auto] gap-2 sm:gap-3 items-center py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-secondary/40 rounded-lg px-1">
                   <span className="font-medium text-foreground truncate">{product.name}</span>
-                  <span className={`text-xs px-2 py-1 rounded-full font-semibold ${status === 'expired' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                  <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-semibold ${status === 'expired' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
                     {status === 'expired' ? 'Expiré' : 'Urgent'}
                   </span>
                   <span className="text-muted-foreground whitespace-nowrap">{getDaysRemaining(product.expiration_date)}j</span>
@@ -83,12 +84,12 @@ export default function CockpitOverview({ products }) {
           </div>
         </section>
 
-        <section className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 min-h-[210px]">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-lg text-foreground">Évolution</h2>
-            <span className="text-xs rounded-full border border-border px-3 py-1 text-muted-foreground">Pertes CHF</span>
+        <section className="bg-white rounded-xl sm:rounded-2xl border border-border/50 shadow-sm p-3 sm:p-5 sm:min-h-[210px]">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <h2 className="font-bold text-sm sm:text-lg text-foreground">Évolution</h2>
+            <span className="text-[10px] sm:text-xs rounded-full border border-border px-2 sm:px-3 py-0.5 sm:py-1 text-muted-foreground">Pertes CHF</span>
           </div>
-          <ResponsiveContainer width="100%" height={140}>
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <ComposedChart data={data}>
               <defs>
                 <linearGradient id="lossFill" x1="0" y1="0" x2="0" y2="1">
@@ -107,39 +108,39 @@ export default function CockpitOverview({ products }) {
         </section>
       </div>
 
-      <section className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-100 shadow-sm p-4 sm:p-5">
-        <h2 className="font-bold text-xl text-slate-700 mb-4">Actions prioritaires</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link to="/products" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
+      <section className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-100 shadow-sm p-3 sm:p-5">
+        <h2 className="font-bold text-base sm:text-xl text-slate-700 mb-2.5 sm:mb-4">Actions prioritaires</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+          <Link to="/products" className="group relative overflow-hidden bg-white rounded-lg sm:rounded-xl border border-slate-200 shadow-sm px-3 sm:px-4 py-3 sm:py-4 min-h-[82px] sm:min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
             <span className="absolute inset-y-0 left-0 w-1.5 bg-[#C9A646]" />
             <div className="flex items-start justify-between gap-3 pl-2">
-              <List className="w-7 h-7 text-[#C9A646]" />
-              <ChevronRight className="w-5 h-5 text-slate-400 mt-7 group-hover:text-[#C9A646]" />
+              <List className="w-5 h-5 sm:w-7 sm:h-7 text-[#C9A646]" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 mt-2 sm:mt-7 group-hover:text-[#C9A646]" />
             </div>
             <div className="pl-2">
-              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Ouvrir la liste produits</h3>
+              <h3 className="text-sm sm:text-xl font-bold leading-tight text-slate-950 mb-1 sm:mb-2">Ouvrir la liste produits</h3>
               <p className="text-xs text-slate-500">Accéder au stock complet</p>
             </div>
           </Link>
-          <Link to="/analytics" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
+          <Link to="/analytics" className="group relative overflow-hidden bg-white rounded-lg sm:rounded-xl border border-slate-200 shadow-sm px-3 sm:px-4 py-3 sm:py-4 min-h-[82px] sm:min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
             <span className="absolute inset-y-0 left-0 w-1.5 bg-[#EF4444]" />
             <div className="flex items-start justify-between gap-3 pl-2">
-              <TrendingDown className="w-7 h-7 text-[#EF4444]" />
-              <ChevronRight className="w-5 h-5 text-slate-400 mt-7 group-hover:text-[#EF4444]" />
+              <TrendingDown className="w-5 h-5 sm:w-7 sm:h-7 text-[#EF4444]" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 mt-2 sm:mt-7 group-hover:text-[#EF4444]" />
             </div>
             <div className="pl-2">
-              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Analyser les pertes</h3>
+              <h3 className="text-sm sm:text-xl font-bold leading-tight text-slate-950 mb-1 sm:mb-2">Analyser les pertes</h3>
               <p className="text-xs text-slate-500">Repérer les rayons à risque</p>
             </div>
           </Link>
-          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
+          <Link to="/products?status=urgent" className="group relative overflow-hidden bg-white rounded-lg sm:rounded-xl border border-slate-200 shadow-sm px-3 sm:px-4 py-3 sm:py-4 min-h-[82px] sm:min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow">
             <span className="absolute inset-y-0 left-0 w-1.5 bg-[#F97316]" />
             <div className="flex items-start justify-between gap-3 pl-2">
-              <ClipboardCheck className="w-7 h-7 text-[#F97316]" />
-              <ChevronRight className="w-5 h-5 text-slate-400 mt-7 group-hover:text-[#F97316]" />
+              <ClipboardCheck className="w-5 h-5 sm:w-7 sm:h-7 text-[#F97316]" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 mt-2 sm:mt-7 group-hover:text-[#F97316]" />
             </div>
             <div className="pl-2">
-              <h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">Valider les stocks urgents</h3>
+              <h3 className="text-sm sm:text-xl font-bold leading-tight text-slate-950 mb-1 sm:mb-2">Valider les stocks urgents</h3>
               <p className="text-xs text-slate-500">Contrôler les produits à traiter</p>
             </div>
           </Link>
