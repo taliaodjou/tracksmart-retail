@@ -32,7 +32,7 @@ export default function ExportActions({ products, onImport }) {
 
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8">
-<title>TrackSmart — ${t('dash_print')}</title>
+<title>TrackSmart Retail — ${t('dash_print')}</title>
 <style>
 body { font-family: Arial, sans-serif; font-size: 12px; }
 h1 { font-size: 16px; margin-bottom: 8px; }
@@ -41,7 +41,7 @@ th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
 th { background: #f5f5f5; font-weight: bold; }
 </style>
 </head><body>
-<h1>TrackSmart — Produits expirés / bientôt expirés (${format(new Date(), 'dd/MM/yyyy')})</h1>
+<h1>TrackSmart Retail — Produits expirés / bientôt expirés (${format(new Date(), 'dd/MM/yyyy')})</h1>
 <table>
 <thead><tr>
 <th>Produit</th><th>Catégorie</th><th>Rayon</th><th>Expiration</th><th>Jours</th><th>Statut</th><th>Commande</th>

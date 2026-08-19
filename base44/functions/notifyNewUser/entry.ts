@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Nouvelle demande d'accès — TrackSmart</title>
+  <title>Nouvelle demande d'accès — TrackSmart Retail</title>
 </head>
 <body style="margin:0;padding:0;background:#f0efeb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0efeb;padding:48px 0;">
@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
                   <table cellpadding="0" cellspacing="0">
                     <tr>
                       <td style="background:#C9A64C;border-radius:10px;padding:8px 18px;">
-                        <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.3px;">TrackSmart</span>
+                        <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.3px;">TrackSmart Retail</span>
                         <span style="color:rgba(0,0,0,0.3);font-size:11px;font-weight:500;margin-left:7px;letter-spacing:0.3px;">Retail</span>
                       </td>
                     </tr>
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
               </tr>
             </table>
             <h1 style="margin:14px 0 10px;font-size:28px;font-weight:800;color:#111111;line-height:1.2;letter-spacing:-0.5px;">
-              Un nouvel utilisateur<br/>souhaite rejoindre TrackSmart
+              Un nouvel utilisateur<br/>souhaite rejoindre TrackSmart Retail
             </h1>
             <p style="margin:0 0 32px;font-size:15px;color:#666666;line-height:1.7;">
               Un nouveau compte vient d'être créé. Consultez le profil ci-dessous et décidez d'accorder ou de refuser l'accès à la plateforme.
@@ -192,7 +192,7 @@ Deno.serve(async (req) => {
     // 1. Notify admin
     await base44.integrations.Core.SendEmail({
       to: ADMIN_EMAIL,
-      subject: `🔔 TrackSmart — Nouvelle demande d'accès : ${user.full_name || user.email}`,
+      subject: `🔔 TrackSmart Retail — Nouvelle demande d'accès : ${user.full_name || user.email}`,
       body: emailHtml,
     });
 
@@ -204,7 +204,7 @@ Deno.serve(async (req) => {
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>${isEn ? 'Access request received — TrackSmart' : 'Demande d\'accès reçue — TrackSmart'}</title>
+  <title>${isEn ? 'Access request received — TrackSmart Retail' : 'Demande d\'accès reçue — TrackSmart Retail'}</title>
 </head>
 <body style="margin:0;padding:0;background:#f0efeb;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0efeb;padding:48px 0;">
@@ -220,7 +220,7 @@ Deno.serve(async (req) => {
                   <table cellpadding="0" cellspacing="0">
                     <tr>
                       <td style="background:#C9A64C;border-radius:10px;padding:8px 18px;">
-                        <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.3px;">TrackSmart</span>
+                        <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.3px;">TrackSmart Retail</span>
                         <span style="color:rgba(0,0,0,0.3);font-size:11px;font-weight:500;margin-left:7px;">Retail</span>
                       </td>
                     </tr>
@@ -244,7 +244,7 @@ Deno.serve(async (req) => {
         <tr>
           <td style="padding:44px 44px 0;">
             <h1 style="margin:0 0 12px;font-size:26px;font-weight:800;color:#111111;line-height:1.2;letter-spacing:-0.3px;">
-              ${isEn ? `Welcome to TrackSmart, ${firstName}!` : `Bienvenue sur TrackSmart, ${firstName} !`}
+              ${isEn ? `Welcome to TrackSmart Retail, ${firstName}!` : `Bienvenue sur TrackSmart Retail, ${firstName} !`}
             </h1>
             <p style="margin:0 0 28px;font-size:15px;color:#666666;line-height:1.8;">
               ${isEn
@@ -268,7 +268,7 @@ Deno.serve(async (req) => {
                         <p style="margin:0;font-size:13px;color:#a16207;line-height:1.6;">
                           ${isEn
                             ? 'You will receive an email with your access credentials as soon as your account is validated.'
-                            : 'Vous recevrez un email dès que votre compte sera validé, vous permettant d\'accéder à votre espace TrackSmart.'}
+                            : 'Vous recevrez un email dès que votre compte sera validé, vous permettant d\'accéder à votre espace TrackSmart Retail.'}
                         </p>
                       </td>
                     </tr>
@@ -320,8 +320,8 @@ Deno.serve(async (req) => {
     await base44.integrations.Core.SendEmail({
       to: user.email,
       subject: isEn
-        ? '⏳ TrackSmart — Your access request is being reviewed'
-        : '⏳ TrackSmart — Votre demande d\'accès est en cours de traitement',
+        ? '⏳ TrackSmart Retail — Your access request is being reviewed'
+        : '⏳ TrackSmart Retail — Votre demande d\'accès est en cours de traitement',
       body: pendingHtml,
     });
 

@@ -76,7 +76,7 @@ const DOC_SEED = [
   { _id: 'd1', name: 'Facture Metro Janvier', file_type: 'application/pdf', category: 'facture', folder_id: null, is_deleted: false, supplier_name: 'Metro Cash & Carry', amount: 1250.50, document_date: '2026-01-15', notes: 'Commande mensuelle', file_size: 245000 },
   { _id: 'd2', name: 'Bon livraison Mars', file_type: 'image/png', category: 'bon_livraison', folder_id: null, is_deleted: false, supplier_name: 'Prodega', amount: 875.00, document_date: '2026-03-22', notes: '', file_size: 380000 },
   { _id: 'd3', name: 'Contrat fournisseur Aligro', file_type: 'application/pdf', category: 'contrat', folder_id: null, is_deleted: false, supplier_name: 'Aligro', amount: null, document_date: '2026-01-01', notes: 'Contrat annuel', file_size: 750000 },
-  { _id: 'd4', name: 'Rapport trimestriel T1', file_type: 'application/pdf', category: 'rapport', folder_id: null, is_deleted: false, supplier_name: null, amount: null, document_date: '2026-03-31', notes: 'Généré par TrackSmart', file_size: 320000 },
+  { _id: 'd4', name: 'Rapport trimestriel T1', file_type: 'application/pdf', category: 'rapport', folder_id: null, is_deleted: false, supplier_name: null, amount: null, document_date: '2026-03-31', notes: 'Généré par TrackSmart Retail', file_size: 320000 },
 ];
 
 const FOLDER_SEED = [
@@ -295,9 +295,9 @@ function DashboardTab({ products, addProduct, deleteProduct, handleProductAction
       const sl = s==='expired'?'Expiré':s==='urgent'?'Urgent (J-3)':s==='soon'?`Bientôt (${days}j)`:'OK';
       return `<tr><td>${p.name}</td><td>${categoryKeys[p.category]||'—'}</td><td>${p.rayon?'Rayon '+p.rayon:'—'}</td><td>${p.expiration_date||'—'}</td><td>${days}j</td><td>${sl}</td></tr>`;
     }).join('');
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>TrackSmart Démo — Produits à surveiller</title>
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>TrackSmart Retail Démo — Produits à surveiller</title>
 <style>body{font-family:Arial,sans-serif;font-size:12px}h1{font-size:16px;margin-bottom:8px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left}th{background:#f5f5f5;font-weight:bold}</style></head><body>
-<h1>TrackSmart — Produits expirés / bientôt expirés (${format(new Date(), 'dd/MM/yyyy')})</h1>
+<h1>TrackSmart Retail — Produits expirés / bientôt expirés (${format(new Date(), 'dd/MM/yyyy')})</h1>
 <table><thead><tr><th>Produit</th><th>Catégorie</th><th>Rayon</th><th>Expiration</th><th>Jours</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
     const w = window.open('', '_blank'); w.document.write(html); w.document.close(); w.print();
   };

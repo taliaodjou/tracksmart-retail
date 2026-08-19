@@ -13,13 +13,13 @@ Deno.serve(async (req) => {
 
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: adminEmail,
-      subject: `📬 TrackSmart — Nouveau message de ${name}`,
+      subject: `📬 TrackSmart Retail — Nouveau message de ${name}`,
       body: `<!DOCTYPE html>
 <html lang="fr">
 <body style="margin:0;padding:0;font-family:sans-serif;background:#f5f5f5;">
   <div style="max-width:560px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;">
     <div style="background:#0f0f0f;padding:24px 32px;">
-      <span style="color:#C9A64C;font-weight:800;">TrackSmart</span>
+      <span style="color:#C9A64C;font-weight:800;">TrackSmart Retail</span>
       <span style="color:rgba(255,255,255,0.4);font-size:13px;margin-left:8px;">Retail</span>
     </div>
     <div style="padding:32px;">

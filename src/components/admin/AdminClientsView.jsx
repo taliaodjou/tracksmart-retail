@@ -85,7 +85,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
             <table cellpadding="0" cellspacing="0">
               <tr>
                 <td style="background:#C9A64C;border-radius:10px;padding:8px 14px;display:inline-block;">
-                  <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart</span>
+                  <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart Retail</span>
                 </td>
                 <td style="padding-left:14px;color:rgba(255,255,255,0.35);font-size:11px;">by TNO Studio</td>
               </tr>
@@ -104,7 +104,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
         <!-- Footer -->
         <tr>
           <td style="background:#f9f9f7;border-top:1px solid #eeeeee;padding:24px 40px;text-align:center;">
-            <p style="margin:0;font-size:12px;color:#999999;">© ${new Date().getFullYear()} TNO Studio · TrackSmart</p>
+            <p style="margin:0;font-size:12px;color:#999999;">© ${new Date().getFullYear()} TNO Studio · TrackSmart Retail</p>
             <p style="margin:6px 0 0;font-size:12px;color:#bbbbbb;">support@tracksmart.com</p>
           </td>
         </tr>
@@ -134,7 +134,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
           '🎉 Votre abonnement est activé',
           '#10b981',
           `<p style="margin:0 0 16px;font-size:15px;color:#444444;line-height:1.7;">Bonjour <strong>${shopName}</strong>,</p>
-           <p style="margin:0 0 20px;font-size:15px;color:#444444;line-height:1.7;">Votre abonnement <strong>TrackSmart</strong> a été activé avec succès. Vous avez désormais accès à l'ensemble des fonctionnalités de votre tableau de bord.</p>
+           <p style="margin:0 0 20px;font-size:15px;color:#444444;line-height:1.7;">Votre abonnement <strong>TrackSmart Retail</strong> a été activé avec succès. Vous avez désormais accès à l'ensemble des fonctionnalités de votre tableau de bord.</p>
            <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
              <tr><td style="background:#10b981;border-radius:10px;padding:12px 28px;">
                <a href="https://tracksmart.base44.app/dashboard" style="color:#ffffff;font-weight:700;font-size:14px;text-decoration:none;">Accéder à mon tableau de bord →</a>
@@ -147,14 +147,14 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
           '⚠️ Accès suspendu',
           '#ef4444',
           `<p style="margin:0 0 16px;font-size:15px;color:#444444;line-height:1.7;">Bonjour <strong>${shopName}</strong>,</p>
-           <p style="margin:0 0 20px;font-size:15px;color:#444444;line-height:1.7;">Votre accès <strong>TrackSmart</strong> a été temporairement suspendu. Pour renouveler votre abonnement et retrouver l'accès à vos données, veuillez nous contacter.</p>
+           <p style="margin:0 0 20px;font-size:15px;color:#444444;line-height:1.7;">Votre accès <strong>TrackSmart Retail</strong> a été temporairement suspendu. Pour renouveler votre abonnement et retrouver l'accès à vos données, veuillez nous contacter.</p>
            <p style="margin:0;font-size:14px;color:#444444;">📧 <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;">support@tracksmart.com</a></p>`,
           u.id
         );
 
     await base44.integrations.Core.SendEmail({
       to: u.email,
-      subject: newStatus === 'active' ? 'TrackSmart — Abonnement activé 🎉' : 'TrackSmart — Accès suspendu',
+      subject: newStatus === 'active' ? 'TrackSmart Retail — Abonnement activé 🎉' : 'TrackSmart Retail — Accès suspendu',
       body,
     });
     toast.success(newStatus === 'active' ? 'Paiement confirmé — accès réactivé pour 30 jours' : 'Client désactivé');
@@ -176,7 +176,7 @@ export default function AdminClientsView({ selectedClientId, onSelectClient }) {
     );
     await base44.integrations.Core.SendEmail({
       to: u.email,
-      subject: 'TrackSmart — Message de votre gestionnaire',
+      subject: 'TrackSmart Retail — Message de votre gestionnaire',
       body,
     });
     toast.success('Email envoyé');

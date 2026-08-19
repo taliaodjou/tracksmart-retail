@@ -101,7 +101,7 @@ function generateOrderPDFContent(supplier, items, user, orderNumber) {
   </table>
 
   <div class="footer">
-    <p>Bon de commande généré automatiquement par TrackSmart · ${today}</p>
+    <p>Bon de commande généré automatiquement par TrackSmart Retail · ${today}</p>
     <p style="margin-top:4px">support@tracksmart.com</p>
   </div>
 </body>
@@ -285,7 +285,7 @@ export default function Orders() {
     setSending(true);
     logActivity(user, 'order_created', `${user.full_name || user.email} a créé un bon de commande #${orderNumber} (${orderItems.length} produits) pour ${supplier.name || supplier.email}`);
     const today = format(new Date(), 'dd/MM/yyyy');
-    const shopName = user?.shop_name || user?.full_name || 'TrackSmart';
+    const shopName = user?.shop_name || user?.full_name || 'TrackSmart Retail';
     const totalQty = orderItems.reduce((s, i) => s + (parseInt(i.quantity) || 1), 0);
 
     const productRows = orderItems.map(it => `
@@ -321,7 +321,7 @@ export default function Orders() {
                   <table cellpadding="0" cellspacing="0">
                     <tr>
                       <td style="background:#C9A64C;border-radius:10px;padding:8px 16px;">
-                        <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart</span>
+                        <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart Retail</span>
                         <span style="color:rgba(0,0,0,0.35);font-size:11px;font-weight:500;margin-left:6px;">Retail</span>
                       </td>
                     </tr>

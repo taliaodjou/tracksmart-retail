@@ -40,7 +40,7 @@ export default function OnboardingModal({ user, onComplete }) {
             <Store className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-foreground">Bienvenue sur TrackSmart</h2>
+            <h2 className="text-xl font-bold text-foreground">Bienvenue sur TrackSmart Retail</h2>
             <p className="text-sm text-muted-foreground">Configurez votre espace en quelques secondes</p>
           </div>
         </div>

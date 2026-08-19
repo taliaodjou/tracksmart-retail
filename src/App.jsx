@@ -44,7 +44,7 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, user, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // Force light mode always — TrackSmart uses fixed light theme
+  // Force light mode always — TrackSmart Retail uses fixed light theme
   useEffect(() => {
     document.documentElement.classList.remove('dark');
     document.documentElement.style.colorScheme = 'light';

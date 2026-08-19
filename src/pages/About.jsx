@@ -13,7 +13,7 @@ export default function About() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-white text-sm font-bold">TS</span>
             </div>
-            TrackSmart
+            TrackSmart Retail
           </Link>
           <Link to="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />

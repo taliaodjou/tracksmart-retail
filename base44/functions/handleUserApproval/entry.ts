@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
         <tr><td style="background:#111111;padding:28px 40px;">
           <table cellpadding="0" cellspacing="0"><tr>
             <td style="background:#C9A64C;border-radius:10px;padding:8px 16px;">
-              <span style="color:#000000;font-weight:800;font-size:15px;">TrackSmart</span>
+              <span style="color:#000000;font-weight:800;font-size:15px;">TrackSmart Retail</span>
               <span style="color:rgba(0,0,0,0.35);font-size:11px;margin-left:6px;">Retail</span>
             </td>
           </tr></table>
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
         <tr><td style="height:3px;background:linear-gradient(90deg,#16a34a,#16a34aaa);"></td></tr>
         <tr><td style="padding:36px 40px 0;">
           <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#16a34a;letter-spacing:0.5px;text-transform:uppercase;">✓ Accès confirmé</p>
-          <h1 style="margin:0 0 20px;font-size:24px;font-weight:800;color:#111111;">Bienvenue sur TrackSmart ! 🎉</h1>
+          <h1 style="margin:0 0 20px;font-size:24px;font-weight:800;color:#111111;">Bienvenue sur TrackSmart Retail ! 🎉</h1>
           <p style="margin:0 0 20px;font-size:15px;color:#555555;line-height:1.7;">
             Bonjour <strong>${targetUser.full_name || targetUser.email}</strong>,<br/><br/>
             Bonne nouvelle ! Votre accès à <strong>TrackSmart Retail</strong> a été <strong style="color:#16a34a;">validé</strong>. Vous pouvez dès maintenant vous connecter et commencer à gérer vos produits.
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
 
         await base44.integrations.Core.SendEmail({
           to: targetUser.email,
-          subject: '✓ TrackSmart — Votre accès a été approuvé !',
+          subject: '✓ TrackSmart Retail — Votre accès a été approuvé !',
           body: emailHtml,
         });
       }
@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
         <tr><td style="background:#111111;padding:28px 40px;">
           <table cellpadding="0" cellspacing="0"><tr>
             <td style="background:#C9A64C;border-radius:10px;padding:8px 16px;">
-              <span style="color:#000000;font-weight:800;font-size:15px;">TrackSmart</span>
+              <span style="color:#000000;font-weight:800;font-size:15px;">TrackSmart Retail</span>
               <span style="color:rgba(0,0,0,0.35);font-size:11px;margin-left:6px;">Retail</span>
             </td>
           </tr></table>
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
           <h1 style="margin:0 0 20px;font-size:24px;font-weight:800;color:#111111;">Demande non approuvée</h1>
           <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
             Bonjour <strong>${targetUser.full_name || targetUser.email}</strong>,<br/><br/>
-            Votre demande d'accès à TrackSmart n'a pas pu être approuvée pour le moment. Pour toute question, contactez-nous directement.
+            Votre demande d'accès à TrackSmart Retail n'a pas pu être approuvée pour le moment. Pour toute question, contactez-nous directement.
           </p>
           <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
             <tr><td style="background:#111111;border-radius:12px;padding:14px 32px;">
@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
 
         await base44.integrations.Core.SendEmail({
           to: targetUser.email,
-          subject: 'TrackSmart — Demande d\'accès non approuvée',
+          subject: 'TrackSmart Retail — Demande d\'accès non approuvée',
           body: emailHtml,
         });
       }

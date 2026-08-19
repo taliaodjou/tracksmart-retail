@@ -319,7 +319,7 @@ export default function ImportModal({ onClose, onImported }) {
               <div className="flex items-center justify-between bg-secondary/50 rounded-xl p-4">
                 <div>
                   <p className="text-sm font-medium">{isFr ? 'Télécharger le modèle CSV' : 'Download CSV template'}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{isFr ? 'Structure officielle TrackSmart' : 'Official TrackSmart structure'}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{isFr ? 'Structure officielle TrackSmart Retail' : 'Official TrackSmart Retail structure'}</p>
                 </div>
                 <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={downloadTemplate}>
                   <Download className="w-4 h-4" />{isFr ? 'Modèle' : 'Template'}

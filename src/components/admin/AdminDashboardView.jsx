@@ -42,7 +42,7 @@ export default function AdminDashboardView({ onNavigate, onSelectClient }) {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Dashboard Admin</h1>
-        <p className="text-white/40 text-sm mt-1">Vue d'ensemble de tous les clients TrackSmart</p>
+        <p className="text-white/40 text-sm mt-1">Vue d'ensemble de tous les clients TrackSmart Retail</p>
       </div>
 
       {/* Stats grid */}

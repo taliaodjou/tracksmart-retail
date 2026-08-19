@@ -89,7 +89,7 @@ export default function AdminPinGate({ userEmail, children }) {
           </button>
         </form>
 
-        <p className="text-center text-white/20 text-xs mt-8">TrackSmart · TNO Studio</p>
+        <p className="text-center text-white/20 text-xs mt-8">TrackSmart Retail · TNO Studio</p>
       </div>
     </div>
   );

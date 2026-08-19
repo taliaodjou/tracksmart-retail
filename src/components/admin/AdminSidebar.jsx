@@ -28,7 +28,7 @@ export default function AdminSidebar({ activeSection, onNavigate }) {
         </div>
         {!collapsed && (
           <div>
-            <div className="font-bold text-white text-sm leading-tight tracking-tight">TrackSmart</div>
+            <div className="font-bold text-white text-sm leading-tight tracking-tight">TrackSmart Retail</div>
             <div className="text-[10px] text-white/40 tracking-widest uppercase">TNO Studio</div>
           </div>
         )}
@@ -100,7 +100,7 @@ export default function AdminSidebar({ activeSection, onNavigate }) {
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
             <Hourglass className="w-4 h-4 text-black" />
           </div>
-          <span className="font-bold text-white text-sm">TrackSmart <span className="text-white/40 font-normal text-xs">Admin</span></span>
+          <span className="font-bold text-white text-sm">TrackSmart Retail <span className="text-white/40 font-normal text-xs">Admin</span></span>
         </div>
         <button onClick={() => setMobileOpen(o => !o)} className="text-white/60 hover:text-white">
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

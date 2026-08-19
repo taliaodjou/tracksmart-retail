@@ -61,10 +61,10 @@ export default function Admin() {
     // Send email
     await base44.integrations.Core.SendEmail({
       to: u.email,
-      subject: 'TrackSmart — ' + (newStatus === 'active' ? 'Abonnement activé' : 'Accès suspendu'),
+      subject: 'TrackSmart Retail — ' + (newStatus === 'active' ? 'Abonnement activé' : 'Accès suspendu'),
       body: newStatus === 'active'
-        ? 'Votre abonnement TrackSmart a été activé. Vous pouvez maintenant accéder à votre tableau de bord.'
-        : 'Votre accès TrackSmart est suspendu. Veuillez contacter l\'administrateur pour renouveler votre abonnement.',
+        ? 'Votre abonnement TrackSmart Retail a été activé. Vous pouvez maintenant accéder à votre tableau de bord.'
+        : 'Votre accès TrackSmart Retail est suspendu. Veuillez contacter l\'administrateur pour renouveler votre abonnement.',
     });
 
     toast.success(newStatus === 'active' ? t('admin_user_activated') : t('admin_user_deactivated'));

@@ -241,7 +241,7 @@ ${insights.length > 0 ? `
 
 <!-- FOOTER -->
 <div style="background:${DARK};padding:20px 40px;display:flex;justify-content:space-between;align-items:center;margin-top:24px;">
-  <div style="color:#6b7280;font-size:11px;">Document généré automatiquement par TrackSmart • Confidentiel</div>
+  <div style="color:#6b7280;font-size:11px;">Document généré automatiquement par TrackSmart Retail • Confidentiel</div>
   <div style="color:${GOLD};font-size:11px;font-weight:600;">${report.quarter_label} — ${report.shop_name || ''}</div>
 </div>
 

@@ -29,10 +29,10 @@ export default function AdminSubscriptionsView() {
     });
     await base44.integrations.Core.SendEmail({
       to: u.email,
-      subject: 'TrackSmart — ' + (newStatus === 'active' ? 'Abonnement activé' : 'Accès suspendu'),
+      subject: 'TrackSmart Retail — ' + (newStatus === 'active' ? 'Abonnement activé' : 'Accès suspendu'),
       body: newStatus === 'active'
-        ? 'Votre abonnement TrackSmart a été activé.'
-        : "Votre accès TrackSmart est suspendu. Contactez TNO Studio.",
+        ? 'Votre abonnement TrackSmart Retail a été activé.'
+        : "Votre accès TrackSmart Retail est suspendu. Contactez TNO Studio.",
     });
     toast.success(newStatus === 'active' ? 'Abonnement activé' : 'Abonnement désactivé');
   };

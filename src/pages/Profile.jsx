@@ -102,8 +102,8 @@ export default function Profile() {
           </h2>
           <p className="text-xs text-muted-foreground mb-4">
             {user?.email_unsubscribed
-              ? (lang === 'fr' ? 'Vous ne recevez plus les emails de notification TrackSmart.' : 'You are no longer receiving TrackSmart notification emails.')
-              : (lang === 'fr' ? 'Vous recevez les emails de notification TrackSmart.' : 'You are receiving TrackSmart notification emails.')
+              ? (lang === 'fr' ? 'Vous ne recevez plus les emails de notification TrackSmart Retail.' : 'You are no longer receiving TrackSmart Retail notification emails.')
+              : (lang === 'fr' ? 'Vous recevez les emails de notification TrackSmart Retail.' : 'You are receiving TrackSmart Retail notification emails.')
             }
           </p>
           <button

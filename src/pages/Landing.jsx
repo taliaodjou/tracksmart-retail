@@ -255,7 +255,7 @@ export default function Landing() {
                 Trop de produits suivis à la main, trop de pertes invisibles.
               </h2>
               <p className="text-muted-foreground text-sm sm:text-base leading-relaxed mb-6">
-                TrackSmart remplace les carnets, les oublis et les contrôles dispersés par une vue claire de vos DLC, alertes, documents et pertes.
+                TrackSmart Retail remplace les carnets, les oublis et les contrôles dispersés par une vue claire de vos DLC, alertes, documents et pertes.
               </p>
               <Link to="/offres" className="inline-flex">
                 <Button className="rounded-xl px-5 h-11 font-semibold gap-2 shadow-md">

@@ -54,7 +54,7 @@ function buildEmailHtml({ title, accentColor, bodyContent, userId = '' }) {
             <table cellpadding="0" cellspacing="0">
               <tr>
                 <td style="background:#C9A64C;border-radius:10px;padding:8px 16px;">
-                  <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart</span>
+                  <span style="color:#000000;font-weight:800;font-size:15px;letter-spacing:0.5px;">TrackSmart Retail</span>
                   <span style="color:rgba(0,0,0,0.35);font-size:11px;font-weight:500;margin-left:6px;">Retail</span>
                 </td>
                 <td style="padding-left:16px;">
@@ -127,8 +127,8 @@ function subscriptionReminderEmail({ shopName, daysLeft, renewalDate, userId, ur
 
     <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
       ${isUrgent
-        ? 'Votre abonnement TrackSmart expire très bientôt. Sans renouvellement, votre accès à l\'inventaire, aux rapports et aux alertes sera bloqué.'
-        : 'Votre abonnement TrackSmart arrive bientôt à échéance. Pensez à anticiper le renouvellement pour éviter toute interruption de service.'}
+        ? 'Votre abonnement TrackSmart Retail expire très bientôt. Sans renouvellement, votre accès à l\'inventaire, aux rapports et aux alertes sera bloqué.'
+        : 'Votre abonnement TrackSmart Retail arrive bientôt à échéance. Pensez à anticiper le renouvellement pour éviter toute interruption de service.'}
     </p>
 
     <!-- CTA -->
@@ -162,7 +162,7 @@ function subscriptionReminderEmail({ shopName, daysLeft, renewalDate, userId, ur
       Une question ? Contactez-nous à <a href="mailto:support@tracksmart.com" style="color:#C9A64C;font-weight:600;text-decoration:none;">support@tracksmart.com</a>
     </p>`;
 
-  return buildEmailHtml({ title: 'Rappel abonnement TrackSmart', accentColor, bodyContent, userId });
+  return buildEmailHtml({ title: 'Rappel abonnement TrackSmart Retail', accentColor, bodyContent, userId });
 }
 
 export async function checkAndSendReminders(user, products) {
@@ -197,10 +197,10 @@ export async function checkAndSendReminders(user, products) {
 
     if (subType) {
       const plainMessage = urgency === 'urgent'
-        ? `Votre abonnement TrackSmart expire dans ${daysLeft} jour(s). Sans renouvellement, votre accès sera bloqué.`
+        ? `Votre abonnement TrackSmart Retail expire dans ${daysLeft} jour(s). Sans renouvellement, votre accès sera bloqué.`
         : daysLeft <= 7
-          ? `Rappel : votre abonnement TrackSmart expire dans ${daysLeft} jours. Merci d'anticiper le renouvellement.`
-          : `Votre abonnement TrackSmart arrive bientôt à échéance (${daysLeft} jours). Merci de prévoir le renouvellement.`;
+          ? `Rappel : votre abonnement TrackSmart Retail expire dans ${daysLeft} jours. Merci d'anticiper le renouvellement.`
+          : `Votre abonnement TrackSmart Retail arrive bientôt à échéance (${daysLeft} jours). Merci de prévoir le renouvellement.`;
 
       await base44.entities.Notification.create({
         user_email: user.email,
@@ -215,8 +215,8 @@ export async function checkAndSendReminders(user, products) {
       await base44.integrations.Core.SendEmail({
         to: user.email,
         subject: urgency === 'urgent'
-          ? `⚠️ TrackSmart — Renouvellement dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`
-          : `TrackSmart — Rappel abonnement (${daysLeft} jours restants)`,
+          ? `⚠️ TrackSmart Retail — Renouvellement dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`
+          : `TrackSmart Retail — Rappel abonnement (${daysLeft} jours restants)`,
         body: htmlBody,
       });
       const tag = subType === 'reminder_3d' ? 'sub_3d' : subType === 'reminder_7d' ? 'sub_7d' : 'sub_14d';
@@ -308,7 +308,7 @@ export async function checkAndSendWeeklyReport(user, products) {
   };
 
   const weeklyHtmlBody = buildEmailHtml({
-    title: 'Rapport hebdomadaire TrackSmart',
+    title: 'Rapport hebdomadaire TrackSmart Retail',
     accentColor: '#C9A64C',
     userId: user.id,
     bodyContent: `
@@ -364,7 +364,7 @@ export async function checkAndSendWeeklyReport(user, products) {
 
   await base44.integrations.Core.SendEmail({
     to: user.email,
-    subject: `TrackSmart — Rapport hebdomadaire · ${shopName}`,
+    subject: `TrackSmart Retail — Rapport hebdomadaire · ${shopName}`,
     body: weeklyHtmlBody,
   });
 

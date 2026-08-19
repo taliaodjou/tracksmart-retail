@@ -561,7 +561,7 @@ const uiTextTranslations = {
   'Support réactif': 'Responsive support',
   'de nos clients réduisent leurs pertes produits': 'of our clients reduce product losses',
   'Trop de produits suivis à la main, trop de pertes invisibles.': 'Too many products tracked manually, too many invisible losses.',
-  'TrackSmart remplace les carnets, les oublis et les contrôles dispersés par une vue claire de vos DLC, alertes, documents et pertes.': 'TrackSmart replaces notebooks, missed checks and scattered controls with a clear view of your expiry dates, alerts, documents and losses.',
+  'TrackSmart Retail remplace les carnets, les oublis et les contrôles dispersés par une vue claire de vos DLC, alertes, documents et pertes.': 'TrackSmart Retail replaces notebooks, missed checks and scattered controls with a clear view of your expiry dates, alerts, documents and losses.',
   'Découvrir les offres': 'View plans',
   'Marge protégée': 'Protected margin',
   'Repérez les produits à risque avant qu’ils ne deviennent une perte.': 'Spot at-risk products before they become a loss.',

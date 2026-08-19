@@ -12,7 +12,7 @@
         "user"
       ],
       "default": "user",
-      "description": "Platform role. 'admin'=TrackSmart admin, 'owner'=store owner, 'manager'=store manager, 'employee'=store employee, 'user'=legacy"
+      "description": "Platform role. 'admin'=TrackSmart Retail admin, 'owner'=store owner, 'manager'=store manager, 'employee'=store employee, 'user'=legacy"
     },
     "store_owner_email": {
       "type": "string",

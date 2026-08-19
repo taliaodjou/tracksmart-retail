@@ -10,7 +10,7 @@ export default function AdminSettingsView() {
     <div className="p-6 lg:p-8 pt-16 lg:pt-8 space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-white">Paramètres Admin</h1>
-        <p className="text-white/40 text-sm mt-1">Configuration du portail TrackSmart</p>
+        <p className="text-white/40 text-sm mt-1">Configuration du portail TrackSmart Retail</p>
       </div>
 
       {/* Company info */}
@@ -21,7 +21,7 @@ export default function AdminSettingsView() {
             <Hourglass className="w-7 h-7 text-primary" />
           </div>
           <div>
-            <div className="text-white font-bold text-lg">TrackSmart</div>
+            <div className="text-white font-bold text-lg">TrackSmart Retail</div>
             <div className="text-white/40 text-sm">by TNO Studio</div>
             <div className="text-white/30 text-xs mt-0.5">Gestion des dates de péremption</div>
           </div>
@@ -31,7 +31,7 @@ export default function AdminSettingsView() {
           {[
             { iconName: 'building', label: 'Société', value: 'TNO Studio' },
             { iconName: 'mail', label: 'Contact', value: 'contact@tno-studio.com' },
-            { iconName: 'globe', label: 'Application', value: 'TrackSmart v2.0' },
+            { iconName: 'globe', label: 'Application', value: 'TrackSmart Retail v2.0' },
           ].map(({ iconName, label, value }) => {
             const IconMap = { building: Building2, mail: Mail, globe: Globe };
             const IconComp = IconMap[iconName];

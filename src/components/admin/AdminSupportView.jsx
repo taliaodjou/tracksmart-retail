@@ -14,9 +14,9 @@ export default function AdminSupportView() {
   const clients = users.filter(u => u.role !== 'admin');
 
   const templates = {
-    support: `Bonjour,\n\nMerci de nous avoir contacté. Notre équipe TNO Studio est à votre disposition.\n\nN'hésitez pas à nous décrire votre problème en détail.\n\nCordialement,\nL'équipe TrackSmart`,
-    payment: `Bonjour,\n\nNous vous rappelons que votre abonnement TrackSmart nécessite un renouvellement de paiement.\n\nMerci de nous contacter pour régulariser votre situation et maintenir l'accès à votre tableau de bord.\n\nCordialement,\nTNO Studio`,
-    welcome: `Bienvenue sur TrackSmart !\n\nNous sommes ravis de vous accueillir parmi nos clients. Votre boutique est maintenant configurée et votre abonnement est actif.\n\nPour toute question, contactez notre équipe TNO Studio.\n\nBonne utilisation !`,
+    support: `Bonjour,\n\nMerci de nous avoir contacté. Notre équipe TNO Studio est à votre disposition.\n\nN'hésitez pas à nous décrire votre problème en détail.\n\nCordialement,\nL'équipe TrackSmart Retail`,
+    payment: `Bonjour,\n\nNous vous rappelons que votre abonnement TrackSmart Retail nécessite un renouvellement de paiement.\n\nMerci de nous contacter pour régulariser votre situation et maintenir l'accès à votre tableau de bord.\n\nCordialement,\nTNO Studio`,
+    welcome: `Bienvenue sur TrackSmart Retail !\n\nNous sommes ravis de vous accueillir parmi nos clients. Votre boutique est maintenant configurée et votre abonnement est actif.\n\nPour toute question, contactez notre équipe TNO Studio.\n\nBonne utilisation !`,
   };
 
   const handleSend = async () => {
@@ -26,7 +26,7 @@ export default function AdminSupportView() {
     setSending(true);
     await base44.integrations.Core.SendEmail({
       to: u.email,
-      subject: msgType === 'payment' ? 'TrackSmart — Rappel de paiement' : msgType === 'welcome' ? 'Bienvenue sur TrackSmart !' : 'TrackSmart — Message de support',
+      subject: msgType === 'payment' ? 'TrackSmart Retail — Rappel de paiement' : msgType === 'welcome' ? 'Bienvenue sur TrackSmart Retail !' : 'TrackSmart Retail — Message de support',
       body: message,
     });
     toast.success('Message envoyé à ' + (u.shop_name || u.email));
@@ -40,7 +40,7 @@ export default function AdminSupportView() {
     for (const u of clients) {
       await base44.integrations.Core.SendEmail({
         to: u.email,
-        subject: 'TrackSmart — Annonce importante',
+        subject: 'TrackSmart Retail — Annonce importante',
         body: message,
       });
     }
@@ -150,20 +150,20 @@ export default function AdminSupportView() {
             { label: 'Rappel paiement (inactifs)', action: async () => {
               const inactive = clients.filter(u => u.subscription_status !== 'active');
               for (const u of inactive) {
-                await base44.integrations.Core.SendEmail({ to: u.email, subject: 'TrackSmart — Rappel de paiement', body: templates.payment });
+                await base44.integrations.Core.SendEmail({ to: u.email, subject: 'TrackSmart Retail — Rappel de paiement', body: templates.payment });
               }
               toast.success(`Rappels envoyés à ${inactive.length} clients inactifs`);
             }, color: 'text-red-400 border-red-500/20 hover:bg-red-500/10' },
             { label: 'Message de bienvenue (actifs)', action: async () => {
               const active = clients.filter(u => u.subscription_status === 'active');
               for (const u of active) {
-                await base44.integrations.Core.SendEmail({ to: u.email, subject: 'Bienvenue sur TrackSmart !', body: templates.welcome });
+                await base44.integrations.Core.SendEmail({ to: u.email, subject: 'Bienvenue sur TrackSmart Retail !', body: templates.welcome });
               }
               toast.success(`Messages envoyés à ${active.length} clients`);
             }, color: 'text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10' },
             { label: 'Rapport de test (moi)', action: async () => {
               const me = users.find(u => u.role === 'admin');
-              if (me) { await base44.integrations.Core.SendEmail({ to: me.email, subject: 'TrackSmart — Test email', body: 'Ceci est un test de l\'envoi d\'email depuis le portail admin.' }); toast.success('Email de test envoyé'); }
+              if (me) { await base44.integrations.Core.SendEmail({ to: me.email, subject: 'TrackSmart Retail — Test email', body: 'Ceci est un test de l\'envoi d\'email depuis le portail admin.' }); toast.success('Email de test envoyé'); }
             }, color: 'text-primary border-primary/20 hover:bg-primary/10' },
           ].map((a, i) => (
             <button key={i} onClick={a.action} className={`p-4 rounded-xl border text-sm font-medium text-left transition-all ${a.color}`}>

@@ -80,7 +80,7 @@ export default function AccountingSettings({ user, onSaved }) {
       {open && (
       <div className="px-6 pb-6 border-t border-border/30">
         <p className="text-xs text-muted-foreground mt-4 mb-5 leading-relaxed">
-          Les paramètres comptables vous permettent de définir le début de votre trimestre fiscal et la manière dont TrackSmart vous envoie vos rapports trimestriels. Ces rapports récapitulent les pertes, les produits jetés et les tendances sur la période pour vous aider à mieux gérer votre stock et votre comptabilité.
+          Les paramètres comptables vous permettent de définir le début de votre trimestre fiscal et la manière dont TrackSmart Retail vous envoie vos rapports trimestriels. Ces rapports récapitulent les pertes, les produits jetés et les tendances sur la période pour vous aider à mieux gérer votre stock et votre comptabilité.
         </p>
         <form onSubmit={handleSave} className="space-y-5">
         {/* Quarter start */}

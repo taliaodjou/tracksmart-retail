@@ -33,7 +33,7 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
   const handleSendEmail = async () => {
     if (!emailMsg.trim()) return;
     setSending(true);
-    await base44.integrations.Core.SendEmail({ to: client.email, subject: 'TrackSmart — Message de votre gestionnaire', body: emailMsg });
+    await base44.integrations.Core.SendEmail({ to: client.email, subject: 'TrackSmart Retail — Message de votre gestionnaire', body: emailMsg });
     toast.success('Email envoyé');
     setEmailMsg('');
     setSending(false);
@@ -47,7 +47,7 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rappel de paiement TrackSmart</title>
+  <title>Rappel de paiement TrackSmart Retail</title>
 </head>
 <body style="margin:0;padding:0;background:#f4f1e8;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1e8;padding:36px 14px;">
@@ -59,7 +59,7 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td>
-                    <div style="display:inline-block;background:#C9A646;color:#111111;font-weight:800;font-size:16px;letter-spacing:.3px;padding:10px 14px;border-radius:12px;">TrackSmart</div>
+                    <div style="display:inline-block;background:#C9A646;color:#111111;font-weight:800;font-size:16px;letter-spacing:.3px;padding:10px 14px;border-radius:12px;">TrackSmart Retail</div>
                     <div style="color:rgba(255,255,255,.55);font-size:12px;margin-top:8px;">Gestion intelligente de votre commerce</div>
                   </td>
                   <td align="right" style="color:#C9A646;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Rappel paiement</td>
@@ -81,7 +81,7 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
               <table cellpadding="0" cellspacing="0" style="margin:26px 0 8px;">
                 <tr>
                   <td style="background:#C9A646;border-radius:12px;padding:13px 24px;">
-                    <a href="mailto:support@tracksmart.com" style="color:#111111;text-decoration:none;font-weight:800;font-size:14px;">Contacter TrackSmart</a>
+                    <a href="mailto:support@tracksmart.com" style="color:#111111;text-decoration:none;font-weight:800;font-size:14px;">Contacter TrackSmart Retail</a>
                   </td>
                 </tr>
               </table>
@@ -104,7 +104,7 @@ export default function ClientDetailView({ client, products, onBack, onToggle })
     try {
       await base44.integrations.Core.SendEmail({
         to: client.email,
-        subject: 'TrackSmart — Rappel de renouvellement de votre abonnement',
+        subject: 'TrackSmart Retail — Rappel de renouvellement de votre abonnement',
         body,
       });
       toast.success('Rappel de paiement envoyé');

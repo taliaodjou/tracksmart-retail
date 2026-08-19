@@ -45,7 +45,7 @@ export default function EmailPreferences() {
         {/* Header */}
         <div className="bg-[#111111] px-8 py-6 flex items-center gap-3">
           <div className="bg-primary rounded-lg px-3 py-1.5">
-            <span className="text-black font-bold text-sm">TrackSmart</span>
+            <span className="text-black font-bold text-sm">TrackSmart Retail</span>
           </div>
           <span className="text-white/30 text-xs">by TNO Studio</span>
         </div>
@@ -64,7 +64,7 @@ export default function EmailPreferences() {
               <div>
                 <h2 className="text-xl font-bold text-foreground mb-2">Désabonnement confirmé</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Vous ne recevrez plus les emails de notification TrackSmart.
+                  Vous ne recevrez plus les emails de notification TrackSmart Retail.
                 </p>
               </div>
               <div className="bg-secondary/50 rounded-xl p-4">
@@ -85,7 +85,7 @@ export default function EmailPreferences() {
               <div>
                 <h2 className="text-xl font-bold text-foreground mb-2">Réabonnement confirmé !</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Vous recevrez à nouveau les emails de notification TrackSmart.
+                  Vous recevrez à nouveau les emails de notification TrackSmart Retail.
                 </p>
               </div>
               <a
@@ -109,7 +109,7 @@ export default function EmailPreferences() {
         </div>
 
         <div className="border-t border-border/30 px-8 py-4 text-center">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} TNO Studio · TrackSmart</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} TNO Studio · TrackSmart Retail</p>
         </div>
       </div>
     </div>

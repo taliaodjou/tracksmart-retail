@@ -14,7 +14,7 @@ const faq = [
   { q: 'Est-ce que je peux scanner les produits ?', a: 'Oui. L’application permet d’ajouter plus rapidement des produits grâce au scan code-barres, puis de compléter les informations utiles comme la DLC, le rayon et le prix.' },
   { q: 'Comment fonctionnent les alertes DLC ?', a: 'Les produits proches de leur date limite sont mis en avant pour vous aider à agir avant expiration et réduire les pertes.' },
   { q: 'Puis-je suivre mes pertes ?', a: 'Oui. Les produits jetés peuvent être suivis avec quantité et prix afin d’obtenir une vision claire des pertes en CHF.' },
-  { q: 'Est-ce que je peux générer des rapports ?', a: 'Oui. TrackSmart permet de produire des rapports et analyses utiles pour le suivi interne, la gestion et la comptabilité.' },
+  { q: 'Est-ce que je peux générer des rapports ?', a: 'Oui. TrackSmart Retail permet de produire des rapports et analyses utiles pour le suivi interne, la gestion et la comptabilité.' },
   { q: 'Dois-je faire l’installation moi-même ?', a: 'Vous pouvez choisir un accompagnement personnalisé ou effectuer le setup vous-même avec l’offre Classic.' },
 ];
 
@@ -43,7 +43,7 @@ export default function Offers() {
               Choisissez le niveau de setup adapté à votre magasin.
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Vous pouvez être accompagné pour la mise en place complète de TrackSmart, ou configurer l’application vous-même avec un forfait unique.
+              Vous pouvez être accompagné pour la mise en place complète de TrackSmart Retail, ou configurer l’application vous-même avec un forfait unique.
             </p>
           </div>
         </section>
@@ -87,7 +87,7 @@ export default function Offers() {
                 <span className="text-lg mb-1 opacity-80">CHF</span>
               </div>
               <p className="opacity-80 leading-relaxed mb-6">
-                Un forfait unique pour les personnes qui souhaitent configurer elles-mêmes leur espace TrackSmart.
+                Un forfait unique pour les personnes qui souhaitent configurer elles-mêmes leur espace TrackSmart Retail.
               </p>
               <div className="space-y-3 mb-8 flex-1">
                 {['Accès à l’application', 'Configuration personnelle', 'Suivi DLC et alertes', 'Dashboard, analytics et rapports'].map((item) => (
