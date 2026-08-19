@@ -362,15 +362,15 @@ export default function Products() {
             <p className="text-sm text-muted-foreground mt-1">Liste complète de vos produits en stock</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
-            <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
-              <Layers className="w-4 h-4" />
-              Gérer mon stock
-            </Button>
             <Button onClick={() => setShowAddOptions(true)} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
             </Button>
+            <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
+              <Layers className="w-4 h-4" />
+              Gérer mon stock
+            </Button>
+            <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
         </div>
 
