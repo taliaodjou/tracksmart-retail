@@ -47,6 +47,10 @@ export default function ProductDetailModal({ product, onClose, onEdit }) {
   const imageUrl = product.image_url || product.photo_url || product.image_front_url;
   const barcode = product.barcode || product.ean || product.code_ean;
   const totalLoss = (product.quantity_thrown || 0) * (product.price_chf || 0);
+  const stockEntries = product.stock_entries || [];
+  const priorityEntry = stockEntries[0];
+  const secondaryEntries = stockEntries.slice(1);
+  const stockTotal = product.stock_total != null ? product.stock_total : null;
 
   return (
     <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -91,6 +95,30 @@ export default function ProductDetailModal({ product, onClose, onEdit }) {
               </div>
             </div>
           </div>
+
+          {stockTotal !== null && (
+            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-bold text-foreground">Stock total</span>
+                <span className="text-lg font-bold text-primary">{stockTotal} unités</span>
+              </div>
+              {priorityEntry && (
+                <div className="rounded-xl bg-white border border-border/50 px-3 py-2">
+                  <p className="text-xs font-semibold text-muted-foreground mb-1">Péremption prioritaire</p>
+                  <p className="text-sm font-bold text-foreground">{formatDate(priorityEntry.expiration_date)} <span className="text-primary">({priorityEntry.quantity_remaining} unités)</span></p>
+                </div>
+              )}
+              {secondaryEntries.length > 0 && (
+                <div className="space-y-1">
+                  {secondaryEntries.map((entry) => (
+                    <p key={entry.id} className="text-xs text-muted-foreground">
+                      + {entry.quantity_remaining} unités — DLC {formatDate(entry.expiration_date)}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="rounded-2xl border border-border/50 p-4">

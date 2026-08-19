@@ -21,7 +21,7 @@ const ACTION_KEYS = {
 
 const empty = {
   name: '', marque: '', etagere: '', category: '', rayon: '',
-  reception_date: '', expiration_date: '',
+  reception_date: '', expiration_date: '', quantity_received: '',
   action: '', order_date: '', quantity_thrown: '', price_chf: '',
 };
 
@@ -42,6 +42,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         rayon: editProduct.rayon || '',
         reception_date: editProduct.reception_date || '',
         expiration_date: editProduct.expiration_date || '',
+        quantity_received: '',
         action: editProduct.action || '',
         order_date: editProduct.order_date || '',
         quantity_thrown: editProduct.quantity_thrown ?? '',
@@ -60,6 +61,10 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!editProduct && ((Number(form.quantity_received) || 0) <= 0)) {
+      window.alert('Merci de renseigner une quantité supérieure à 0.');
+      return;
+    }
     if (isExpired && form.action === 'jeter' && ((Number(form.quantity_thrown) || 0) <= 0 || (Number(form.price_chf) || 0) <= 0)) {
       window.alert('Merci de renseigner une quantité jetée et un prix supérieurs à 0.');
       return;
@@ -68,6 +73,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
       name: form.name,
       expiration_date: form.expiration_date,
     };
+    if (!editProduct) data.quantity_received = Number(form.quantity_received);
     if (form.marque) data.marque = form.marque;
     if (form.etagere) data.etagere = form.etagere;
     if (form.category) data.category = form.category;
@@ -200,6 +206,13 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
           <Label className="text-xs">{t('form_reception_date')}</Label>
           <Input type="date" value={form.reception_date} onChange={set('reception_date')} className="h-8 text-sm" />
         </div>
+
+        {!editProduct && (
+          <div className="space-y-1">
+            <Label className="text-xs">Quantité reçue *</Label>
+            <Input required type="number" min="1" value={form.quantity_received} onChange={set('quantity_received')} placeholder="0" className="h-8 text-sm" />
+          </div>
+        )}
 
         {/* DLC */}
         <div className="space-y-1">

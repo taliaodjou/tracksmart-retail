@@ -15,6 +15,7 @@ const XlsIcon = () =>
 import { getProductStatus, hasActiveSubscription, categoryKeys, getStoreOwnerEmail, isDiscarded } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 import { logActivity } from '@/lib/activityLogger';
+import { addStockEntry, enrichProductsWithStock } from '@/lib/stockEntries';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
@@ -97,22 +98,40 @@ export default function Dashboard() {
     enabled: canAccess
   });
 
+  const { data: stockEntries = [] } = useQuery({
+    queryKey: ['stockEntries', storeOwnerEmail],
+    queryFn: () => base44.entities.Batch.filter({ store_owner_email: storeOwnerEmail }, 'expiration_date', 5000),
+    enabled: canAccess && !!storeOwnerEmail
+  });
+
+  const productsWithStock = useMemo(() => enrichProductsWithStock(products, stockEntries), [products, stockEntries]);
+
   useEffect(() => {
-    if (user && canAccess && products.length >= 0) {
-      checkAndSendReminders(user, products);
-      checkAndSendWeeklyReport(user, products);
+    if (user && canAccess && productsWithStock.length >= 0) {
+      checkAndSendReminders(user, productsWithStock);
+      checkAndSendWeeklyReport(user, productsWithStock);
     }
-  }, [user, products.length]);
+  }, [user, productsWithStock.length]);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const savedData = data.action === 'jeter'
-        ? { ...data, discarded: true, discarded_at: new Date().toISOString().split('T')[0] }
-        : data;
+      const stockQuantity = Number(data.quantity_received) || 0;
+      const productData = { ...data };
+      delete productData.quantity_received;
+      const savedData = productData.action === 'jeter'
+        ? { ...productData, discarded: true, discarded_at: new Date().toISOString().split('T')[0] }
+        : productData;
       const product = await base44.entities.Product.create({
         ...savedData,
         store_owner_email: storeOwnerEmail,
         added_by_name: user.full_name || user.email
+      });
+      await addStockEntry({
+        productId: product.id,
+        storeOwnerEmail,
+        expirationDate: data.expiration_date,
+        quantity: stockQuantity,
+        dateAdded: data.reception_date
       });
       logActivity(user, 'product_added', `${user.full_name || user.email} a ajouté le produit "${data.name}"`, {
         entity_id: product.id,
@@ -122,6 +141,7 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
       setShowForm(false);
       setEditProduct(null);
       setQuickAdd(null);
@@ -130,7 +150,9 @@ export default function Dashboard() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
+      const stockQuantity = Number(data.quantity_received) || 0;
       const savedData = { ...data };
+      delete savedData.quantity_received;
       if (data.action === 'jeter') {
         savedData.discarded = true;
         savedData.discarded_at = new Date().toISOString().split('T')[0];
@@ -138,6 +160,13 @@ export default function Dashboard() {
         savedData.discarded = false;
       }
       const product = await base44.entities.Product.update(id, savedData);
+      await addStockEntry({
+        productId: id,
+        storeOwnerEmail,
+        expirationDate: data.expiration_date,
+        quantity: stockQuantity,
+        dateAdded: data.reception_date
+      });
       const actionType = data.action === 'jeter' ? 'product_thrown' :
       data.action ? 'product_status_changed' :
       'product_edited';
@@ -149,6 +178,7 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
       setShowForm(false);
       setEditProduct(null);
     }
@@ -156,14 +186,18 @@ export default function Dashboard() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      const prod = products.find((p) => p.id === id);
+      const prod = productsWithStock.find((p) => p.id === id);
+      await base44.entities.Batch.deleteMany({ product_id: id });
       await base44.entities.Product.delete(id);
       logActivity(user, 'product_deleted', `${user.full_name || user.email} a supprimé "${prod?.name || 'un produit'}"`, {
         entity_id: id,
         entity_name: prod?.name
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+    }
   });
 
   const handleSave = (data) => {
@@ -241,10 +275,14 @@ export default function Dashboard() {
   };
 
   // ── Find duplicate by name + brand ──────────────────────
-  const findExistingProduct = (name, brand) => {
-    if (!name) return null;
+  const findExistingProduct = (name, brand, barcode) => {
     const normalize = (s) => (s || '').toLowerCase().trim();
-    return products.find((p) =>
+    if (barcode) {
+      const byBarcode = productsWithStock.find((p) => normalize(p.barcode) === normalize(barcode));
+      if (byBarcode) return byBarcode;
+    }
+    if (!name) return null;
+    return productsWithStock.find((p) =>
     normalize(p.name) === normalize(name) &&
     normalize(p.marque) === normalize(brand)
     ) || null;
@@ -260,7 +298,7 @@ export default function Dashboard() {
     // 1. Search local DB first
     const match = barcodeDB.find((b) => b.barcode === code);
     if (match) {
-      const existing = findExistingProduct(match.name, match.brand || match.marque);
+      const existing = findExistingProduct(match.name, match.brand || match.marque, code);
       setQuickAdd({ barcode: code, prefill: match, existingProduct: existing });
       return;
     }
@@ -271,7 +309,7 @@ export default function Dashboard() {
       const brand = p.brands || '';
       const rawCategory = matchCategory(p.categories_tags || []);
       const category = rawCategory || defaultCategory;
-      const existing = findExistingProduct(name, brand);
+      const existing = findExistingProduct(name, brand, code);
       setQuickAdd({
         barcode: code,
         prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
@@ -314,7 +352,7 @@ export default function Dashboard() {
         const name = item.title || '';
         const brand = item.brand || '';
         const category = matchCategory((item.category || '').toLowerCase().split(/[,/]/).map(s => s.trim()));
-        const existing = findExistingProduct(name, brand);
+        const existing = findExistingProduct(name, brand, code);
         setQuickAdd({
           barcode: code,
           prefill: { name, brand, category, image_url: item.images?.[0] || '' },
@@ -329,7 +367,7 @@ export default function Dashboard() {
   };
 
   // All products (including discarded) shown in stock list
-  const activeProducts = useMemo(() => products, [products]);
+  const activeProducts = useMemo(() => productsWithStock, [productsWithStock]);
 
   const filteredProducts = useMemo(() => activeProducts.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -353,9 +391,9 @@ export default function Dashboard() {
   filter(Boolean).length;
 
   const availableRayons = useMemo(() => {
-    return Array.from(new Set(products.map((product) => product.rayon).filter(Boolean)))
+    return Array.from(new Set(activeProducts.map((product) => product.rayon).filter(Boolean)))
       .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' }));
-  }, [products]);
+  }, [activeProducts]);
 
   if (!canAccess) {
     return (
@@ -372,7 +410,7 @@ export default function Dashboard() {
   { key: 'urgent', label: t('dash_filter_urgent') },
   { key: 'soon', label: t('dash_filter_soon') },
   { key: 'ok', label: t('dash_filter_ok') },
-  { key: 'archived', label: 'Archivé' }];
+  { key: 'archived', label: t('status_archived') }];
 
 
   return (

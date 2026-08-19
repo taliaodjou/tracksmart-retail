@@ -1,0 +1,101 @@
+{
+  "name": "Batch",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "Linked Product record id"
+    },
+    "store_owner_email": {
+      "type": "string",
+      "description": "Email of the store owner for team scoping"
+    },
+    "expiration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expiration date for this stock entry"
+    },
+    "quantity_received": {
+      "type": "number",
+      "description": "Initial quantity received"
+    },
+    "quantity_remaining": {
+      "type": "number",
+      "description": "Current remaining quantity"
+    },
+    "date_added": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the stock entered inventory"
+    }
+  },
+  "required": [
+    "product_id",
+    "store_owner_email",
+    "expiration_date",
+    "quantity_received",
+    "quantity_remaining"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

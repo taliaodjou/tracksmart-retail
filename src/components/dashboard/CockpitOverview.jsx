@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, TrendingDown, List, ClipboardCheck, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { getProductStatus, getDaysRemaining, isDiscarded, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
+import { expandProductsByStockDates } from '@/lib/stockEntries';
 
 const monthsFr = ['jan', 'fév', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sep', 'oct', 'nov', 'déc'];
 
@@ -32,7 +33,7 @@ export default function CockpitOverview({ products }) {
   }, [products]);
 
   const activeProducts = products.filter((product) => !isDiscarded(product));
-  const urgentProducts = activeProducts
+  const urgentProducts = expandProductsByStockDates(activeProducts)
     .filter((product) => ['expired', 'urgent'].includes(getProductStatus(product.expiration_date)))
     .sort((a, b) => new Date(a.expiration_date) - new Date(b.expiration_date))
     .slice(0, 4);

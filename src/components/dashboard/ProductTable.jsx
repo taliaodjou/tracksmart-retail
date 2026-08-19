@@ -85,6 +85,9 @@ function InlineEditRow({ product, onSave, onCancel }) {
           listId={`inline-rayons-${product.id}`}
         />
       </td>
+      <td className="px-2 py-1.5 text-xs text-muted-foreground whitespace-nowrap">
+        {product.stock_total != null ? `${product.stock_total} unités` : '—'}
+      </td>
       {/* DLC */}
       <td className="px-2 py-1.5">
         <Input
@@ -153,6 +156,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
           </div>
         ) : <span className="text-xs text-muted-foreground">—</span>}
       </td>
+      <td className="px-2 py-1.5 text-xs text-muted-foreground">{product.added_by_name || '—'}</td>
       {/* Save/Cancel */}
       <td className="px-2 py-1.5">
         <div className="flex items-center gap-1">
@@ -250,6 +254,7 @@ export default function ProductTable({ products, totalProducts = products, hideL
                     </span>
                   )}
                   {p.rayon && <span>{p.rayon}</span>}
+                  {p.stock_total != null && <span>Stock: {p.stock_total} unités</span>}
                   {!compactView && isExpired && total > 0 && <span className="text-red-600 font-semibold">CHF {total.toFixed(2)}</span>}
                 </div>
               </div>
@@ -277,8 +282,8 @@ export default function ProductTable({ products, totalProducts = products, hideL
           <thead className="bg-secondary/40">
             <tr>
               {(compactView
-                ? [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_dlc'), t('col_status'), '']
-                : [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_rayon'), t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', '']
+                ? [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), 'Stock', t('col_dlc'), t('col_status'), '']
+                : [t('col_product'), t('col_brand'), 'Étagère', t('col_category'), t('col_rayon'), 'Stock', t('col_dlc'), t('col_days'), t('col_status'), t('col_action'), t('col_qty_thrown'), t('col_price_chf'), 'Ajouté par', '']
               ).map((h, i) => (
                 <th key={i} className="text-left px-3 py-2 font-semibold text-foreground whitespace-nowrap text-xs">{h}</th>
               ))}
@@ -322,6 +327,9 @@ export default function ProductTable({ products, totalProducts = products, hideL
                     {p.category ? t(categoryKeys[p.category] || p.category) : '—'}
                   </td>
                   {!compactView && <td className="px-3 py-2 text-muted-foreground">{p.rayon || '—'}</td>}
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
+                    {p.stock_total != null ? `${p.stock_total} unités` : '—'}
+                  </td>
                   <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
                     {p.expiration_date ? format(new Date(p.expiration_date), 'dd/MM/yyyy') : '—'}
                   </td>

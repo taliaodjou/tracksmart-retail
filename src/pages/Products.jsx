@@ -18,6 +18,7 @@ import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import { logActivity } from '@/lib/activityLogger';
+import { addStockEntry, enrichProductsWithStock } from '@/lib/stockEntries';
 
 const XlsIcon = () => <span className="text-[10px] font-bold hidden">XLS</span>;
 
@@ -66,19 +67,39 @@ export default function Products() {
     enabled: !!user?.email
   });
 
+  const { data: stockEntries = [] } = useQuery({
+    queryKey: ['stockEntries', storeOwnerEmail],
+    queryFn: () => base44.entities.Batch.filter({ store_owner_email: storeOwnerEmail }, 'expiration_date', 5000),
+    enabled: !!user?.email && !!storeOwnerEmail
+  });
+
+  const productsWithStock = useMemo(() => enrichProductsWithStock(products, stockEntries), [products, stockEntries]);
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      const savedData = data.action === 'jeter'
-        ? { ...data, discarded: true, discarded_at: new Date().toISOString().split('T')[0] }
-        : data;
-      return base44.entities.Product.create({
+      const stockQuantity = Number(data.quantity_received) || 0;
+      const productData = { ...data };
+      delete productData.quantity_received;
+      const savedData = productData.action === 'jeter'
+        ? { ...productData, discarded: true, discarded_at: new Date().toISOString().split('T')[0] }
+        : productData;
+      const product = await base44.entities.Product.create({
         ...savedData,
         store_owner_email: storeOwnerEmail,
         added_by_name: user.full_name || user.email
       });
+      await addStockEntry({
+        productId: product.id,
+        storeOwnerEmail,
+        expirationDate: data.expiration_date,
+        quantity: stockQuantity,
+        dateAdded: data.reception_date
+      });
+      return product;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
       setShowForm(false);
       setEditProduct(null);
       setQuickAdd(null);
@@ -87,13 +108,25 @@ export default function Products() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      const savedData = data.action === 'jeter'
-        ? { ...data, discarded: true, discarded_at: new Date().toISOString().split('T')[0] }
-        : data;
-      return base44.entities.Product.update(id, savedData);
+      const stockQuantity = Number(data.quantity_received) || 0;
+      const productData = { ...data };
+      delete productData.quantity_received;
+      const savedData = productData.action === 'jeter'
+        ? { ...productData, discarded: true, discarded_at: new Date().toISOString().split('T')[0] }
+        : productData;
+      const product = await base44.entities.Product.update(id, savedData);
+      await addStockEntry({
+        productId: id,
+        storeOwnerEmail,
+        expirationDate: data.expiration_date,
+        quantity: stockQuantity,
+        dateAdded: data.reception_date
+      });
+      return product;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
       setShowForm(false);
       setEditProduct(null);
       setQuickAdd(null);
@@ -102,16 +135,20 @@ export default function Products() {
 
   const deleteMutation = useMutation({
     mutationFn: async (product) => {
+      await base44.entities.Batch.deleteMany({ product_id: product.id });
       await base44.entities.Product.delete(product.id);
       logActivity(user, 'product_deleted', `${user.full_name || user.email} a supprimé "${product?.name || 'un produit'}"`, {
         entity_id: product.id,
         entity_name: product.name
       });
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+    }
   });
 
-  const filteredProducts = useMemo(() => products.filter((product) => {
+  const filteredProducts = useMemo(() => productsWithStock.filter((product) => {
     if (search && !product.name?.toLowerCase().includes(search.toLowerCase())) return false;
     if (statusFilter !== 'all') {
       if (statusFilter === 'archived') {
@@ -123,12 +160,12 @@ export default function Products() {
     if (categoryFilter !== 'all' && product.category !== categoryFilter) return false;
     if (rayonFilter !== 'all' && product.rayon !== rayonFilter) return false;
     return true;
-  }), [products, search, statusFilter, categoryFilter, rayonFilter]);
+  }), [productsWithStock, search, statusFilter, categoryFilter, rayonFilter]);
 
   const availableRayons = useMemo(() => {
-    return Array.from(new Set(products.map((product) => product.rayon).filter(Boolean)))
+    return Array.from(new Set(productsWithStock.map((product) => product.rayon).filter(Boolean)))
       .sort((a, b) => a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' }));
-  }, [products]);
+  }, [productsWithStock]);
 
   const activeFilterCount = [statusFilter !== 'all', categoryFilter !== 'all', rayonFilter !== 'all'].filter(Boolean).length;
   const statusFilters = [
@@ -137,7 +174,7 @@ export default function Products() {
     { key: 'urgent', label: t('dash_filter_urgent') },
     { key: 'soon', label: t('dash_filter_soon') },
     { key: 'ok', label: t('dash_filter_ok') },
-    { key: 'archived', label: 'Archivé' }
+    { key: 'archived', label: t('status_archived') }
   ];
 
   const handleSave = (data) => {
@@ -179,10 +216,14 @@ export default function Products() {
     return '';
   };
 
-  const findExistingProduct = (name, brand) => {
-    if (!name) return null;
+  const findExistingProduct = (name, brand, barcode) => {
     const normalize = (value) => (value || '').toLowerCase().trim();
-    return products.find((product) => normalize(product.name) === normalize(name) && normalize(product.marque) === normalize(brand)) || null;
+    if (barcode) {
+      const byBarcode = productsWithStock.find((product) => normalize(product.barcode) === normalize(barcode));
+      if (byBarcode) return byBarcode;
+    }
+    if (!name) return null;
+    return productsWithStock.find((product) => normalize(product.name) === normalize(name) && normalize(product.marque) === normalize(brand)) || null;
   };
 
   const handleBarcodeDetected = async (code) => {
@@ -191,7 +232,7 @@ export default function Products() {
 
     const match = barcodeDB.find((barcode) => barcode.barcode === code);
     if (match) {
-      setQuickAdd({ barcode: code, prefill: match, existingProduct: findExistingProduct(match.name, match.brand || match.marque) });
+      setQuickAdd({ barcode: code, prefill: match, existingProduct: findExistingProduct(match.name, match.brand || match.marque, code) });
       return;
     }
 
@@ -202,7 +243,7 @@ export default function Products() {
       setQuickAdd({
         barcode: code,
         prefill: { name, brand, category, image_url: productData.image_front_url || productData.image_url || '' },
-        existingProduct: findExistingProduct(name, brand)
+        existingProduct: findExistingProduct(name, brand, code)
       });
     };
 
@@ -228,7 +269,7 @@ export default function Products() {
         const name = item.title || '';
         const brand = item.brand || '';
         const category = matchCategory((item.category || '').toLowerCase().split(/[,/]/).map((value) => value.trim()));
-        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: item.images?.[0] || '' }, existingProduct: findExistingProduct(name, brand) });
+        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: item.images?.[0] || '' }, existingProduct: findExistingProduct(name, brand, code) });
         return;
       }
     } catch (_) {}
@@ -326,9 +367,9 @@ export default function Products() {
         {isLoading ? (
           <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>
         ) : groupByRayon ? (
-          <RayonGroupedTable products={filteredProducts} totalProducts={products} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
+          <RayonGroupedTable products={filteredProducts} totalProducts={productsWithStock} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
         ) : (
-          <ProductTable products={filteredProducts} totalProducts={products} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
+          <ProductTable products={filteredProducts} totalProducts={productsWithStock} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
         )}
       </main>
 
