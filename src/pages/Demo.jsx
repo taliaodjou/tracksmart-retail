@@ -7,9 +7,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Search, X, ScanLine, Sparkles, Package, AlertTriangle, XCircle,
   ChevronRight, ChevronDown, CheckCircle2, Tag, Layers, RefreshCw,
-  TrendingDown, TrendingUp, PackageX, Flame, BarChart2, ShoppingCart,
+  TrendingDown, TrendingUp, PackageX, Flame, BarChart2, ShoppingCart, List, ClipboardCheck,
   FileText, Download, Send, Building2, Mail, Phone, Printer,
-  LayoutDashboard, BarChart3, Folder, Users, Crown,
+  LayoutDashboard, BarChart3, Folder, Users, Crown, Bell, LogOut,
   ShieldCheck, User as UserIcon, Upload, FolderPlus, ChevronLeft,
   FileText as DocIcon, Trash2, MoreVertical, Edit2, UserPlus
 } from 'lucide-react';
@@ -230,22 +230,33 @@ function QuickAddModal({ prefill, barcode, existingProduct, onSave, onClose }) {
 }
 
 // ═══════════ TAB: DASHBOARD ═══════════
-function OverviewTab({ products, handleProductAction, editProductDlc }) {
-  const active = products.filter(p => !isDiscarded(p));
-  const rayons = useMemo(() => Array.from(new Set(products.map(p => p.rayon).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true,sensitivity:'base'})), [products]);
-  return (<div className="space-y-4 sm:space-y-6">
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div><h1 className="text-2xl sm:text-3xl font-bold">Tableau de bord</h1><p className="text-sm text-muted-foreground mt-1">Vue d’ensemble de la boutique démo, comme dans TrackSmart Retail.</p></div>
-      <div className="bg-white rounded-full border px-4 py-2 text-xs font-semibold text-primary">5 rayons suivis · {active.length} unités actives</div>
-    </div>
+function OverviewTab({ products, handleProductAction, editProductDlc, setTab }) {
+  const chartData = useMemo(() => {
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const dt = subMonths(new Date(), i);
+      months.push({ key: getMonthKey(dt), month: format(dt, 'MMM', { locale: fr }), pertes: 0, cumulative: 0 });
+    }
+    products.forEach(p => {
+      const loss = (Number(p.quantity_thrown) || 0) * (Number(p.price_chf) || 0);
+      if (!loss) return;
+      const date = p.discarded_at ? new Date(p.discarded_at) : new Date(p.expiration_date || new Date());
+      const entry = months.find(m => m.key === getMonthKey(date));
+      if (entry) entry.pertes += loss;
+    });
+    let running = 0;
+    return months.map(m => { running += m.pertes; return { ...m, pertes: Number(m.pertes.toFixed(2)), cumulative: Number(running.toFixed(2)) }; });
+  }, [products]);
+  const urgentProducts = products.filter(p => !isDiscarded(p) && ['expired','urgent'].includes(getProductStatus(p.expiration_date))).sort((a,b)=>new Date(a.expiration_date)-new Date(b.expiration_date)).slice(0,4);
+  return (<div className="space-y-4">
     <StatsCards products={products}/>
     <WeeklyAlert products={products} onProductAction={handleProductAction} onEditDlc={editProductDlc}/>
-    <div className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5">
-      <div className="flex items-center gap-2 mb-4"><Layers className="w-4 h-4 text-primary"/><h2 className="font-semibold text-sm">Aperçu par rayon</h2></div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        {rayons.map(rayon => {const prods = products.filter(p => p.rayon === rayon); const actifs = prods.filter(p => !isDiscarded(p)); const expired = actifs.filter(p => getProductStatus(p.expiration_date) === 'expired').length; const urgent = actifs.filter(p => getProductStatus(p.expiration_date) === 'urgent').length; const soon = actifs.filter(p => getProductStatus(p.expiration_date) === 'soon').length; const value = actifs.reduce((s,p)=>s+(Number(p.price_chf)||0),0); return <div key={rayon} className="rounded-2xl border bg-secondary/30 p-4"><p className="font-bold text-sm mb-1">{rayon}</p><p className="text-xs text-muted-foreground mb-3">{actifs.length} unités · CHF {value.toFixed(2)}</p><div className="flex flex-wrap gap-1.5 text-[11px]"><span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100">{expired} expiré</span><span className="px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-100">{urgent} urgent</span><span className="px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-100">{soon} bientôt</span></div></div>})}
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <section className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 min-h-[210px]"><div className="flex items-center justify-between mb-4"><h2 className="font-bold text-lg">Pertes</h2><button onClick={()=>setTab('analytics')} className="text-xs font-medium inline-flex items-center gap-1 hover:text-primary">Voir détails <ChevronRight className="w-3 h-3" /></button></div><ResponsiveContainer width="100%" height={140}><BarChart data={chartData}><CartesianGrid vertical={false} stroke="#E8E0D3"/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize:11}}/><YAxis axisLine={false} tickLine={false} tick={{fontSize:11}}/><Tooltip formatter={v=>[`CHF ${Number(v).toFixed(2)}`,'Pertes']}/><Bar dataKey="pertes" fill="#C9A646" radius={[6,6,0,0]}/></BarChart></ResponsiveContainer></section>
+      <section className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 min-h-[210px]"><h2 className="font-bold text-lg mb-4">Urgences</h2><div className="space-y-2"><div className="grid grid-cols-[1fr_auto_auto] gap-3 text-xs font-semibold text-muted-foreground border-b border-border/40 pb-2"><span>Produit</span><span>Statut</span><span>DLC</span></div>{urgentProducts.length>0?urgentProducts.map(product=>{const status=getProductStatus(product.expiration_date);return <button key={product._id} onClick={()=>setTab('products')} className="w-full grid grid-cols-[1fr_auto_auto] gap-3 items-center py-2 text-sm hover:bg-secondary/40 rounded-lg px-1 text-left"><span className="font-medium truncate">{product.name}</span><span className={`text-xs px-2 py-1 rounded-full font-semibold ${status==='expired'?'bg-red-100 text-red-700':'bg-orange-100 text-orange-700'}`}>{status==='expired'?'Expiré':'Urgent'}</span><span className="text-muted-foreground whitespace-nowrap">{getDaysRemaining(product.expiration_date)}j</span></button>}):<div className="py-8 text-sm text-muted-foreground text-center">Aucune urgence</div>}</div></section>
+      <section className="bg-white rounded-2xl border border-border/50 shadow-sm p-5 min-h-[210px]"><div className="flex items-center justify-between mb-4"><h2 className="font-bold text-lg">Évolution</h2><span className="text-xs rounded-full border border-border px-3 py-1 text-muted-foreground">Pertes CHF</span></div><ResponsiveContainer width="100%" height={140}><LineChart data={chartData}><CartesianGrid vertical={false} stroke="#E8E0D3"/><XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize:11}}/><YAxis axisLine={false} tickLine={false} tick={{fontSize:11}}/><Tooltip formatter={v=>[`CHF ${Number(v).toFixed(2)}`,'Pertes cumulées']}/><Line type="monotone" dataKey="cumulative" stroke="#C9A646" strokeWidth={3} dot={false}/></LineChart></ResponsiveContainer></section>
     </div>
+    <section className="rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-100 shadow-sm p-4 sm:p-5"><h2 className="font-bold text-xl text-slate-700 mb-4">Actions prioritaires</h2><div className="grid grid-cols-1 sm:grid-cols-3 gap-4">{[{label:'Ouvrir la liste produits',sub:'Accéder au stock complet',icon:List,color:'#C9A646',tab:'products'},{label:'Analyser les pertes',sub:'Repérer les rayons à risque',icon:TrendingDown,color:'#EF4444',tab:'analytics'},{label:'Valider les stocks urgents',sub:'Contrôler les produits à traiter',icon:ClipboardCheck,color:'#F97316',tab:'stock'}].map(action=>{const Icon=action.icon;return <button key={action.label} onClick={()=>setTab(action.tab)} className="group relative overflow-hidden text-left bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4 min-h-[132px] flex flex-col justify-between hover:shadow-md transition-shadow"><span className="absolute inset-y-0 left-0 w-1.5" style={{backgroundColor:action.color}}/><div className="flex items-start justify-between gap-3 pl-2"><Icon className="w-7 h-7" style={{color:action.color}}/><ChevronRight className="w-5 h-5 text-slate-400 mt-7"/></div><div className="pl-2"><h3 className="text-lg sm:text-xl font-bold leading-tight text-slate-950 mb-2">{action.label}</h3><p className="text-xs text-slate-500">{action.sub}</p></div></button>})}</div></section>
   </div>);
 }
 
@@ -536,12 +547,11 @@ export default function Demo() {
 
   return (
     <div className="min-h-screen pb-20 sm:pb-0 pt-0" style={{backgroundColor:'#f5f5f5',color:'#1a1a1a'}}>
-      <DemoBanner/>
       <header className="bg-white border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary flex items-center justify-center"><span className="text-white font-bold text-xs sm:text-sm">TS</span></div>
-            <span className="font-bold text-sm sm:text-lg tracking-tight hidden sm:inline">TrackSmart Retail <span className="text-primary">Démo</span></span>
+            <span className="font-bold text-sm sm:text-lg tracking-tight hidden sm:inline">TrackSmart Retail</span>
           </Link>
           <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto flex-1 mx-1 sm:mx-0 sm:flex-none scrollbar-hide">
             {tabs.map(t => (
@@ -549,18 +559,20 @@ export default function Demo() {
                 <t.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5"/><span>{t.label}</span>
               </button>
             ))}
+            <button className="hidden sm:flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary whitespace-nowrap flex-shrink-0">
+              Plus <ChevronDown className="w-3 h-3" />
+            </button>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Link to="/about"><button className="text-[10px] sm:text-xs text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap">À propos</button></Link>
-            <Button variant="outline" size="sm" onClick={()=>setShowScanner(true)} className="rounded-full gap-1 sm:gap-2 text-[10px] sm:text-xs h-7 sm:h-9 px-2 sm:px-3">
-              <ScanLine className="w-3 h-3 sm:w-3.5 sm:h-3.5"/> <span className="hidden sm:inline">Scanner</span>
-            </Button>
-            <Link to="/register"><Button size="sm" className="rounded-lg text-[10px] sm:text-xs h-7 sm:h-9 px-2.5 sm:px-3">Essayer</Button></Link>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center text-muted-foreground hover:bg-secondary" title="Notifications"><Bell className="w-4 h-4" /></button>
+            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">FH</div>
+            <span className="hidden sm:inline text-xs font-medium text-muted-foreground">EN</span>
+            <button className="hidden sm:flex w-8 h-8 rounded-full items-center justify-center text-muted-foreground hover:bg-secondary" title="Déconnexion"><LogOut className="w-4 h-4" /></button>
           </div>
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pt-2 sm:pt-6 pb-24 sm:pb-8">
-        {tab==='dashboard'&&<OverviewTab products={products} handleProductAction={handleProductAction} editProductDlc={editProductDlc}/>}
+        {tab==='dashboard'&&<OverviewTab products={products} handleProductAction={handleProductAction} editProductDlc={editProductDlc} setTab={setTab}/>}
         {tab==='products'&&<DashboardTab products={products} addProduct={addProduct} deleteProduct={deleteProduct} handleProductAction={handleProductAction} editProductDlc={editProductDlc} editProductField={editProductField}/>}
         {tab==='stock'&&<StockTab products={products} editProductField={editProductField}/>}
         {tab==='analytics'&&<AnalyticsTab products={products}/>}
