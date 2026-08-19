@@ -23,6 +23,7 @@ import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import StockAdjustmentModal from '@/components/dashboard/StockAdjustmentModal';
 import StockMovementHistoryModal from '@/components/dashboard/StockMovementHistoryModal';
 import InventoryCountModal from '@/components/dashboard/InventoryCountModal';
+import WeeklyAlert from '@/components/dashboard/WeeklyAlert';
 import { logActivity } from '@/lib/activityLogger';
 import { addStockEntry, applyManualStockMovement, applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
 
@@ -372,6 +373,8 @@ export default function Products() {
         </div>
 
         <StatsCards products={productsWithStock} movements={stockMovements} />
+
+        <WeeklyAlert products={productsWithStock} onUpdate={(id, data) => updateMutation.mutateAsync({ id, data })} />
 
         {showForm && (
           <ProductForm
