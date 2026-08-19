@@ -1,21 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, Trash2 } from 'lucide-react';
-import { categoryKeys, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
+import { buildLossRecords, categoryKeys } from '@/lib/productUtils';
 
-export default function LossRecapByMonth({ products, lang = 'fr' }) {
+export default function LossRecapByMonth({ products, movements = [], lossRecords: providedLossRecords, lang = 'fr' }) {
   const [expandedMonth, setExpandedMonth] = useState(null);
 
   const monthlyGroups = React.useMemo(() => {
     const map = {};
-    const thrown = products.filter(p => getProductLoss(p) > 0);
-    thrown.forEach(p => {
-      const refDate = getLossReferenceDate(p);
-      if (!refDate) return;
-      const key = refDate.substring(0, 7); // "YYYY-MM"
+    const records = providedLossRecords || buildLossRecords(products, movements);
+    records.forEach(p => {
+      if (!p.loss_date) return;
+      const key = p.loss_date.substring(0, 7); // "YYYY-MM"
       if (!map[key]) map[key] = { products: [], totalLoss: 0 };
-      const loss = getProductLoss(p);
-      map[key].products.push({ ...p, loss, loss_date: refDate });
-      map[key].totalLoss += loss;
+      map[key].products.push(p);
+      map[key].totalLoss += p.loss;
     });
     // Sort by month descending
     return Object.entries(map)
@@ -25,7 +23,7 @@ export default function LossRecapByMonth({ products, lang = 'fr' }) {
         label: formatMonthLabel(month, lang),
         ...data,
       }));
-  }, [products, lang]);
+  }, [products, movements, providedLossRecords, lang]);
 
   if (monthlyGroups.length === 0) {
     return (
@@ -97,8 +95,8 @@ export default function LossRecapByMonth({ products, lang = 'fr' }) {
                         {p.rayon && <span>· Rayon {p.rayon}</span>}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {p.quantity_thrown} unité{p.quantity_thrown > 1 ? 's' : ''} × CHF {Number(p.price_chf).toFixed(2)}
-                        {' · '}🗑 {p.loss_date || '—'}
+                        {p.quantity} unité{p.quantity > 1 ? 's' : ''} × CHF {Number(p.unit_price).toFixed(2)}
+                        {' · '}{p.loss_date || '—'}
                       </p>
                     </div>
                   ))}

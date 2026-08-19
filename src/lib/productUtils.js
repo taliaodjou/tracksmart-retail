@@ -129,8 +129,55 @@ export function getProductLoss(product) {
   return (Number(product?.quantity_thrown) || 0) * (Number(product?.price_chf) || 0);
 }
 
-export function calculateTotalLoss(products) {
-  return (products || []).reduce((sum, p) => sum + getProductLoss(p), 0);
+export function buildLossRecords(products = [], movements = []) {
+  const productMap = new Map((products || []).map((product) => [product.id, product]));
+  const movementProductIds = new Set();
+  const movementLosses = (movements || [])
+    .filter((movement) => movement.type === 'perte')
+    .map((movement) => {
+      const product = productMap.get(movement.product_id) || {};
+      movementProductIds.add(movement.product_id);
+      const quantity = Number(movement.quantity) || 0;
+      const unitPrice = Number(product.price_chf) || 0;
+      return {
+        id: movement.id,
+        product_id: movement.product_id,
+        name: product.name || 'Produit supprimé',
+        marque: product.marque || '',
+        category: product.category || '',
+        rayon: product.rayon || '',
+        quantity,
+        unit_price: unitPrice,
+        loss: quantity * unitPrice,
+        loss_date: movement.movement_date || movement.created_date,
+        justification: movement.justification || '',
+        source: 'movement',
+      };
+    })
+    .filter((record) => record.loss > 0);
+
+  const legacyLosses = (products || [])
+    .filter((product) => !movementProductIds.has(product.id) && getProductLoss(product) > 0)
+    .map((product) => ({
+      id: product.id,
+      product_id: product.id,
+      name: product.name,
+      marque: product.marque || '',
+      category: product.category || '',
+      rayon: product.rayon || '',
+      quantity: Number(product.quantity_thrown) || 0,
+      unit_price: Number(product.price_chf) || 0,
+      loss: getProductLoss(product),
+      loss_date: getLossReferenceDate(product),
+      justification: 'Historique produit',
+      source: 'legacy',
+    }));
+
+  return [...movementLosses, ...legacyLosses];
+}
+
+export function calculateTotalLoss(products, movements = []) {
+  return buildLossRecords(products, movements).reduce((sum, record) => sum + record.loss, 0);
 }
 
 export function getLossReferenceDate(product) {
@@ -141,7 +188,7 @@ export function getActiveProducts(products) {
   return (products || []).filter(p => getDisplayStatus(p) !== 'archived');
 }
 
-export function getCoreProductMetrics(products) {
+export function getCoreProductMetrics(products, movements = []) {
   const activeProducts = getActiveProducts(products);
   const stockValue = activeProducts
     .filter(p => !isDiscarded(p))
@@ -154,7 +201,7 @@ export function getCoreProductMetrics(products) {
     totalProducts: activeProducts.length,
     expiredProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length,
     urgentProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length,
-    totalLoss: calculateTotalLoss(products),
+    totalLoss: calculateTotalLoss(products, movements),
     stockValue
   };
 }

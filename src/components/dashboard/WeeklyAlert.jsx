@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 const PREVIEW_COUNT = 10;
 
 // Action panel for a single product inside the modal
-function ProductActionPanel({ product, onUpdate, lang }) {
+function ProductActionPanel({ product, onUpdate, onDiscard, lang }) {
   const isFr = lang === 'fr';
   const [tab, setTab] = useState('info'); // info | jeter | dlc
   const [qty, setQty] = useState('');
@@ -26,11 +26,15 @@ function ProductActionPanel({ product, onUpdate, lang }) {
   const handleJeter = async () => {
     if ((Number(qty) || 0) <= 0 || (Number(price) || 0) <= 0) return;
     setSaving(true);
-    await onUpdate(product.id, {
-      action: 'jeter',
-      quantity_thrown: Number(qty),
-      price_chf: Number(price),
-    });
+    if (onDiscard) {
+      await onDiscard(product, Number(qty), Number(price));
+    } else {
+      await onUpdate(product.id, {
+        action: 'jeter',
+        quantity_thrown: Number(qty),
+        price_chf: Number(price),
+      });
+    }
     setSaving(false);
     setDone(true);
   };
@@ -234,7 +238,7 @@ function WatchBox({ title, products, icon, borderColor, bgColor, titleColor, onP
   );
 }
 
-export default function WeeklyAlert({ products, onUpdate }) {
+export default function WeeklyAlert({ products, onUpdate, onDiscard }) {
   const { t, lang } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [activeProduct, setActiveProduct] = useState(null);
@@ -358,6 +362,12 @@ export default function WeeklyAlert({ products, onUpdate }) {
                 <ProductActionPanel
                   key={activeProduct.id}
                   product={activeProduct}
+                  onDiscard={async (product, quantity, price) => {
+                    if (onDiscard) await onDiscard(product, quantity, price);
+                    setDismissedIds(prev => new Set([...prev, product.id]));
+                    setActiveProduct(null);
+                    setShowModal(false);
+                  }}
                   onUpdate={async (id, data) => {
                     if (onUpdate) await onUpdate(id, data);
                     // If thrown, remove immediately from the alert lists

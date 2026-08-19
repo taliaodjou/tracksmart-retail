@@ -12,7 +12,7 @@ import { Plus, Search, X, LayoutList, Layers } from 'lucide-react';
 import { getProductStatus, hasActiveSubscription, categoryKeys, getStoreOwnerEmail, isDiscarded } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 import { logActivity } from '@/lib/activityLogger';
-import { addStockEntry, applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
+import { addStockEntry, applyManualStockMovement, applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
@@ -196,6 +196,36 @@ export default function Dashboard() {
       setManualInitialProduct(null);
       setQuickAdd(null);
     }
+  });
+
+  const quickDiscardMutation = useMutation({
+    mutationFn: async ({ product, quantity, price }) => {
+      const movementDate = new Date().toISOString().split('T')[0];
+      const priceNumber = Number(price) || Number(product.price_chf) || 0;
+      const stockTotal = Number(product.stock_total) || 0;
+      await applyManualStockMovement({
+        productId: product.id,
+        storeOwnerEmail,
+        quantity,
+        movementType: 'perte',
+        justification: 'Action rapide — produit jeté',
+        movementDate,
+        source: 'manual'
+      });
+      const updates = { price_chf: priceNumber };
+      if (quantity >= stockTotal) Object.assign(updates, { action: 'jeter', discarded: true, discarded_at: movementDate });
+      await base44.entities.Product.update(product.id, updates);
+      logActivity(user, 'product_thrown', `${user.full_name || user.email} a jeté ${quantity} unité(s) de "${product.name}"`, {
+        entity_id: product.id,
+        entity_name: product.name
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
+    },
+    onError: (error) => window.alert(error.message || 'Impossible d’enregistrer cette perte.')
   });
 
   const inventoryCountMutation = useMutation({
@@ -455,6 +485,12 @@ export default function Dashboard() {
 
         <div className="space-y-4 sm:space-y-6">
             <StatsCards products={activeProducts} movements={stockMovements} />
+
+            <WeeklyAlert
+              products={activeProducts}
+              onUpdate={(id, data) => updateMutation.mutateAsync({ id, data })}
+              onDiscard={(product, quantity, price) => quickDiscardMutation.mutateAsync({ product, quantity, price })}
+            />
 
             {showForm &&
           <ProductForm

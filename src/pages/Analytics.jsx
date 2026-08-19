@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
-import { getProductStatus, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin, getCoreProductMetrics, getProductLoss, getLossReferenceDate } from '@/lib/productUtils';
+import { getProductStatus, categoryKeys, hasActiveSubscription, getStoreOwnerEmail, isAdmin, getCoreProductMetrics, buildLossRecords } from '@/lib/productUtils';
 import { format, startOfMonth, subMonths, isSameMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
@@ -56,6 +56,14 @@ export default function Analytics() {
     enabled: canAccess && !!user?.email,
   });
 
+  const { data: stockMovements = [] } = useQuery({
+    queryKey: ['stockMovements', storeOwnerEmail],
+    queryFn: () => base44.entities.StockMovement.filter({ store_owner_email: storeOwnerEmail, archived: false }, '-movement_date', 5000),
+    enabled: canAccess && !!storeOwnerEmail,
+  });
+
+  const lossRecords = useMemo(() => buildLossRecords(products, stockMovements), [products, stockMovements]);
+
   // Build monthly data with the same loss formula used everywhere else
   const monthlyData = useMemo(() => {
     const months = [];
@@ -68,11 +76,9 @@ export default function Analytics() {
       const [y, m] = monthKey.split('-');
       const monthDate = new Date(parseInt(y), parseInt(m) - 1, 1);
 
-      const lossProducts = products.filter(p => {
-        if (getProductLoss(p) <= 0) return false;
-        const ref = getLossReferenceDate(p);
-        if (!ref) return false;
-        return isSameMonth(new Date(ref), monthDate);
+      const lossProducts = lossRecords.filter(record => {
+        if (!record.loss_date) return false;
+        return isSameMonth(new Date(record.loss_date), monthDate);
       });
 
       const expiredInMonth = products.filter(p => {
@@ -80,8 +86,8 @@ export default function Analytics() {
         return isSameMonth(new Date(p.expiration_date), monthDate) && getProductStatus(p.expiration_date) === 'expired';
       });
 
-      const totalLoss = lossProducts.reduce((sum, p) => sum + getProductLoss(p), 0);
-      const totalThrown = lossProducts.reduce((sum, p) => sum + (Number(p.quantity_thrown) || 0), 0);
+      const totalLoss = lossProducts.reduce((sum, record) => sum + record.loss, 0);
+      const totalThrown = lossProducts.reduce((sum, record) => sum + (Number(record.quantity) || 0), 0);
 
       return {
         month: monthKey,
@@ -92,7 +98,7 @@ export default function Analytics() {
         totalThrown,
       };
     });
-  }, [products, lang]);
+  }, [products, lossRecords, lang]);
 
   // Current month vs previous month trend
   const currentMonth = monthlyData[monthlyData.length - 1];
@@ -107,43 +113,41 @@ export default function Analytics() {
   // Category analysis — based on recorded losses only
   const categoryStats = useMemo(() => {
     const map = {};
-    products.forEach(p => {
-      const loss = getProductLoss(p);
-      if (!p.category || loss <= 0) return;
+    lossRecords.forEach(p => {
+      if (!p.category || p.loss <= 0) return;
       if (!map[p.category]) map[p.category] = { count: 0, loss: 0, thrown: 0 };
       map[p.category].count++;
-      map[p.category].loss += loss;
-      map[p.category].thrown += (Number(p.quantity_thrown) || 0);
+      map[p.category].loss += p.loss;
+      map[p.category].thrown += (Number(p.quantity) || 0);
     });
     return Object.entries(map)
       .map(([cat, data]) => ({ cat, label: t(categoryKeys[cat] || cat), ...data }))
       .sort((a, b) => b.loss - a.loss)
       .slice(0, 6);
-  }, [products, t]);
+  }, [lossRecords, t]);
 
   // Rayon analysis — based on recorded losses only
   const rayonStats = useMemo(() => {
     const map = {};
-    products.forEach(p => {
-      const loss = getProductLoss(p);
-      if (!p.rayon || loss <= 0) return;
+    lossRecords.forEach(p => {
+      if (!p.rayon || p.loss <= 0) return;
       if (!map[p.rayon]) map[p.rayon] = { count: 0, loss: 0 };
       map[p.rayon].count++;
-      map[p.rayon].loss += loss;
+      map[p.rayon].loss += p.loss;
     });
     return Object.entries(map)
       .map(([rayon, data]) => ({ rayon: `R${rayon}`, ...data }))
       .sort((a, b) => b.loss - a.loss)
       .slice(0, 8);
-  }, [products]);
+  }, [lossRecords]);
 
   // Most problematic products — based on recorded losses only
   const topProblematicProducts = useMemo(() => {
-    return products
-      .filter(p => getProductLoss(p) > 0)
-      .sort((a, b) => getProductLoss(b) - getProductLoss(a))
+    return lossRecords
+      .filter(record => record.loss > 0)
+      .sort((a, b) => b.loss - a.loss)
       .slice(0, 5);
-  }, [products]);
+  }, [lossRecords]);
 
   if (!canAccess) {
     const hasSubscription = user?.subscription_status === 'active';
@@ -159,7 +163,7 @@ export default function Analytics() {
   }
 
   // Same top metrics as Dashboard / Produits
-  const { totalProducts, expiredProducts, urgentProducts, totalLoss } = getCoreProductMetrics(products);
+  const { totalProducts, expiredProducts, urgentProducts, totalLoss } = getCoreProductMetrics(products, stockMovements);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5', color: '#1a1a1a' }}>
@@ -346,7 +350,7 @@ export default function Analytics() {
             ) : (
               <div className="space-y-2">
                 {topProblematicProducts.map((p, i) => {
-                  const loss = getProductLoss(p);
+                  const loss = p.loss;
                   return (
                     <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-secondary/50">
                       <div className="flex items-center gap-3">
@@ -360,7 +364,7 @@ export default function Analytics() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-red-600">CHF {loss.toFixed(2)}</p>
-                        <p className="text-xs text-muted-foreground">{Number(p.quantity_thrown) || 0} {lang === 'fr' ? 'jetés' : 'thrown'}</p>
+                        <p className="text-xs text-muted-foreground">{Number(p.quantity) || 0} {lang === 'fr' ? 'jetés' : 'thrown'}</p>
                       </div>
                     </div>
                   );
@@ -371,7 +375,7 @@ export default function Analytics() {
         </div>
 
         {/* Loss Recap by Month */}
-        <LossRecapByMonth products={products} lang={lang} />
+        <LossRecapByMonth products={products} movements={stockMovements} lossRecords={lossRecords} lang={lang} />
 
       </main>
       <DashboardFooter />

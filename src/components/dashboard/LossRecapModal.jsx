@@ -1,21 +1,13 @@
 import React from 'react';
 import { X, TrendingDown, Package } from 'lucide-react';
 import { format } from 'date-fns';
-import { categoryKeys } from '@/lib/productUtils';
+import { buildLossRecords, categoryKeys } from '@/lib/productUtils';
 import { useLanguage } from '@/lib/LanguageContext';
 
-export default function LossRecapModal({ products, onClose }) {
+export default function LossRecapModal({ products, movements = [], onClose }) {
   const { t } = useLanguage();
-
-  // Only products that have been thrown (action=jeter with qty & price)
-  const thrownProducts = products.filter(
-    p => p.action === 'jeter' && p.quantity_thrown > 0 && p.price_chf > 0
-  );
-
-  const grandTotal = thrownProducts.reduce(
-    (sum, p) => sum + (p.quantity_thrown || 0) * (p.price_chf || 0),
-    0
-  );
+  const lossRecords = buildLossRecords(products, movements);
+  const grandTotal = lossRecords.reduce((sum, record) => sum + record.loss, 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={onClose}>
@@ -48,15 +40,15 @@ export default function LossRecapModal({ products, onClose }) {
 
         {/* Product list */}
         <div className="overflow-y-auto flex-1 px-4 py-3">
-          {thrownProducts.length === 0 ? (
+          {lossRecords.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center gap-2">
               <Package className="w-8 h-8 text-muted-foreground/40" />
               <p className="text-sm text-muted-foreground">Aucun produit jeté enregistré</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {thrownProducts.map(p => {
-                const total = (p.quantity_thrown || 0) * (p.price_chf || 0);
+              {lossRecords.map(p => {
+                const total = p.loss;
                 return (
                   <div
                     key={p.id}
@@ -70,11 +62,11 @@ export default function LossRecapModal({ products, onClose }) {
                         {p.rayon && <span>· Rayon {p.rayon}</span>}
                       </div>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
-                        <span>{p.quantity_thrown} unité{p.quantity_thrown > 1 ? 's' : ''} × CHF {p.price_chf?.toFixed(2)}</span>
-                        {(p.discarded_at || p.updated_date) && (
-                          <span className="text-red-500 font-medium">
-                            🗑 Jeté le {format(new Date(p.discarded_at || p.updated_date), 'dd/MM/yyyy')}
-                          </span>
+                        <span>{p.quantity} unité{p.quantity > 1 ? 's' : ''} × CHF {Number(p.unit_price).toFixed(2)}</span>
+                        {p.loss_date && (
+                        <span className="text-red-500 font-medium">
+                          Jeté le {format(new Date(p.loss_date), 'dd/MM/yyyy')}
+                        </span>
                         )}
                       </div>
                     </div>

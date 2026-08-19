@@ -192,6 +192,36 @@ export default function Products() {
     onError: (error) => window.alert(error.message || 'Impossible d’enregistrer ce mouvement.')
   });
 
+  const quickDiscardMutation = useMutation({
+    mutationFn: async ({ product, quantity, price }) => {
+      const movementDate = new Date().toISOString().split('T')[0];
+      const priceNumber = Number(price) || Number(product.price_chf) || 0;
+      const stockTotal = Number(product.stock_total) || 0;
+      await applyManualStockMovement({
+        productId: product.id,
+        storeOwnerEmail,
+        quantity,
+        movementType: 'perte',
+        justification: 'Action rapide — produit jeté',
+        movementDate,
+        source: 'manual'
+      });
+      const updates = { price_chf: priceNumber };
+      if (quantity >= stockTotal) Object.assign(updates, { action: 'jeter', discarded: true, discarded_at: movementDate });
+      await base44.entities.Product.update(product.id, updates);
+      logActivity(user, 'product_thrown', `${user.full_name || user.email} a jeté ${quantity} unité(s) de "${product.name}"`, {
+        entity_id: product.id,
+        entity_name: product.name
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
+    },
+    onError: (error) => window.alert(error.message || 'Impossible d’enregistrer cette perte.')
+  });
+
   const inventoryCountMutation = useMutation({
     mutationFn: (entries) => Promise.all(entries.map((entry) => applyPeriodicStockCount({
       product: entry.product,
@@ -374,7 +404,11 @@ export default function Products() {
 
         <StatsCards products={productsWithStock} movements={stockMovements} />
 
-        <WeeklyAlert products={productsWithStock} onUpdate={(id, data) => updateMutation.mutateAsync({ id, data })} />
+        <WeeklyAlert
+          products={productsWithStock}
+          onUpdate={(id, data) => updateMutation.mutateAsync({ id, data })}
+          onDiscard={(product, quantity, price) => quickDiscardMutation.mutateAsync({ product, quantity, price })}
+        />
 
         {showForm && (
           <ProductForm
