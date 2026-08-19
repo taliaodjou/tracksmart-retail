@@ -1,23 +1,17 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BarChart2, ShoppingCart, User, Shield } from 'lucide-react';
-
-const ADMIN_EMAIL = 'talia.odjou@gmail.com';
+import { LayoutDashboard, BarChart2, ShoppingCart, Package } from 'lucide-react';
 
 const baseTabs = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/products', label: 'Produits', icon: Package },
+  { to: '/stock', label: 'Stock', icon: ShoppingCart },
   { to: '/analytics', label: 'Analytique', icon: BarChart2 },
-  { to: '/orders', label: 'Commandes', icon: ShoppingCart },
-  { to: '/profile', label: 'Profil', icon: User },
 ];
 
-export default function BottomTabBar({ userEmail }) {
+export default function BottomTabBar() {
   const location = useLocation();
-  const isAdminUser = userEmail === ADMIN_EMAIL;
-
-  const tabs = isAdminUser
-    ? [...baseTabs, { to: '/admin-portal', label: 'Admin', icon: Shield }]
-    : baseTabs;
+  const tabs = baseTabs;
 
   return (
     <nav

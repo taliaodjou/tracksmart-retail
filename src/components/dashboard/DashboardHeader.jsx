@@ -26,17 +26,17 @@ export default function DashboardHeader() {
     { to: '/products', label: 'Produits', icon: null },
     { to: '/stock', label: 'Gérer mon stock', icon: null },
     ...(canAccessAnalytics(user) ? [{ to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> }] : []),
-    { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
-    ...(isTaliaAdmin ? [{ to: '/admin-portal', label: 'Admin', icon: <Shield className="w-3.5 h-3.5" /> }] : []),
   ];
 
   // Secondary nav items in "Plus" dropdown
   const secondaryNavItems = [
+    { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
     { to: '/documents', label: 'Documents', icon: <Folder className="w-3.5 h-3.5" /> },
     ...(canManageTeam(user) ? [{ to: '/team', label: 'Équipe', icon: <Users className="w-3.5 h-3.5" /> }] : []),
     ...(canViewActivity(user) ? [{ to: '/activity', label: 'Activité', icon: <Activity className="w-3.5 h-3.5" /> }] : []),
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
     { to: '/reports', label: 'Rapports', icon: <FileText className="w-3.5 h-3.5" /> },
+    ...(isTaliaAdmin ? [{ to: '/admin-portal', label: 'Admin', icon: <Shield className="w-3.5 h-3.5" /> }] : []),
   ];
 
   // Keep navItems for mobile menu (all items) — primaryNavItems already includes admin if applicable
