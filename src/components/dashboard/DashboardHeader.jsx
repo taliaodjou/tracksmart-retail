@@ -23,19 +23,19 @@ export default function DashboardHeader() {
   // Primary nav items shown inline
   const primaryNavItems = [
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
-    { to: '/products', label: 'Produits', icon: null },
-    { to: '/stock', label: 'Gérer mon stock', icon: null },
+    { to: '/products', label: t('nav_products'), icon: null },
+    { to: '/stock', label: t('nav_stock'), icon: null },
     ...(canAccessAnalytics(user) ? [{ to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> }] : []),
   ];
 
   // Secondary nav items in "Plus" dropdown
   const secondaryNavItems = [
     { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
-    { to: '/documents', label: 'Documents', icon: <Folder className="w-3.5 h-3.5" /> },
-    ...(canManageTeam(user) ? [{ to: '/team', label: 'Équipe', icon: <Users className="w-3.5 h-3.5" /> }] : []),
-    ...(canViewActivity(user) ? [{ to: '/activity', label: 'Activité', icon: <Activity className="w-3.5 h-3.5" /> }] : []),
+    { to: '/documents', label: t('nav_documents'), icon: <Folder className="w-3.5 h-3.5" /> },
+    ...(canManageTeam(user) ? [{ to: '/team', label: t('nav_team'), icon: <Users className="w-3.5 h-3.5" /> }] : []),
+    ...(canViewActivity(user) ? [{ to: '/activity', label: t('nav_activity'), icon: <Activity className="w-3.5 h-3.5" /> }] : []),
     { to: '/profile', label: t('nav_profile'), icon: <User className="w-3.5 h-3.5" /> },
-    { to: '/reports', label: 'Rapports', icon: <FileText className="w-3.5 h-3.5" /> },
+    { to: '/reports', label: t('nav_reports'), icon: <FileText className="w-3.5 h-3.5" /> },
     ...(isTaliaAdmin ? [{ to: '/admin-portal', label: 'Admin', icon: <Shield className="w-3.5 h-3.5" /> }] : []),
   ];
 
@@ -82,7 +82,7 @@ export default function DashboardHeader() {
                 onClick={() => setMoreOpen(o => !o)}
                 className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded-full transition-colors ${secondaryNavItems.some(i => location.pathname === i.to) ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}
               >
-                <span>Plus</span>
+                <span>{t('nav_more')}</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
               {moreOpen && (

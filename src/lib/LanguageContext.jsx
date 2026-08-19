@@ -11,6 +11,16 @@ const translations = {
     nav_profile: 'Profil',
     nav_logout: 'Déconnexion',
     nav_notifications: 'Notifications',
+    nav_features: 'Fonctionnalités',
+    nav_pricing: 'Tarifs',
+    nav_get_started: 'Commencer',
+    nav_products: 'Produits',
+    nav_stock: 'Gérer mon stock',
+    nav_more: 'Plus',
+    nav_documents: 'Documents',
+    nav_team: 'Équipe',
+    nav_activity: 'Activité',
+    nav_reports: 'Rapports',
 
     // Dashboard
     dash_title: 'Tableau de bord',
@@ -237,6 +247,16 @@ const translations = {
     nav_profile: 'Profile',
     nav_logout: 'Logout',
     nav_notifications: 'Notifications',
+    nav_features: 'Features',
+    nav_pricing: 'Pricing',
+    nav_get_started: 'Get started',
+    nav_products: 'Products',
+    nav_stock: 'Manage stock',
+    nav_more: 'More',
+    nav_documents: 'Documents',
+    nav_team: 'Team',
+    nav_activity: 'Activity',
+    nav_reports: 'Reports',
 
     dash_title: 'Dashboard',
     dash_add_product: 'Add product',
@@ -446,6 +466,168 @@ const translations = {
   },
 };
 
+const uiTextTranslations = {
+  'Tableau de bord': 'Dashboard',
+  'Produits': 'Products',
+  'Gérer mon stock': 'Manage stock',
+  'Analytiques': 'Analytics',
+  'Analytique': 'Analytics',
+  'Commandes': 'Orders',
+  'Documents': 'Documents',
+  'Équipe': 'Team',
+  'Activité': 'Activity',
+  'Rapports': 'Reports',
+  'Profil': 'Profile',
+  'Plus': 'More',
+  'Déconnexion': 'Logout',
+  'Ajouter un produit': 'Add product',
+  'Fichiers': 'Files',
+  'Importer': 'Import',
+  'Exporter': 'Export',
+  'Imprimer': 'Print',
+  'Rechercher': 'Search',
+  'Tous': 'All',
+  'Expirés': 'Expired',
+  'Urgents': 'Urgent',
+  'Bientôt': 'Soon',
+  'Fin de stock': 'Out of stock',
+  'Catégorie': 'Category',
+  'Rayon': 'Section',
+  'Statut': 'Status',
+  'Actions': 'Actions',
+  'Modifier': 'Edit',
+  'Supprimer': 'Delete',
+  'Fermer': 'Close',
+  'Annuler': 'Cancel',
+  'Enregistrer': 'Save',
+  'Valider': 'Confirm',
+  'Retour': 'Back',
+  'Chargement…': 'Loading…',
+  'Unités en stock': 'Units in stock',
+  'Produits expirés': 'Expired products',
+  'Produits urgents': 'Urgent products',
+  'Total pertes': 'Total losses',
+  'Valeur du stock': 'Stock value',
+  'Voir le détail des pertes': 'View loss details',
+  'Produits à surveiller cette semaine': 'Products to monitor this week',
+  'Proches expiration': 'Close to expiry',
+  'à traiter': 'to review',
+  'Pertes évitées': 'Avoided losses',
+  'ce mois': 'this month',
+  'total': 'total',
+  'Compléter': 'Replenish',
+  'Jeter': 'Discard',
+  'Vendu': 'Sold',
+  'Perdu': 'Lost',
+  'Vendues': 'Sold',
+  'Perdues': 'Lost',
+  'Précision perte optionnelle': 'Optional loss details',
+  'Valider le recomptage': 'Confirm stock count',
+  'Stock théorique': 'Expected stock',
+  'Quantité réelle': 'Actual quantity',
+  'Nature de l’écart': 'Discrepancy type',
+  'Nature de l\'écart': 'Discrepancy type',
+  'Total à répartir': 'Total to split',
+  'unités': 'units',
+  'unité': 'unit',
+  'Scanner le code-barres': 'Scan barcode',
+  'Saisir un nouveau produit manuellement': 'Enter a new product manually',
+  'Compléter un produit déjà enregistré': 'Replenish an existing product',
+  'Nom du produit': 'Product name',
+  'Marque': 'Brand',
+  'Code-barres': 'Barcode',
+  'Prix de vente': 'Sale price',
+  'Date de réception': 'Reception date',
+  'Date d\'expiration': 'Expiration date',
+  'DLC': 'Expiry date',
+  'Quantité': 'Quantity',
+  'Description': 'Description',
+  'Connexion': 'Log in',
+  'Créer un compte': 'Create account',
+  'Essayer gratuitement': 'Try for free',
+  'Voir comment ça marche': 'See how it works',
+  'Le problème': 'The problem',
+  'La solution': 'The solution',
+  'Fonctionnalités': 'Features',
+  'Les offres': 'Plans',
+  'LA SOLUTION DES COMMERÇANTS MALINS': 'THE SMART RETAILER SOLUTION',
+  'Gérez vos stocks.': 'Manage your stock.',
+  'Évitez les pertes.': 'Avoid losses.',
+  'Développez': 'Grow',
+  'votre commerce.': 'your business.',
+  'TrackSmart Retail vous aide à suivre vos produits, leurs dates de péremption et vos stocks en temps réel pour ne plus perdre d\'argent.': 'TrackSmart Retail helps you track products, expiry dates and stock in real time so you stop losing money.',
+  'Installation rapide': 'Quick setup',
+  'Données sécurisées': 'Secure data',
+  'Support réactif': 'Responsive support',
+  'de nos clients réduisent leurs pertes produits': 'of our clients reduce product losses',
+  'Trop de produits suivis à la main, trop de pertes invisibles.': 'Too many products tracked manually, too many invisible losses.',
+  'TrackSmart remplace les carnets, les oublis et les contrôles dispersés par une vue claire de vos DLC, alertes, documents et pertes.': 'TrackSmart replaces notebooks, missed checks and scattered controls with a clear view of your expiry dates, alerts, documents and losses.',
+  'Découvrir les offres': 'View plans',
+  'Marge protégée': 'Protected margin',
+  'Repérez les produits à risque avant qu’ils ne deviennent une perte.': 'Spot at-risk products before they become a loss.',
+  'Alertes utiles': 'Useful alerts',
+  'Les DLC importantes remontent au bon moment, sans vérification permanente.': 'Important expiry dates surface at the right time, without constant checking.',
+  'Ajout rapide': 'Quick add',
+  'Scannez, complétez, suivez : moins de saisie, plus de fiabilité.': 'Scan, complete, track: less data entry, more reliability.',
+  'Tout centralisé': 'Everything centralized',
+  'Stock, analyses, PDF et documents restent au même endroit.': 'Stock, analytics, PDFs and documents stay in one place.',
+  'Comment ça fonctionne': 'How it works',
+  'Un processus simple pour reprendre le contrôle de vos pertes.': 'A simple process to regain control of your losses.',
+  'Scanner': 'Scan',
+  'Ajoutez un produit en quelques secondes.': 'Add a product in seconds.',
+  'Planifier': 'Plan',
+  'Gardez les dates importantes visibles.': 'Keep important dates visible.',
+  'Agir': 'Act',
+  'Traitez les alertes avant expiration.': 'Handle alerts before expiry.',
+  'Optimiser': 'Optimize',
+  'Mesurez les pertes évitées et progressez.': 'Measure avoided losses and improve.',
+  'Les fonctionnalités': 'Features',
+  'Tout ce qu\'il vous faut pour mieux gérer votre magasin': 'Everything you need to manage your store better',
+  'Vue stock': 'Stock view',
+  'Toutes les priorités du magasin visibles en un coup d’œil.': 'All store priorities visible at a glance.',
+  'Scan rapide': 'Fast scan',
+  'Moins de saisie, plus de précision au quotidien.': 'Less typing, more accuracy every day.',
+  'Pilotage': 'Management',
+  'Repérez les rayons sensibles et les tendances de pertes.': 'Identify sensitive sections and loss trends.',
+  'PDF prêts': 'Ready PDFs',
+  'Des rapports propres pour les suivis et la comptabilité.': 'Clean reports for follow-up and accounting.',
+  'Factures et bons de livraison gardés au bon endroit.': 'Invoices and delivery notes kept in the right place.',
+  'Multi-écran': 'Multi-device',
+  'Une utilisation fluide sur mobile, tablette et ordinateur.': 'Smooth use on mobile, tablet and desktop.',
+  'Intéressé(e) par TrackSmart Retail ?': 'Interested in TrackSmart Retail?',
+  'Vous souhaitez plus d\'informations sur nos tarifs ou devenir client chez nous ?': 'Would you like more information about our prices or to become a customer?',
+  'Contactez-nous directement, nous serons ravis d\'échanger avec vous.': 'Contact us directly — we’ll be happy to talk with you.',
+  'Voir les offres': 'View plans',
+  'Par téléphone': 'By phone',
+  'Par email': 'By email',
+  'Disponible 7j/7 · Réponse sous 24h': 'Available 7 days a week · Reply within 24h',
+  'Mentions légales': 'Legal notice',
+  'Politique de confidentialité': 'Privacy policy',
+  'Conditions d\'utilisation': 'Terms of use',
+  'Powered by TrackSmart Retail': 'Powered by TrackSmart Retail',
+  'Mon profil': 'My profile',
+  'Gestion des commandes': 'Order management',
+  'Produits à commander': 'Products to order',
+  'Coordonnées fournisseur': 'Supplier details',
+  'Récapitulatif': 'Summary',
+  'Documents': 'Documents',
+  'Activité récente': 'Recent activity',
+  'Gestion équipe': 'Team management'
+};
+
+const reverseUiTextTranslations = Object.fromEntries(Object.entries(uiTextTranslations).map(([fr, en]) => [en, fr]));
+
+function translateUiText(value, lang) {
+  if (typeof value !== 'string') return value;
+  const trimmed = value.trim();
+  if (!trimmed) return value;
+  const translated = lang === 'en' ? uiTextTranslations[trimmed] : reverseUiTextTranslations[trimmed];
+  if (!translated) return value;
+  const prefix = value.match(/^\s*/)?.[0] || '';
+  const suffix = value.match(/\s*$/)?.[0] || '';
+  return `${prefix}${translated}${suffix}`;
+}
+
 const LanguageContext = createContext();
 
 export function LanguageProvider({ children }) {
@@ -453,6 +635,54 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem('tracksmart_lang', lang);
+  }, [lang]);
+
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (!root) return;
+
+    const applyTranslations = () => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+      textNodes.forEach((node) => {
+        const nextValue = translateUiText(node.nodeValue, lang);
+        if (nextValue !== node.nodeValue) node.nodeValue = nextValue;
+      });
+
+      root.querySelectorAll('[placeholder], [title], [aria-label]').forEach((element) => {
+        ['placeholder', 'title', 'aria-label'].forEach((attribute) => {
+          if (!element.hasAttribute(attribute)) return;
+          const current = element.getAttribute(attribute);
+          const nextValue = translateUiText(current, lang);
+          if (nextValue !== current) element.setAttribute(attribute, nextValue);
+        });
+      });
+    };
+
+    let frame = null;
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        applyTranslations();
+      });
+    };
+
+    applyTranslations();
+    const observer = new MutationObserver(schedule);
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['placeholder', 'title', 'aria-label']
+    });
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [lang]);
 
   const t = (key) => translations[lang]?.[key] || translations['fr']?.[key] || key;
