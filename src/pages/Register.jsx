@@ -4,13 +4,15 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import { COUNTRIES } from "@/lib/countries";
 
 export default function Register() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [country, setCountry] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -23,6 +25,21 @@ export default function Register() {
     e.preventDefault();
     setError("");
     const normalizedEmail = email.trim().toLowerCase();
+    const cleanFirstName = firstName.trim();
+    const cleanLastName = lastName.trim();
+    const cleanCountry = country.trim();
+    if (!cleanFirstName) {
+      setError("Veuillez renseigner votre prénom");
+      return;
+    }
+    if (!cleanLastName) {
+      setError("Veuillez renseigner votre nom");
+      return;
+    }
+    if (!cleanCountry) {
+      setError("Veuillez renseigner votre pays");
+      return;
+    }
     if (!normalizedEmail) {
       setError("Veuillez renseigner votre email");
       return;
@@ -56,6 +73,12 @@ export default function Register() {
         throw new Error("Code de vérification invalide");
       }
       base44.auth.setToken(result.access_token);
+      await base44.auth.updateMe({
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        contact_name: `${firstName.trim()} ${lastName.trim()}`.trim(),
+        country: country.trim(),
+      });
       window.location.href = "/welcome";
     } catch (err) {
       setError(err.message || "Code de vérification invalide");
@@ -92,7 +115,6 @@ export default function Register() {
   if (showOtp) {
     return (
       <AuthLayout
-        icon={Mail}
         title="Vérifiez votre email"
         subtitle={`Nous avons envoyé un code à ${email}`}
       >
@@ -124,14 +146,7 @@ export default function Register() {
           onClick={handleVerify}
           disabled={loading || otpCode.length < 6}
         >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Vérification...
-            </>
-          ) : (
-            "Vérifier"
-          )}
+          {loading ? "Vérification..." : "Vérifier"}
         </Button>
         <p className="text-center text-sm text-muted-foreground mt-4">
           Vous n'avez pas reçu le code ?{" "}
@@ -145,9 +160,10 @@ export default function Register() {
 
   return (
     <AuthLayout
-      icon={UserPlus}
       title="Créez votre compte"
       subtitle="Inscrivez-vous pour commencer"
+      wide
+      hideIcon
       footer={
         <>
           Déjà un compte ?{" "}
@@ -157,14 +173,13 @@ export default function Register() {
         </>
       }
     >
-      <div className="space-y-3 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         <Button
           type="button"
           variant="outline"
           className="w-full h-12 text-sm font-medium"
           onClick={handleGoogle}
         >
-          <GoogleIcon className="w-5 h-5 mr-2" />
           Continuer avec Google
         </Button>
         <Button
@@ -173,12 +188,6 @@ export default function Register() {
           className="w-full h-12 text-sm font-medium"
           onClick={handleMicrosoft}
         >
-          <svg className="w-5 h-5 mr-2" viewBox="0 0 21 21" aria-hidden="true">
-            <rect x="1" y="1" width="9" height="9" fill="#f25022" />
-            <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
-            <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
-            <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
-          </svg>
           Continuer avec Microsoft
         </Button>
         <Button
@@ -187,9 +196,6 @@ export default function Register() {
           className="w-full h-12 text-sm font-medium"
           onClick={handleApple}
         >
-          <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" fill="currentColor"/>
-          </svg>
           Continuer avec Apple
         </Button>
       </div>
@@ -209,69 +215,98 @@ export default function Register() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName">Prénom</Label>
+          <Input
+            id="firstName"
+            type="text"
+            autoComplete="given-name"
+            autoFocus
+            placeholder="Votre prénom"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            className="h-12"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="lastName">Nom</Label>
+          <Input
+            id="lastName"
+            type="text"
+            autoComplete="family-name"
+            placeholder="Votre nom"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            className="h-12"
+            required
+          />
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => setEmail((value) => value.trim().toLowerCase())}
-              className="pl-10 h-12"
-              required
-            />
-          </div>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="vous@exemple.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setEmail((value) => value.trim().toLowerCase())}
+            className="h-12"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="country">Pays</Label>
+          <Input
+            id="country"
+            list="country-options"
+            type="text"
+            autoComplete="country-name"
+            placeholder="Tapez les 2 premières lettres"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="h-12"
+            required
+          />
+          <datalist id="country-options">
+            {COUNTRIES.map((countryName) => (
+              <option key={countryName} value={countryName} />
+            ))}
+          </datalist>
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Mot de passe</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10 h-12"
-              minLength={8}
-              required
-            />
-          </div>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="h-12"
+            minLength={8}
+            required
+          />
           <p className="text-xs text-muted-foreground">Minimum 8 caractères.</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirmer le mot de passe</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id="confirm"
-              type="password"
-              autoComplete="new-password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pl-10 h-12"
-              minLength={8}
-              required
-            />
-          </div>
+          <Input
+            id="confirm"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Confirmer le mot de passe"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="h-12"
+            minLength={8}
+            required
+          />
         </div>
-        <Button type="submit" className="w-full h-12 font-medium" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Création du compte...
-            </>
-          ) : (
-            "Créer un compte"
-          )}
+        <Button type="submit" className="w-full h-12 font-medium md:col-span-2" disabled={loading}>
+          {loading ? "Création du compte..." : "Créer un compte"}
         </Button>
       </form>
     </AuthLayout>
