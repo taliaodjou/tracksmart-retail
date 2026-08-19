@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BarChart2, ShoppingCart, Package } from 'lucide-react';
 
@@ -11,7 +11,10 @@ const baseTabs = [
 
 export default function BottomTabBar() {
   const location = useLocation();
+  const [hidden, setHidden] = useState(false);
   const tabs = baseTabs;
+
+  if (hidden) return null;
 
   return (
     <nav
@@ -25,6 +28,7 @@ export default function BottomTabBar() {
             <Link
               key={to}
               to={to}
+              onClick={() => setHidden(true)}
               className={`flex-1 flex flex-col items-center justify-center py-1.5 gap-0.5 transition-colors ${
                 active ? 'text-primary' : 'text-gray-600'
               }`}
