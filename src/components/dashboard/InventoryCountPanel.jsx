@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 export default function InventoryCountPanel({ products = [], onSubmit, saving, message }) {
   const [search, setSearch] = useState('');
   const [counts, setCounts] = useState({});
-  const [movementTypes, setMovementTypes] = useState({});
+  const [splits, setSplits] = useState({});
   const [justifications, setJustifications] = useState({});
 
   const visibleProducts = useMemo(() => {
@@ -15,20 +15,33 @@ export default function InventoryCountPanel({ products = [], onSubmit, saving, m
   }, [products, search]);
 
   const countedEntries = Object.entries(counts).filter(([, value]) => value !== '' && !Number.isNaN(Number(value)) && Number(value) >= 0);
-  const missingNatureCount = countedEntries.filter(([productId, value]) => {
+  const invalidSplitCount = countedEntries.filter(([productId, value]) => {
     const product = products.find((item) => item.id === productId);
-    return product && Number(value) < (Number(product.stock_total) || 0) && !movementTypes[productId];
+    const theoretical = Number(product?.stock_total) || 0;
+    const difference = theoretical - Number(value);
+    if (!product || difference <= 0) return false;
+    const sold = Number(splits[productId]?.vente) || 0;
+    const lost = Number(splits[productId]?.perte) || 0;
+    return sold + lost !== difference;
   }).length;
 
   const submit = () => {
-    const entries = countedEntries
-      .map(([productId, value]) => ({
-        product: products.find((product) => product.id === productId),
-        actualQuantity: Number(value),
-        movementType: movementTypes[productId] || 'perte',
-        justification: justifications[productId] || ''
-      }))
-      .filter((entry) => entry.product);
+    const entries = countedEntries.flatMap(([productId, value]) => {
+      const product = products.find((item) => item.id === productId);
+      if (!product) return [];
+      const actualQuantity = Number(value);
+      const theoretical = Number(product.stock_total) || 0;
+      const difference = theoretical - actualQuantity;
+      if (difference > 0) {
+        const sold = Number(splits[productId]?.vente) || 0;
+        const lost = Number(splits[productId]?.perte) || 0;
+        return [
+          sold > 0 ? { product, quantity: sold, movementType: 'vente', justification: '' } : null,
+          lost > 0 ? { product, quantity: lost, movementType: 'perte', justification: justifications[productId] || '' } : null,
+        ].filter(Boolean);
+      }
+      return [{ product, actualQuantity }];
+    });
     onSubmit(entries);
   };
 
@@ -46,7 +59,7 @@ export default function InventoryCountPanel({ products = [], onSubmit, saving, m
       </div>
 
       <div className="p-5 sm:p-6 border-b border-border/40 bg-secondary/30">
-        <p className="text-sm text-muted-foreground">Renseignez la quantité réellement comptée. Si elle est inférieure au stock théorique, indiquez si l’écart correspond à une vente ou à une perte.</p>
+        <p className="text-sm text-muted-foreground">Renseignez la quantité réellement comptée. Si elle est inférieure au stock théorique, répartissez l’écart entre les unités vendues et les unités perdues.</p>
         {message && <p className="mt-3 text-sm font-medium text-primary">{message}</p>}
       </div>
 
@@ -71,10 +84,11 @@ export default function InventoryCountPanel({ products = [], onSubmit, saving, m
                   {hasLoss ? (
                     <div className="space-y-2">
                       <div className="grid grid-cols-2 gap-1.5">
-                        <button type="button" onClick={() => setMovementTypes((current) => ({ ...current, [product.id]: 'vente' }))} className={`rounded-lg border px-2 py-1.5 text-xs font-semibold ${movementTypes[product.id] === 'vente' ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-foreground'}`}>Vendu</button>
-                        <button type="button" onClick={() => setMovementTypes((current) => ({ ...current, [product.id]: 'perte' }))} className={`rounded-lg border px-2 py-1.5 text-xs font-semibold ${movementTypes[product.id] === 'perte' ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-foreground'}`}>Perdu</button>
+                        <Input type="number" min="0" value={splits[product.id]?.vente || ''} onChange={(e) => setSplits((current) => ({ ...current, [product.id]: { ...current[product.id], vente: e.target.value } }))} placeholder="Vendues" className="rounded-lg h-9 text-xs" />
+                        <Input type="number" min="0" value={splits[product.id]?.perte || ''} onChange={(e) => setSplits((current) => ({ ...current, [product.id]: { ...current[product.id], perte: e.target.value } }))} placeholder="Perdues" className="rounded-lg h-9 text-xs" />
                       </div>
-                      {movementTypes[product.id] === 'perte' && <Input value={justifications[product.id] || ''} onChange={(e) => setJustifications((current) => ({ ...current, [product.id]: e.target.value }))} placeholder="Précision optionnelle" className="rounded-lg h-8 text-xs" />}
+                      <p className="text-[11px] text-muted-foreground">Total à répartir : {theoretical - actual} unité{theoretical - actual > 1 ? 's' : ''}</p>
+                      {(Number(splits[product.id]?.perte) || 0) > 0 && <Input value={justifications[product.id] || ''} onChange={(e) => setJustifications((current) => ({ ...current, [product.id]: e.target.value }))} placeholder="Précision perte optionnelle" className="rounded-lg h-8 text-xs" />}
                     </div>
                   ) : <span className="text-xs text-muted-foreground">—</span>}
                 </div>
@@ -86,8 +100,8 @@ export default function InventoryCountPanel({ products = [], onSubmit, saving, m
       </div>
 
       <div className="px-5 sm:px-6 py-4 border-t border-border/40 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <p className="text-xs text-muted-foreground">{countedEntries.length} produit{countedEntries.length > 1 ? 's' : ''} renseigné{countedEntries.length > 1 ? 's' : ''}{missingNatureCount > 0 ? ` · ${missingNatureCount} écart${missingNatureCount > 1 ? 's' : ''} à qualifier` : ''}</p>
-        <Button disabled={countedEntries.length === 0 || missingNatureCount > 0 || saving} onClick={submit} className="rounded-xl">Valider le recomptage</Button>
+        <p className="text-xs text-muted-foreground">{countedEntries.length} produit{countedEntries.length > 1 ? 's' : ''} renseigné{countedEntries.length > 1 ? 's' : ''}{invalidSplitCount > 0 ? ` · ${invalidSplitCount} écart${invalidSplitCount > 1 ? 's' : ''} à répartir correctement` : ''}</p>
+        <Button disabled={countedEntries.length === 0 || invalidSplitCount > 0 || saving} onClick={submit} className="rounded-xl">Valider le recomptage</Button>
       </div>
     </div>
   );

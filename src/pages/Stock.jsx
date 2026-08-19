@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
-import { applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
+import { applyManualStockMovement, applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
 import { getStoreOwnerEmail, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
@@ -47,14 +47,33 @@ export default function Stock() {
   const productsWithStock = useMemo(() => enrichProductsWithStock(products, stockEntries).filter((product) => !product.discarded), [products, stockEntries]);
 
   const inventoryCountMutation = useMutation({
-    mutationFn: (entries) => Promise.all(entries.map((entry) => applyPeriodicStockCount({
-      product: entry.product,
-      storeOwnerEmail,
-      actualQuantity: entry.actualQuantity,
-      movementDate: new Date().toISOString().split('T')[0],
-      movementType: entry.movementType,
-      justification: entry.justification
-    }))),
+    mutationFn: async (entries) => {
+      const results = [];
+      for (const entry of entries) {
+        const movementDate = new Date().toISOString().split('T')[0];
+        if (entry.quantity) {
+          results.push(await applyManualStockMovement({
+            productId: entry.product.id,
+            storeOwnerEmail,
+            quantity: entry.quantity,
+            movementDate,
+            movementType: entry.movementType,
+            justification: entry.justification || 'Recomptage périodique',
+            source: 'manual'
+          }));
+        } else {
+          results.push(await applyPeriodicStockCount({
+            product: entry.product,
+            storeOwnerEmail,
+            actualQuantity: entry.actualQuantity,
+            movementDate,
+            movementType: entry.movementType,
+            justification: entry.justification
+          }));
+        }
+      }
+      return results;
+    },
     onSuccess: (results) => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
