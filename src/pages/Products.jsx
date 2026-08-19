@@ -25,8 +25,6 @@ import InventoryCountModal from '@/components/dashboard/InventoryCountModal';
 import { logActivity } from '@/lib/activityLogger';
 import { addStockEntry, applyManualStockMovement, applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
 
-const XlsIcon = () => <span className="text-[10px] font-bold hidden">XLS</span>;
-
 export default function Products() {
   const { t, lang } = useLanguage();
   const { user } = useAuth();
@@ -364,11 +362,7 @@ export default function Products() {
             <p className="text-sm text-muted-foreground mt-1">Liste complète de vos produits en stock</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <ExportActions products={filteredProducts} />
-            <Button variant="outline" onClick={() => setShowImport(true)} className="rounded-full gap-2">
-              <XlsIcon />
-              {lang === 'fr' ? 'Importer' : 'Import'}
-            </Button>
+            <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
             <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
               <Layers className="w-4 h-4" />
               Gérer mon stock

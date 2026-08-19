@@ -1,11 +1,12 @@
 import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Printer, Download } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Printer, Download, Upload, MoreHorizontal } from 'lucide-react';
 import { format } from 'date-fns';
 import { getProductStatus, getDaysRemaining, categoryKeys, orderStatusKeys } from '@/lib/productUtils';
 
-export default function ExportActions({ products }) {
+export default function ExportActions({ products, onImport }) {
   const { t } = useLanguage();
 
   // Print only expired + soon products
@@ -98,15 +99,27 @@ th { background: #f5f5f5; font-weight: bold; }
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={handlePrint}>
-        <Printer className="w-4 h-4" />
-        {t('dash_print')}
-      </Button>
-      <Button variant="outline" size="sm" className="rounded-full gap-2" onClick={handleExportCSV}>
-        <Download className="w-4 h-4" />
-        {t('dash_export_csv')}
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="sm" className="rounded-full gap-2">
+          <MoreHorizontal className="w-4 h-4" />
+          Fichiers
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={handlePrint} className="gap-2 cursor-pointer">
+          <Printer className="w-4 h-4" />
+          {t('dash_print')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleExportCSV} className="gap-2 cursor-pointer">
+          <Download className="w-4 h-4" />
+          {t('dash_export_csv')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onImport} className="gap-2 cursor-pointer">
+          <Upload className="w-4 h-4" />
+          Importer
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
