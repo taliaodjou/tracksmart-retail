@@ -17,24 +17,24 @@ export default function AddProductOptionsModal({ onScan, onSearchByName, onCreat
           <button onClick={onScan} className="w-full rounded-2xl border border-primary/30 bg-primary/5 p-4 text-left hover:border-primary/60 transition-colors flex items-center gap-4">
             <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center"><ScanLine className="w-5 h-5 text-primary" /></div>
             <div>
-              <p className="font-bold text-sm text-foreground">Scanner le code-barres</p>
+              <p className="font-bold text-sm text-foreground">Scanner le code-barres d'un nouveau produit</p>
               <p className="text-xs text-muted-foreground mt-0.5">Option recommandée pour identifier automatiquement le produit.</p>
-            </div>
-          </button>
-
-          <button onClick={onSearchByName} className="w-full rounded-2xl border border-border/60 p-4 text-left hover:border-primary/50 hover:bg-primary/5 transition-colors flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center"><Package className="w-5 h-5 text-primary" /></div>
-            <div>
-              <p className="font-bold text-sm text-foreground">Rechercher par nom</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Pour retrouver un produit déjà présent dans le stock.</p>
             </div>
           </button>
 
           <button onClick={onCreateManual} className="w-full rounded-2xl border border-border/60 p-4 text-left hover:border-primary/50 hover:bg-primary/5 transition-colors flex items-center gap-4">
             <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center"><Keyboard className="w-5 h-5 text-primary" /></div>
             <div>
-              <p className="font-bold text-sm text-foreground">Saisir un nouveau produit</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Pour remplir les informations manuellement sans scanner.</p>
+              <p className="font-bold text-sm text-foreground">Saisir un nouveau produit manuellement</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Pour créer un produit qui n’existe pas encore dans le stock.</p>
+            </div>
+          </button>
+
+          <button onClick={onSearchByName} className="w-full rounded-2xl border border-border/60 p-4 text-left hover:border-primary/50 hover:bg-primary/5 transition-colors flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center"><Package className="w-5 h-5 text-primary" /></div>
+            <div>
+              <p className="font-bold text-sm text-foreground">Compléter un produit déjà enregistré</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Pour réapprovisionner un produit déjà enregistré avec une nouvelle quantité / date.</p>
             </div>
           </button>
         </div>
