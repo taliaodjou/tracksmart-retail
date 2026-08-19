@@ -27,9 +27,13 @@ import OnboardingModal from '@/components/dashboard/OnboardingModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import CockpitOverview from '@/components/dashboard/CockpitOverview';
 import InventoryCountModal from '@/components/dashboard/InventoryCountModal';
+import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
+import QuickAddModal from '@/components/dashboard/QuickAddModal';
+import AddProductOptionsModal from '@/components/dashboard/AddProductOptionsModal';
+import ManualProductSearchModal from '@/components/dashboard/ManualProductSearchModal';
 
 export default function Dashboard() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -37,6 +41,11 @@ export default function Dashboard() {
   const [editProduct, setEditProduct] = useState(null);
   const [showImport, setShowImport] = useState(false);
   const [showInventoryCount, setShowInventoryCount] = useState(false);
+  const [showAddOptions, setShowAddOptions] = useState(false);
+  const [showManualSearch, setShowManualSearch] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [manualInitialProduct, setManualInitialProduct] = useState(null);
+  const [quickAdd, setQuickAdd] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -83,6 +92,12 @@ export default function Dashboard() {
       // Employees only see their own products
       return base44.entities.Product.filter({ created_by: user.email }, '-created_date');
     },
+    enabled: canAccess && !!user?.email
+  });
+
+  const { data: barcodeDB = [] } = useQuery({
+    queryKey: ['barcodes'],
+    queryFn: () => base44.entities.BarcodeProduct.list('barcode', 1000),
     enabled: canAccess && !!user?.email
   });
 
@@ -139,6 +154,8 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
+      setManualInitialProduct(null);
+      setQuickAdd(null);
     }
   });
 
@@ -176,6 +193,8 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
+      setManualInitialProduct(null);
+      setQuickAdd(null);
     }
   });
 
@@ -221,6 +240,16 @@ export default function Dashboard() {
   const handleEdit = (product) => {setEditProduct(product);setShowForm(true);};
   const handleDelete = (product) => {
     if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product.id);
+  };
+
+  const findExistingProduct = (name, brand, barcode) => {
+    const normalize = (value) => (value || '').toLowerCase().trim();
+    if (barcode) {
+      const byBarcode = productsWithStock.find((product) => normalize(product.barcode) === normalize(barcode));
+      if (byBarcode) return byBarcode;
+    }
+    if (!name) return null;
+    return productsWithStock.find((product) => normalize(product.name) === normalize(name) && normalize(product.marque) === normalize(brand)) || null;
   };
 
   // ── Category mapping from Open Food Facts tags ───────────
@@ -287,6 +316,59 @@ export default function Dashboard() {
     return '';
   };
 
+  const handleBarcodeDetected = async (code) => {
+    setShowScanner(false);
+    logActivity(user, 'barcode_scanned', `${user.full_name || user.email} a scanné le code-barres ${code}`, { entity_name: code });
+
+    const match = barcodeDB.find((barcode) => barcode.barcode === code);
+    if (match) {
+      setQuickAdd({ barcode: code, prefill: match, existingProduct: findExistingProduct(match.name, match.brand || match.marque, code) });
+      return;
+    }
+
+    const applyPrefill = (productData, defaultCategory = '') => {
+      const name = productData.product_name_fr || productData.product_name || productData.generic_name || '';
+      const brand = productData.brands || '';
+      const category = matchCategory(productData.categories_tags || []) || defaultCategory;
+      setQuickAdd({
+        barcode: code,
+        prefill: { name, brand, category, image_url: productData.image_front_url || productData.image_url || '' },
+        existingProduct: findExistingProduct(name, brand, code)
+      });
+    };
+
+    try {
+      const foodData = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then((response) => response.json());
+      if (foodData?.status === 1 && foodData?.product) { applyPrefill(foodData.product); return; }
+    } catch (_) {}
+
+    try {
+      const beautyData = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then((response) => response.json());
+      if (beautyData?.status === 1 && beautyData?.product) { applyPrefill(beautyData.product, 'hygiene_beaute'); return; }
+    } catch (_) {}
+
+    try {
+      const opData = await fetch(`https://world.openproductsfacts.org/api/v0/product/${code}.json`).then((response) => response.json());
+      if (opData?.status === 1 && opData?.product) { applyPrefill(opData.product); return; }
+    } catch (_) {}
+
+    try {
+      const upcData = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`).then((response) => response.json());
+      if (upcData?.code === 'OK' && upcData?.items?.length > 0) {
+        const item = upcData.items[0];
+        const name = item.title || '';
+        const brand = item.brand || '';
+        const category = matchCategory((item.category || '').toLowerCase().split(/[,/]/).map((value) => value.trim()));
+        setQuickAdd({ barcode: code, prefill: { name, brand, category, image_url: item.images?.[0] || '' }, existingProduct: findExistingProduct(name, brand, code) });
+        return;
+      }
+    } catch (_) {}
+
+    setManualInitialProduct({ barcode: code });
+    setEditProduct(null);
+    setShowForm(true);
+  };
+
   // All products (including discarded) shown in stock list
   const activeProducts = useMemo(() => productsWithStock, [productsWithStock]);
 
@@ -347,7 +429,7 @@ export default function Dashboard() {
         <div className="hidden sm:flex items-start sm:items-center justify-between gap-4 mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('dash_title')}</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <Button onClick={() => {setEditProduct(null);setShowForm(true);}} className="rounded-full gap-2">
+            <Button onClick={() => setShowAddOptions(true)} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
             </Button>
@@ -359,7 +441,7 @@ export default function Dashboard() {
         <div className="sm:hidden flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-foreground">{t('dash_title')}</h1>
           <div className="flex flex-wrap justify-end gap-2">
-            <Button size="sm" onClick={() => {setEditProduct(null);setShowForm(true);}} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
+            <Button size="sm" onClick={() => setShowAddOptions(true)} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Ajouter un produit
             </Button>
             <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
@@ -377,8 +459,9 @@ export default function Dashboard() {
             {showForm &&
           <ProductForm
             onSave={handleSave}
-            onCancel={() => {setShowForm(false);setEditProduct(null);}}
-            editProduct={editProduct} />
+            onCancel={() => {setShowForm(false);setEditProduct(null);setManualInitialProduct(null);}}
+            editProduct={editProduct}
+            initialProduct={manualInitialProduct} />
 
           }
 
@@ -397,6 +480,44 @@ export default function Dashboard() {
           queryClient.invalidateQueries({ queryKey: ['products'] });
           logActivity(user, 'excel_imported', `${user.full_name || user.email} a importé un fichier Excel${count ? ` (${count} produits)` : ''}`);
         }} />
+
+      }
+
+      {showAddOptions &&
+      <AddProductOptionsModal
+        onScan={() => { setShowAddOptions(false); setShowScanner(true); }}
+        onSearchByName={() => { setShowAddOptions(false); setShowManualSearch(true); }}
+        onCreateManual={() => { setShowAddOptions(false); setEditProduct(null); setManualInitialProduct(null); setShowForm(true); }}
+        onClose={() => setShowAddOptions(false)} />
+
+      }
+
+      {showManualSearch &&
+      <ManualProductSearchModal
+        products={productsWithStock}
+        onSelect={(product) => { setQuickAdd({ barcode: null, prefill: null, existingProduct: product }); setShowManualSearch(false); }}
+        onCreate={(name) => { setManualInitialProduct({ name }); setEditProduct(null); setShowForm(true); setShowManualSearch(false); }}
+        onClose={() => setShowManualSearch(false)} />
+
+      }
+
+      {showScanner &&
+      <BarcodeScanner
+        lang={lang}
+        onDetected={handleBarcodeDetected}
+        onClose={() => setShowScanner(false)} />
+
+      }
+
+      {quickAdd &&
+      <QuickAddModal
+        barcode={quickAdd.barcode}
+        prefill={quickAdd.prefill}
+        existingProduct={quickAdd.existingProduct}
+        onSave={(data) => createMutation.mutate(data)}
+        onUpdate={(id, data) => updateMutation.mutate({ id, data })}
+        onClose={() => setQuickAdd(null)}
+        saving={createMutation.isPending || updateMutation.isPending} />
 
       }
 
