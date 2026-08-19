@@ -7,15 +7,12 @@ import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, ScanLine, X, LayoutList, Layers } from 'lucide-react';
-
-const XlsIcon = () =>
-<span className="text-[10px] font-bold hidden">XLS</span>;
+import { Plus, Search, X, LayoutList, Layers } from 'lucide-react';
 
 import { getProductStatus, hasActiveSubscription, categoryKeys, getStoreOwnerEmail, isDiscarded } from '@/lib/productUtils';
 import { checkAndSendReminders, checkAndSendWeeklyReport } from '@/lib/schedulerUtils';
 import { logActivity } from '@/lib/activityLogger';
-import { addStockEntry, enrichProductsWithStock } from '@/lib/stockEntries';
+import { addStockEntry, applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
@@ -28,20 +25,18 @@ import ExportActions from '@/components/dashboard/ExportActions';
 import ImportModal from '@/components/dashboard/ImportModal';
 import OnboardingModal from '@/components/dashboard/OnboardingModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
-import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
-import QuickAddModal from '@/components/dashboard/QuickAddModal';
 import CockpitOverview from '@/components/dashboard/CockpitOverview';
+import InventoryCountModal from '@/components/dashboard/InventoryCountModal';
 
 export default function Dashboard() {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [showImport, setShowImport] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
-  const [quickAdd, setQuickAdd] = useState(null); // { barcode, prefill }
+  const [showInventoryCount, setShowInventoryCount] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -91,16 +86,15 @@ export default function Dashboard() {
     enabled: canAccess && !!user?.email
   });
 
-  // Barcode DB — loaded once, used for local lookup
-  const { data: barcodeDB = [] } = useQuery({
-    queryKey: ['barcodes'],
-    queryFn: () => base44.entities.BarcodeProduct.list('barcode', 1000),
-    enabled: canAccess
-  });
-
   const { data: stockEntries = [] } = useQuery({
     queryKey: ['stockEntries', storeOwnerEmail],
     queryFn: () => base44.entities.Batch.filter({ store_owner_email: storeOwnerEmail }, 'expiration_date', 5000),
+    enabled: canAccess && !!storeOwnerEmail
+  });
+
+  const { data: stockMovements = [] } = useQuery({
+    queryKey: ['stockMovements', storeOwnerEmail],
+    queryFn: () => base44.entities.StockMovement.filter({ store_owner_email: storeOwnerEmail, archived: false }, '-movement_date', 5000),
     enabled: canAccess && !!storeOwnerEmail
   });
 
@@ -142,9 +136,9 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
-      setQuickAdd(null);
     }
   });
 
@@ -179,9 +173,28 @@ export default function Dashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
     }
+  });
+
+  const inventoryCountMutation = useMutation({
+    mutationFn: (entries) => Promise.all(entries.map((entry) => applyPeriodicStockCount({
+      product: entry.product,
+      storeOwnerEmail,
+      actualQuantity: entry.actualQuantity,
+      movementDate: new Date().toISOString().split('T')[0],
+      movementType: entry.movementType,
+      justification: entry.justification
+    }))),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
+      setShowInventoryCount(false);
+    },
+    onError: (error) => window.alert(error.message || 'Impossible de valider cet inventaire.')
   });
 
   const deleteMutation = useMutation({
@@ -274,98 +287,6 @@ export default function Dashboard() {
     return '';
   };
 
-  // ── Find duplicate by name + brand ──────────────────────
-  const findExistingProduct = (name, brand, barcode) => {
-    const normalize = (s) => (s || '').toLowerCase().trim();
-    if (barcode) {
-      const byBarcode = productsWithStock.find((p) => normalize(p.barcode) === normalize(barcode));
-      if (byBarcode) return byBarcode;
-    }
-    if (!name) return null;
-    return productsWithStock.find((p) =>
-    normalize(p.name) === normalize(name) &&
-    normalize(p.marque) === normalize(brand)
-    ) || null;
-  };
-
-  // ── Barcode scan flow ────────────────────────────────────
-  const handleBarcodeDetected = async (code) => {
-    setShowScanner(false);
-    logActivity(user, 'barcode_scanned', `${user.full_name || user.email} a scanné le code-barres ${code}`, {
-      entity_name: code
-    });
-
-    // 1. Search local DB first
-    const match = barcodeDB.find((b) => b.barcode === code);
-    if (match) {
-      const existing = findExistingProduct(match.name, match.brand || match.marque, code);
-      setQuickAdd({ barcode: code, prefill: match, existingProduct: existing });
-      return;
-    }
-
-    // Helper to build prefill and setQuickAdd from an OFF-style product object
-    const applyPrefill = (p, defaultCategory = '') => {
-      const name = p.product_name_fr || p.product_name || p.generic_name || '';
-      const brand = p.brands || '';
-      const rawCategory = matchCategory(p.categories_tags || []);
-      const category = rawCategory || defaultCategory;
-      const existing = findExistingProduct(name, brand, code);
-      setQuickAdd({
-        barcode: code,
-        prefill: { name, brand, category, image_url: p.image_front_url || p.image_url || '' },
-        existingProduct: existing
-      });
-    };
-
-    // 2. Open Food Facts
-    try {
-      const foodData = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`).then(r => r.json());
-      if (foodData?.status === 1 && foodData?.product) {
-        applyPrefill(foodData.product);
-        return;
-      }
-    } catch (_) {}
-
-    // 3. Open Beauty Facts
-    try {
-      const beautyData = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${code}.json`).then(r => r.json());
-      if (beautyData?.status === 1 && beautyData?.product) {
-        applyPrefill(beautyData.product, 'hygiene_beaute');
-        return;
-      }
-    } catch (_) {}
-
-    // 4. Open Products Facts (produits ménagers, Afrique, etc.)
-    try {
-      const opData = await fetch(`https://world.openproductsfacts.org/api/v0/product/${code}.json`).then(r => r.json());
-      if (opData?.status === 1 && opData?.product) {
-        applyPrefill(opData.product);
-        return;
-      }
-    } catch (_) {}
-
-    // 5. UPC Item DB (base de données mondiale, bons résultats pour produits africains)
-    try {
-      const upcData = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`).then(r => r.json());
-      if (upcData?.code === 'OK' && upcData?.items?.length > 0) {
-        const item = upcData.items[0];
-        const name = item.title || '';
-        const brand = item.brand || '';
-        const category = matchCategory((item.category || '').toLowerCase().split(/[,/]/).map(s => s.trim()));
-        const existing = findExistingProduct(name, brand, code);
-        setQuickAdd({
-          barcode: code,
-          prefill: { name, brand, category, image_url: item.images?.[0] || '' },
-          existingProduct: existing
-        });
-        return;
-      }
-    } catch (_) {}
-
-    // 6. Not found anywhere — manual entry
-    setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
-  };
-
   // All products (including discarded) shown in stock list
   const activeProducts = useMemo(() => productsWithStock, [productsWithStock]);
 
@@ -426,33 +347,29 @@ export default function Dashboard() {
         <div className="hidden sm:flex items-start sm:items-center justify-between gap-4 mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{t('dash_title')}</h1>
           <div className="flex flex-wrap items-center gap-2">
-            <ExportActions products={filteredProducts} />
-            <Button variant="outline" onClick={() => setShowImport(true)} className="rounded-full gap-2">
-              <XlsIcon />
-              {lang === 'fr' ? 'Importer' : 'Import'}
-            </Button>
-            <Button variant="outline" onClick={() => setShowScanner(true)} className="rounded-full gap-2">
-              <ScanLine className="w-4 h-4" />
-              {t('btn_scanner')}
-            </Button>
             <Button onClick={() => {setEditProduct(null);setShowForm(true);}} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
             </Button>
+            <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
+              <Layers className="w-4 h-4" />
+              Gérer mon stock
+            </Button>
+            <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
         </div>
 
         {/* Mobile header */}
         <div className="sm:hidden flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold text-foreground">{t('dash_title')}</h1>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => setShowImport(true)} className="rounded-full h-9 px-3 gap-1.5 text-xs">
-              <XlsIcon />
-              <span>Importer</span>
-            </Button>
+          <div className="flex flex-wrap justify-end gap-2">
             <Button size="sm" onClick={() => {setEditProduct(null);setShowForm(true);}} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Ajouter un produit
             </Button>
+            <Button size="sm" variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full h-9 px-3 gap-1.5 text-xs">
+              <Layers className="w-3.5 h-3.5" /> Gérer mon stock
+            </Button>
+            <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
         </div>
 
@@ -462,7 +379,7 @@ export default function Dashboard() {
           </div> :
 
         <div className="space-y-4 sm:space-y-6">
-            <StatsCards products={activeProducts} />
+            <StatsCards products={activeProducts} movements={stockMovements} />
 
             {showForm &&
           <ProductForm
@@ -490,23 +407,12 @@ export default function Dashboard() {
 
       }
 
-      {showScanner &&
-      <BarcodeScanner
-        lang={lang}
-        onDetected={handleBarcodeDetected}
-        onClose={() => setShowScanner(false)} />
-
-      }
-
-      {quickAdd &&
-      <QuickAddModal
-        barcode={quickAdd.barcode}
-        prefill={quickAdd.prefill}
-        existingProduct={quickAdd.existingProduct}
-        onSave={(data) => createMutation.mutate(data)}
-        onUpdate={(id, data) => updateMutation.mutate({ id, data })}
-        onClose={() => setQuickAdd(null)}
-        saving={createMutation.isPending || updateMutation.isPending} />
+      {showInventoryCount &&
+      <InventoryCountModal
+        products={productsWithStock}
+        onClose={() => setShowInventoryCount(false)}
+        onSubmit={(entries) => inventoryCountMutation.mutate(entries)}
+        saving={inventoryCountMutation.isPending} />
 
       }
 

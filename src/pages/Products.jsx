@@ -14,6 +14,7 @@ import ProductTable from '@/components/dashboard/ProductTable';
 import RayonGroupedTable from '@/components/dashboard/RayonGroupedTable';
 import ExportActions from '@/components/dashboard/ExportActions';
 import ImportModal from '@/components/dashboard/ImportModal';
+import StatsCards from '@/components/dashboard/StatsCards';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
 import AddProductOptionsModal from '@/components/dashboard/AddProductOptionsModal';
@@ -373,6 +374,8 @@ export default function Products() {
             <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
         </div>
+
+        <StatsCards products={productsWithStock} movements={stockMovements} />
 
         {showForm && (
           <ProductForm

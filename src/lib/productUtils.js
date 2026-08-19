@@ -143,12 +143,19 @@ export function getActiveProducts(products) {
 
 export function getCoreProductMetrics(products) {
   const activeProducts = getActiveProducts(products);
+  const stockValue = activeProducts
+    .filter(p => !isDiscarded(p))
+    .reduce((sum, p) => {
+      const quantity = p.stock_total === null || p.stock_total === undefined ? 1 : Number(p.stock_total) || 0;
+      return sum + quantity * (Number(p.price_chf) || 0);
+    }, 0);
   return {
     activeProducts,
     totalProducts: activeProducts.length,
     expiredProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length,
     urgentProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length,
-    totalLoss: calculateTotalLoss(products)
+    totalLoss: calculateTotalLoss(products),
+    stockValue
   };
 }
 
