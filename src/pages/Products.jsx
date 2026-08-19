@@ -174,12 +174,13 @@ export default function Products() {
   });
 
   const adjustmentMutation = useMutation({
-    mutationFn: ({ product, quantity, justification, movementDate }) => applyManualStockMovement({
+    mutationFn: ({ product, quantity, justification, movementDate, movementType }) => applyManualStockMovement({
       productId: product.id,
       storeOwnerEmail,
       quantity,
       justification,
-      movementDate
+      movementDate,
+      movementType
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
@@ -196,7 +197,9 @@ export default function Products() {
       product: entry.product,
       storeOwnerEmail,
       actualQuantity: entry.actualQuantity,
-      movementDate: new Date().toISOString().split('T')[0]
+      movementDate: new Date().toISOString().split('T')[0],
+      movementType: entry.movementType,
+      justification: entry.justification
     }))),
     onSuccess: (results) => {
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
@@ -369,10 +372,6 @@ export default function Products() {
             <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
               <Layers className="w-4 h-4" />
               Faire l'inventaire
-            </Button>
-            <Button variant="outline" onClick={() => { setShowAdjustment(true); setAdjustmentProduct(null); setAdjustmentEntry(null); }} className="rounded-full gap-2">
-              <Plus className="w-4 h-4" />
-              Enregistrer un mouvement
             </Button>
             <Button onClick={() => setShowAddOptions(true)} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />

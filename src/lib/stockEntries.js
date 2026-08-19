@@ -98,10 +98,10 @@ export async function addStockEntry({ productId, storeOwnerEmail, expirationDate
   return savedEntry;
 }
 
-export async function applyManualStockMovement({ productId, storeOwnerEmail, quantity, justification, movementDate }) {
+export async function applyManualStockMovement({ productId, storeOwnerEmail, quantity, justification, movementDate, movementType = 'perte', source = 'manual' }) {
   const quantityNumber = Number(quantity) || 0;
-  if (!productId || !storeOwnerEmail || quantityNumber <= 0 || !justification?.trim()) {
-    throw new Error('Produit, quantité et justification sont obligatoires.');
+  if (!productId || !storeOwnerEmail || quantityNumber <= 0 || !['vente', 'perte'].includes(movementType)) {
+    throw new Error('Produit, quantité et nature du mouvement sont obligatoires.');
   }
 
   const entries = await base44.entities.Batch.filter({ product_id: productId }, 'expiration_date', 200);
@@ -129,12 +129,12 @@ export async function applyManualStockMovement({ productId, storeOwnerEmail, qua
     store_owner_email: storeOwnerEmail,
     product_id: productId,
     movement_date: movementDate || today(),
-    type: 'vente',
-    source: 'manual',
+    type: movementType,
+    source,
     quantity: quantityNumber,
     quantity_before: totalBefore,
     quantity_after: totalBefore - quantityNumber,
-    justification: justification.trim(),
+    justification: justification?.trim() || '',
     values_before: JSON.stringify(before),
     values_after: JSON.stringify(after),
   });
@@ -142,7 +142,7 @@ export async function applyManualStockMovement({ productId, storeOwnerEmail, qua
   return { decremented: quantityNumber, missing: 0 };
 }
 
-export async function applyPeriodicStockCount({ product, storeOwnerEmail, actualQuantity, movementDate }) {
+export async function applyPeriodicStockCount({ product, storeOwnerEmail, actualQuantity, movementDate, movementType = 'perte', justification = '' }) {
   const actual = Number(actualQuantity);
   const theoretical = Number(product?.stock_total) || 0;
   if (!product?.id || !storeOwnerEmail || Number.isNaN(actual) || actual < 0) {
@@ -155,8 +155,9 @@ export async function applyPeriodicStockCount({ product, storeOwnerEmail, actual
       productId: product.id,
       storeOwnerEmail,
       quantity: difference,
-      justification: 'Recomptage périodique',
+      justification: justification || 'Recomptage périodique',
       movementDate,
+      movementType,
     });
   }
 
@@ -182,7 +183,8 @@ export async function decrementStockFefo(productId, quantity = 1) {
     productId,
     storeOwnerEmail: firstEntry?.store_owner_email,
     quantity,
-    justification: 'Vente scannée',
+    movementType: 'vente',
+    source: 'scan',
     movementDate: today(),
   });
 }

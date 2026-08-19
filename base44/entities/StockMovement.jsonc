@@ -23,7 +23,8 @@
       "type": "string",
       "enum": [
         "reception",
-        "vente"
+        "vente",
+        "perte"
       ],
       "description": "Movement type shown to the user"
     },
@@ -53,7 +54,7 @@
     },
     "justification": {
       "type": "string",
-      "description": "Required reason for manual movements"
+      "description": "Optional detail for manual movements"
     },
     "values_before": {
       "type": "string",

@@ -22,6 +22,10 @@
       "type": "number",
       "default": 0
     },
+    "total_pertes": {
+      "type": "number",
+      "default": 0
+    },
     "movement_count": {
       "type": "number",
       "default": 0

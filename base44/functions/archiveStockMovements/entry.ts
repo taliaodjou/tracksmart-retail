@@ -23,10 +23,12 @@ export default async function(req) {
         month: monthKey(movement.movement_date),
         total_receptions: 0,
         total_ventes: 0,
+        total_pertes: 0,
         movement_count: 0,
       };
       if (movement.type === 'reception') current.total_receptions += Number(movement.quantity) || 0;
       if (movement.type === 'vente') current.total_ventes += Number(movement.quantity) || 0;
+      if (movement.type === 'perte') current.total_pertes += Number(movement.quantity) || 0;
       current.movement_count += 1;
       groups.set(key, current);
     }
@@ -41,6 +43,7 @@ export default async function(req) {
         await base44.asServiceRole.entities.StockMovementSummary.update(existing[0].id, {
           total_receptions: (Number(existing[0].total_receptions) || 0) + summary.total_receptions,
           total_ventes: (Number(existing[0].total_ventes) || 0) + summary.total_ventes,
+          total_pertes: (Number(existing[0].total_pertes) || 0) + summary.total_pertes,
           movement_count: (Number(existing[0].movement_count) || 0) + summary.movement_count,
           generated_at: today,
         });

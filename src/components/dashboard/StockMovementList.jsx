@@ -1,7 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 
-const typeLabel = { reception: 'Réception', vente: 'Vente' };
+const typeLabel = { reception: 'Réception', vente: 'Vente', perte: 'Perte' };
 
 function formatDate(value) {
   if (!value) return '—';
