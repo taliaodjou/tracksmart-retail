@@ -22,7 +22,8 @@ const ACTION_KEYS = {
 const empty = {
   name: '', marque: '', barcode: '', etagere: '', category: '', rayon: '',
   reception_date: '', expiration_date: '', quantity_received: '',
-  action: '', order_date: '', quantity_thrown: '', price_chf: '',
+  price_chf: '', purchase_price_chf: '',
+  action: '', order_date: '', quantity_thrown: '',
 };
 
 export default function ProductForm({ onSave, onCancel, editProduct, initialProduct }) {
@@ -48,6 +49,7 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
         order_date: editProduct.order_date || '',
         quantity_thrown: editProduct.quantity_thrown ?? '',
         price_chf: editProduct.price_chf ?? '',
+        purchase_price_chf: editProduct.purchase_price_chf ?? '',
       });
     } else if (initialProduct) {
       setForm({ ...empty, ...initialProduct });
@@ -83,6 +85,8 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
     if (form.category) data.category = form.category;
     if (form.rayon) data.rayon = form.rayon;
     if (form.reception_date) data.reception_date = form.reception_date;
+    if (form.price_chf !== '') data.price_chf = Number(form.price_chf);
+    if (form.purchase_price_chf !== '') data.purchase_price_chf = Number(form.purchase_price_chf);
     if (isExpired) {
       if (form.action) data.action = form.action;
       if (form.order_date) data.order_date = form.order_date;
@@ -231,6 +235,16 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
           <Input required type="date" value={form.expiration_date} onChange={set('expiration_date')} className="h-8 text-sm" />
         </div>
 
+        <div className="space-y-1">
+          <Label className="text-xs">Prix de vente CHF</Label>
+          <Input type="number" min="0" step="0.05" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" className="h-8 text-sm" />
+        </div>
+
+        <div className="space-y-1">
+          <Label className="text-xs">Prix d’achat CHF</Label>
+          <Input type="number" min="0" step="0.05" value={form.purchase_price_chf} onChange={set('purchase_price_chf')} placeholder="0.00" className="h-8 text-sm" />
+        </div>
+
         {/* Conditional: expired fields */}
         {isExpired && (
           <>
@@ -240,7 +254,7 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
 
             <div className="space-y-1">
               <Label className="text-xs">{t('form_action')}</Label>
-              <Select value={form.action} onValueChange={v => setForm({ ...form, action: v, quantity_thrown: '', price_chf: '' })}>
+              <Select value={form.action} onValueChange={v => setForm({ ...form, action: v, quantity_thrown: '' })}>
                 <SelectTrigger className="h-8 text-sm"><SelectValue placeholder={t('form_action')} /></SelectTrigger>
                 <SelectContent>
                   {actionOptions.map(o => <SelectItem key={o.value} value={o.value}>{t(o.key)}</SelectItem>)}
@@ -258,11 +272,6 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
                 <div className="space-y-1">
                   <Label className="text-xs">{t('form_qty_thrown')}</Label>
                   <Input type="number" min="1" value={form.quantity_thrown} onChange={set('quantity_thrown')} placeholder="0" className="h-8 text-sm" />
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs">{t('form_price_chf')}</Label>
-                  <Input type="number" min="0.01" step="0.01" value={form.price_chf} onChange={set('price_chf')} placeholder="0.00" className="h-8 text-sm" />
                 </div>
 
                 {(form.quantity_thrown || form.price_chf) && (

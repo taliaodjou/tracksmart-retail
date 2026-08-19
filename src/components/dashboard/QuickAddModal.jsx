@@ -23,6 +23,7 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
     reception_date: today,
     quantity_received: '',
     price_chf: productSource.default_price_chf || productSource.price_chf || '',
+    purchase_price_chf: productSource.purchase_price_chf || '',
   });
 
   const imageUrl = prefill?.image_url || existingProduct?.image_url || null;
@@ -44,6 +45,7 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
       reception_date: form.reception_date,
       quantity_received: Number(form.quantity_received),
       price_chf: form.price_chf ? Number(form.price_chf) : undefined,
+      purchase_price_chf: form.purchase_price_chf ? Number(form.purchase_price_chf) : undefined,
     };
 
     if (existingProduct) {
@@ -142,9 +144,15 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
                 </Select>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">{isFr ? 'Prix unitaire CHF' : 'Unit price CHF'}</label>
-                <Input type="number" min="0" step="0.05" value={form.price_chf} onChange={(event) => set('price_chf', event.target.value)} placeholder="0.00" className="h-12 text-base rounded-xl" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">{isFr ? 'Prix de vente CHF' : 'Sale price CHF'}</label>
+                  <Input type="number" min="0" step="0.05" value={form.price_chf} onChange={(event) => set('price_chf', event.target.value)} placeholder="0.00" className="h-12 text-base rounded-xl" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-foreground mb-2">{isFr ? 'Prix d’achat CHF' : 'Purchase price CHF'}</label>
+                  <Input type="number" min="0" step="0.05" value={form.purchase_price_chf} onChange={(event) => set('purchase_price_chf', event.target.value)} placeholder="0.00" className="h-12 text-base rounded-xl" />
+                </div>
               </div>
             </>
           )}

@@ -86,7 +86,11 @@
     },
     "price_chf": {
       "type": "number",
-      "description": "Prix unitaire CHF"
+      "description": "Prix de vente unitaire CHF"
+    },
+    "purchase_price_chf": {
+      "type": "number",
+      "description": "Prix d\u2019achat unitaire CHF"
     },
     "order_status": {
       "type": "string",
