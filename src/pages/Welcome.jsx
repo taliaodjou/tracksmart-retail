@@ -290,7 +290,7 @@ export default function Welcome() {
         transition={{ delay: 1 }}
         className="text-center py-5 px-4 text-xs text-muted-foreground/50 relative z-10"
       >
-        TrackSmart Retail · TNO Studio · support@tracksmart.com · +41 77 222 97 64
+        TrackSmart Retail · TNO Studio · support@tracksmart.com
       </motion.footer>
     </div>
   );

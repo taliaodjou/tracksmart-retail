@@ -445,22 +445,6 @@ export default function Landing() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-8">
               <motion.a
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                href="tel:+41772229764"
-                className="flex items-center gap-2.5 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-white border border-orange-200 hover:border-primary hover:shadow-md transition-all duration-300 group w-full sm:w-auto"
-              >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#25D366] flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">Par téléphone</p>
-                  <p className="text-sm sm:text-lg font-bold text-foreground group-hover:text-primary transition-colors">+41 77 222 97 64</p>
-                </div>
-              </motion.a>
-
-              <motion.a
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.25 }}

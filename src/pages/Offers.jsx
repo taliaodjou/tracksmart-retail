@@ -129,9 +129,6 @@ export default function Offers() {
             <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Vous souhaitez en discuter ?</h2>
             <p className="text-muted-foreground mb-6">Contactez-nous pour choisir l’offre la plus adaptée à votre magasin.</p>
             <div className="flex flex-col sm:flex-row justify-center gap-3">
-              <a href="tel:+41772229764" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white border border-orange-200 px-5 py-3 font-bold">
-                <Phone className="w-4 h-4 text-primary" /> +41 77 222 97 64
-              </a>
               <a href="mailto:contact@tracksmart.ch" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white border border-orange-200 px-5 py-3 font-bold">
                 <Mail className="w-4 h-4 text-primary" /> contact@tracksmart.ch
               </a>
