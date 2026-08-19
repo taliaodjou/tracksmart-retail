@@ -26,6 +26,7 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
   });
 
   const imageUrl = prefill?.image_url || existingProduct?.image_url || null;
+  const isExisting = !!existingProduct;
   const isManual = !productSource.name;
   const set = (key, value) => setForm((current) => ({ ...current, [key]: value }));
   const canSave = form.name && form.expiration_date && (Number(form.quantity_received) || 0) > 0;
@@ -58,7 +59,7 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 flex-shrink-0">
           <div>
             <p className="font-bold text-foreground text-base">
-              {isManual ? (isFr ? '✏️ Ajouter manuellement' : '✏️ Add manually') : (isFr ? '⚡ Produit reconnu' : '⚡ Product recognized')}
+              {isExisting ? (isFr ? '⚡ Produit existant' : '⚡ Existing product') : isManual ? (isFr ? '✏️ Ajouter manuellement' : '✏️ Add manually') : (isFr ? '⚡ Produit reconnu' : '⚡ Product recognized')}
             </p>
             {barcode && <p className="text-xs text-muted-foreground font-mono mt-0.5">EAN: {barcode}</p>}
           </div>
@@ -113,36 +114,40 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
-            <span>📦</span>
-            <span>{isFr ? 'Date de réception' : 'Reception date'}: <strong>{today}</strong></span>
-          </div>
+          {!isExisting && (
+            <>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+                <span>📦</span>
+                <span>{isFr ? 'Date de réception' : 'Reception date'}: <strong>{today}</strong></span>
+              </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">{isFr ? 'Étagère' : 'Shelf'} <span className="text-muted-foreground font-normal text-xs">({isFr ? 'optionnel' : 'optional'})</span></label>
-            <Input value={form.etagere} onChange={(event) => set('etagere', event.target.value)} placeholder={isFr ? 'Ex: Étagère du haut' : 'Ex: Top shelf'} className="h-11 text-sm rounded-xl" />
-          </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">{isFr ? 'Étagère' : 'Shelf'} <span className="text-muted-foreground font-normal text-xs">({isFr ? 'optionnel' : 'optional'})</span></label>
+                <Input value={form.etagere} onChange={(event) => set('etagere', event.target.value)} placeholder={isFr ? 'Ex: Étagère du haut' : 'Ex: Top shelf'} className="h-11 text-sm rounded-xl" />
+              </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5"><Layers className="w-4 h-4 text-primary" />{isFr ? 'Rayon' : 'Section'}</label>
-            <RayonInput value={form.rayon} onChangeValue={(value) => set('rayon', value)} listId="quick-add-rayons" placeholder={isFr ? 'Choisir un rayon ou écrire un nom personnalisé' : 'Choose a section or type a custom name'} className="h-12 text-base rounded-xl" />
-          </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5"><Layers className="w-4 h-4 text-primary" />{isFr ? 'Rayon' : 'Section'}</label>
+                <RayonInput value={form.rayon} onChangeValue={(value) => set('rayon', value)} listId="quick-add-rayons" placeholder={isFr ? 'Choisir un rayon ou écrire un nom personnalisé' : 'Choose a section or type a custom name'} className="h-12 text-base rounded-xl" />
+              </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5"><Tag className="w-4 h-4 text-primary" />{isFr ? 'Catégorie' : 'Category'}</label>
-            <Select value={form.category || '__none__'} onValueChange={(value) => set('category', value === '__none__' ? '' : value)}>
-              <SelectTrigger className="h-12 text-base rounded-xl"><SelectValue placeholder={isFr ? 'Choisir une catégorie…' : 'Choose a category…'} /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">— {isFr ? 'Non défini' : 'Not set'} —</SelectItem>
-                {Object.entries(categoryKeys).map(([value, key]) => <SelectItem key={value} value={value}>{t(key)}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5"><Tag className="w-4 h-4 text-primary" />{isFr ? 'Catégorie' : 'Category'}</label>
+                <Select value={form.category || '__none__'} onValueChange={(value) => set('category', value === '__none__' ? '' : value)}>
+                  <SelectTrigger className="h-12 text-base rounded-xl"><SelectValue placeholder={isFr ? 'Choisir une catégorie…' : 'Choose a category…'} /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— {isFr ? 'Non défini' : 'Not set'} —</SelectItem>
+                    {Object.entries(categoryKeys).map(([value, key]) => <SelectItem key={value} value={value}>{t(key)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">{isFr ? 'Prix unitaire CHF' : 'Unit price CHF'}</label>
-            <Input type="number" min="0" step="0.05" value={form.price_chf} onChange={(event) => set('price_chf', event.target.value)} placeholder="0.00" className="h-12 text-base rounded-xl" />
-          </div>
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">{isFr ? 'Prix unitaire CHF' : 'Unit price CHF'}</label>
+                <Input type="number" min="0" step="0.05" value={form.price_chf} onChange={(event) => set('price_chf', event.target.value)} placeholder="0.00" className="h-12 text-base rounded-xl" />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="px-5 py-4 border-t border-border/30 bg-white flex-shrink-0">

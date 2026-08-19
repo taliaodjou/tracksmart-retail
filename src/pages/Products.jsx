@@ -16,6 +16,7 @@ import ExportActions from '@/components/dashboard/ExportActions';
 import ImportModal from '@/components/dashboard/ImportModal';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
+import ManualProductSearchModal from '@/components/dashboard/ManualProductSearchModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import StockAdjustmentModal from '@/components/dashboard/StockAdjustmentModal';
 import StockMovementHistoryModal from '@/components/dashboard/StockMovementHistoryModal';
@@ -39,6 +40,8 @@ export default function Products() {
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [showManualSearch, setShowManualSearch] = useState(false);
+  const [manualInitialProduct, setManualInitialProduct] = useState(null);
   const [scannerMode, setScannerMode] = useState('add');
   const [quickAdd, setQuickAdd] = useState(null);
   const [showAdjustment, setShowAdjustment] = useState(false);
@@ -118,6 +121,7 @@ export default function Products() {
       queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
+      setManualInitialProduct(null);
       setQuickAdd(null);
     }
   });
@@ -146,6 +150,7 @@ export default function Products() {
       queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
+      setManualInitialProduct(null);
       setQuickAdd(null);
     }
   });
@@ -369,7 +374,11 @@ export default function Products() {
               <ScanLine className="w-4 h-4" />
               {t('btn_scanner')}
             </Button>
-            <Button onClick={() => { setEditProduct(null); setShowForm(true); }} className="rounded-full gap-2">
+            <Button variant="outline" onClick={() => setShowManualSearch(true)} className="rounded-full gap-2">
+              <Search className="w-4 h-4" />
+              Saisir manuellement
+            </Button>
+            <Button onClick={() => { setEditProduct(null); setManualInitialProduct(null); setShowForm(true); }} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
             </Button>
@@ -379,8 +388,9 @@ export default function Products() {
         {showForm && (
           <ProductForm
             onSave={handleSave}
-            onCancel={() => { setShowForm(false); setEditProduct(null); }}
+            onCancel={() => { setShowForm(false); setEditProduct(null); setManualInitialProduct(null); }}
             editProduct={editProduct}
+            initialProduct={manualInitialProduct}
           />
         )}
 
@@ -453,6 +463,15 @@ export default function Products() {
             queryClient.invalidateQueries({ queryKey: ['products'] });
             logActivity(user, 'excel_imported', `${user.full_name || user.email} a importé un fichier Excel${count ? ` (${count} produits)` : ''}`);
           }}
+        />
+      )}
+
+      {showManualSearch && (
+        <ManualProductSearchModal
+          products={productsWithStock}
+          onSelect={(product) => { setQuickAdd({ barcode: null, prefill: null, existingProduct: product }); setShowManualSearch(false); }}
+          onCreate={(name) => { setManualInitialProduct({ name }); setEditProduct(null); setShowForm(true); setShowManualSearch(false); }}
+          onClose={() => setShowManualSearch(false)}
         />
       )}
 

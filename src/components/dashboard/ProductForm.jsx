@@ -20,12 +20,12 @@ const ACTION_KEYS = {
 };
 
 const empty = {
-  name: '', marque: '', etagere: '', category: '', rayon: '',
+  name: '', marque: '', barcode: '', etagere: '', category: '', rayon: '',
   reception_date: '', expiration_date: '', quantity_received: '',
   action: '', order_date: '', quantity_thrown: '', price_chf: '',
 };
 
-export default function ProductForm({ onSave, onCancel, editProduct }) {
+export default function ProductForm({ onSave, onCancel, editProduct, initialProduct }) {
   const { t, lang } = useLanguage();
   const actionOptions = Object.entries(ACTION_KEYS).map(([value, key]) => ({ value, key }));
   const [form, setForm] = useState(empty);
@@ -37,6 +37,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
       setForm({
         name: editProduct.name || '',
         marque: editProduct.marque || '',
+        barcode: editProduct.barcode || '',
         etagere: editProduct.etagere || '',
         category: editProduct.category || '',
         rayon: editProduct.rayon || '',
@@ -48,10 +49,12 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         quantity_thrown: editProduct.quantity_thrown ?? '',
         price_chf: editProduct.price_chf ?? '',
       });
+    } else if (initialProduct) {
+      setForm({ ...empty, ...initialProduct });
     } else {
       setForm(empty);
     }
-  }, [editProduct]);
+  }, [editProduct, initialProduct]);
 
   const isExpired = form.expiration_date
     ? getProductStatus(form.expiration_date) === 'expired'
@@ -75,6 +78,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
     };
     if (!editProduct) data.quantity_received = Number(form.quantity_received);
     if (form.marque) data.marque = form.marque;
+    if (form.barcode) data.barcode = form.barcode;
     if (form.etagere) data.etagere = form.etagere;
     if (form.category) data.category = form.category;
     if (form.rayon) data.rayon = form.rayon;
@@ -121,6 +125,7 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         const p = data.product;
         setForm(prev => ({
           ...prev,
+          barcode: prev.barcode || barcode,
           name: prev.name || p.product_name_fr || p.product_name || p.generic_name || '',
           marque: prev.marque || p.brands || '',
         }));
@@ -174,6 +179,12 @@ export default function ProductForm({ onSave, onCancel, editProduct }) {
         <div className="space-y-1">
           <Label className="text-xs">{t('form_brand')}</Label>
           <Input value={form.marque} onChange={set('marque')} placeholder="Ex: Nestlé" className="h-8 text-sm" />
+        </div>
+
+        {/* Code-barres */}
+        <div className="space-y-1">
+          <Label className="text-xs">Code-barres</Label>
+          <Input value={form.barcode} onChange={set('barcode')} placeholder="EAN si disponible" className="h-8 text-sm" />
         </div>
 
         {/* Étagère */}
