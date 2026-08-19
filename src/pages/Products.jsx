@@ -367,10 +367,6 @@ export default function Products() {
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
             </Button>
-            <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
-              <Layers className="w-4 h-4" />
-              Gérer mon stock
-            </Button>
             <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
         </div>

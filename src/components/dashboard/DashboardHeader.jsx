@@ -24,6 +24,7 @@ export default function DashboardHeader() {
   const primaryNavItems = [
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
     { to: '/products', label: 'Produits', icon: null },
+    { to: '/stock', label: 'Gérer mon stock', icon: null },
     ...(canAccessAnalytics(user) ? [{ to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> }] : []),
     { to: '/orders', label: t('nav_orders'), icon: <ShoppingCart className="w-3.5 h-3.5" /> },
     ...(isTaliaAdmin ? [{ to: '/admin-portal', label: 'Admin', icon: <Shield className="w-3.5 h-3.5" /> }] : []),

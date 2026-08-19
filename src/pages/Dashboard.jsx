@@ -351,10 +351,6 @@ export default function Dashboard() {
               <Plus className="w-4 h-4" />
               {t('dash_add_product')}
             </Button>
-            <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
-              <Layers className="w-4 h-4" />
-              Gérer mon stock
-            </Button>
             <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
         </div>
@@ -365,9 +361,6 @@ export default function Dashboard() {
           <div className="flex flex-wrap justify-end gap-2">
             <Button size="sm" onClick={() => {setEditProduct(null);setShowForm(true);}} className="rounded-full h-9 px-4 gap-1.5 text-xs font-semibold">
               <Plus className="w-3.5 h-3.5" /> Ajouter un produit
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full h-9 px-3 gap-1.5 text-xs">
-              <Layers className="w-3.5 h-3.5" /> Gérer mon stock
             </Button>
             <ExportActions products={filteredProducts} onImport={() => setShowImport(true)} />
           </div>
