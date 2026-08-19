@@ -8,8 +8,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { SupportModeProvider } from '@/lib/SupportModeContext';
-import { getDefaultRouteForUser, isAdmin, isConsumer, isMerchantUser } from '@/lib/productUtils';
-import ConsumerPage from '@/pages/consumer/ConsumerPage';
+import { getDefaultRouteForUser, isAdmin, isMerchantUser } from '@/lib/productUtils';
 import BottomTabBar from '@/components/mobile/BottomTabBar';
 import PageTransition from '@/components/mobile/PageTransition';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -78,16 +77,6 @@ const AuthenticatedApp = () => {
     return children;
   };
 
-  const ConsumerGuard = ({ children }) => {
-    if (isAuthenticated && user && isAdmin(user)) {
-      return children;
-    }
-    if (isAuthenticated && user && !isConsumer(user)) {
-      return <Navigate to={getDefaultRouteForUser(user)} replace />;
-    }
-    return children;
-  };
-
   const AdminOnlyGuard = ({ children }) => {
     if (isAuthenticated && user && !isAdmin(user)) {
       return <Navigate to={getDefaultRouteForUser(user)} replace />;
@@ -115,21 +104,10 @@ const AuthenticatedApp = () => {
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
           <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
           <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+          <Route path="/consumer/*" element={<Navigate to="/" replace />} />
 
           {/* Protected app routes */}
           <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/" replace />} />}>
-
-            {/* Consumer routes */}
-            <Route path="/consumer" element={<PageTransition><ConsumerGuard><ConsumerPage title="Accueil consumer" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/explore" element={<PageTransition><ConsumerGuard><ConsumerPage section="explore" title="Explorer" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/stores" element={<PageTransition><ConsumerGuard><ConsumerPage section="stores" title="Boutiques" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/stores/:id" element={<PageTransition><ConsumerGuard><ConsumerPage section="storeDetail" title="Boutique" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/offers" element={<PageTransition><ConsumerGuard><ConsumerPage section="offers" title="Offres" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/offers/:id" element={<PageTransition><ConsumerGuard><ConsumerPage section="offerDetail" title="Offre" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/cart" element={<PageTransition><ConsumerGuard><ConsumerPage section="cart" title="Panier" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/orders" element={<PageTransition><ConsumerGuard><ConsumerPage section="orders" title="Réservations" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/favorites" element={<PageTransition><ConsumerGuard><ConsumerPage section="favorites" title="Favoris" /></ConsumerGuard></PageTransition>} />
-            <Route path="/consumer/profile" element={<PageTransition><ConsumerGuard><ConsumerPage section="profile" title="Profil" /></ConsumerGuard></PageTransition>} />
 
             {/* Espace Boutique routes */}
             <Route path="/welcome" element={<PageTransition><MerchantGuard><Welcome /></MerchantGuard></PageTransition>} />
