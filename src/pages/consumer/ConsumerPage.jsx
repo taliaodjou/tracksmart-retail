@@ -102,12 +102,16 @@ export default function ConsumerPage({ section = 'home', title = 'TrackSmart Con
 
         {!isLoading && section === 'stores' ? (
           <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {groupedStores.map((store) => <Link key={store.id} to={`/consumer/stores/${encodeURIComponent(store.id)}`} className="bg-white rounded-2xl border border-border/40 shadow-sm p-5 hover:border-primary/50 transition-colors"><Store className="w-8 h-8 text-primary mb-4" /><h3 className="font-semibold text-lg">{store.name}</h3><p className="text-sm text-muted-foreground">{store.offers.length} offre(s) bientôt expirée(s)</p></Link>)}
+            {groupedStores.map((store) => <Link key={store.id} to={`/consumer/stores/${encodeURIComponent(store.id)}`} className="bg-white rounded-2xl border border-border/40 shadow-sm p-5 hover:border-primary/50 transition-colors"><Store className="w-8 h-8 text-primary mb-4" /><h3 className="font-semibold text-lg">{store.name}</h3><p className="text-sm text-muted-foreground">{store.offers.length} produit(s) bientôt expiré(s)</p></Link>)}
           </section>
         ) : null}
 
-        {!isLoading && section !== 'stores' ? (
-          visibleOffers.length > 0 ? <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">{visibleOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)}</section> : <div className="bg-white rounded-2xl border border-border/40 p-8 text-center text-muted-foreground">Aucune offre publiée pour le moment.</div>
+        {!isLoading && section === 'storeDetail' ? (
+          visibleOffers.length > 0 ? <section className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">{visibleOffers.map((offer) => <OfferCard key={offer.id} offer={offer} />)}</section> : <div className="bg-white rounded-2xl border border-border/40 p-8 text-center text-muted-foreground">Aucun produit publié pour cette boutique.</div>
+        ) : null}
+
+        {!isLoading && section !== 'stores' && section !== 'storeDetail' ? (
+          <div className="bg-white rounded-2xl border border-border/40 p-8 text-center text-muted-foreground">Les produits des commerçants sont visibles uniquement depuis l’onglet Boutiques.</div>
         ) : null}
       </main>
     </div>
