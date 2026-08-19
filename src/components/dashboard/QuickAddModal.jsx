@@ -59,7 +59,7 @@ export default function QuickAddModal({ prefill, barcode, existingProduct, onSav
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/30 flex-shrink-0">
           <div>
             <p className="font-bold text-foreground text-base">
-              {isExisting ? (isFr ? '⚡ Produit existant' : '⚡ Existing product') : isManual ? (isFr ? '✏️ Ajouter manuellement' : '✏️ Add manually') : (isFr ? '⚡ Produit reconnu' : '⚡ Product recognized')}
+              {isExisting ? (isFr ? 'Compléter un produit déjà enregistré' : 'Add stock to existing product') : isManual ? (isFr ? 'Ajouter manuellement' : 'Add manually') : (isFr ? 'Produit reconnu' : 'Product recognized')}
             </p>
             {barcode && <p className="text-xs text-muted-foreground font-mono mt-0.5">EAN: {barcode}</p>}
           </div>

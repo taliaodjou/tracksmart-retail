@@ -243,12 +243,12 @@ export default function Products() {
 
   const filteredProducts = useMemo(() => productsWithStock.filter((product) => {
     if (search && !product.name?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'archived') {
-        if (!product.discarded) return false;
-      } else if (product.discarded || getProductStatus(product.expiration_date) !== statusFilter) {
-        return false;
-      }
+    if (statusFilter === 'all') {
+    if (product.discarded) return false;
+    } else if (statusFilter === 'archived') {
+    if (!product.discarded) return false;
+    } else if (product.discarded || getProductStatus(product.expiration_date) !== statusFilter) {
+    return false;
     }
     if (categoryFilter !== 'all' && product.category !== categoryFilter) return false;
     if (rayonFilter !== 'all' && product.rayon !== rayonFilter) return false;
@@ -408,6 +408,7 @@ export default function Products() {
           products={productsWithStock}
           onUpdate={(id, data) => updateMutation.mutateAsync({ id, data })}
           onDiscard={(product, quantity, price) => quickDiscardMutation.mutateAsync({ product, quantity, price })}
+          onCompleteProduct={(product) => setQuickAdd({ barcode: product.barcode || null, prefill: null, existingProduct: product })}
         />
 
         {showForm && (

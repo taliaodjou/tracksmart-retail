@@ -185,20 +185,26 @@ export function getLossReferenceDate(product) {
 }
 
 export function getActiveProducts(products) {
-  return (products || []).filter(p => getDisplayStatus(p) !== 'archived');
+  return (products || []).filter(p => !isDiscarded(p));
+}
+
+export function getStockUnitCount(products = []) {
+  return getActiveProducts(products).reduce((sum, p) => {
+    const quantity = p.stock_total === null || p.stock_total === undefined ? 1 : Number(p.stock_total) || 0;
+    return sum + quantity;
+  }, 0);
 }
 
 export function getCoreProductMetrics(products, movements = []) {
   const activeProducts = getActiveProducts(products);
-  const stockValue = activeProducts
-    .filter(p => !isDiscarded(p))
-    .reduce((sum, p) => {
-      const quantity = p.stock_total === null || p.stock_total === undefined ? 1 : Number(p.stock_total) || 0;
-      return sum + quantity * (Number(p.price_chf) || 0);
-    }, 0);
+  const stockValue = activeProducts.reduce((sum, p) => {
+    const quantity = p.stock_total === null || p.stock_total === undefined ? 1 : Number(p.stock_total) || 0;
+    return sum + quantity * (Number(p.price_chf) || 0);
+  }, 0);
   return {
     activeProducts,
-    totalProducts: activeProducts.length,
+    totalProducts: getStockUnitCount(products),
+    activeProductCount: activeProducts.length,
     expiredProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'expired').length,
     urgentProducts: activeProducts.filter(p => p.expiration_date && getProductStatus(p.expiration_date) === 'urgent').length,
     totalLoss: calculateTotalLoss(products, movements),

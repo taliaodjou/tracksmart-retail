@@ -404,13 +404,13 @@ export default function Dashboard() {
 
   const filteredProducts = useMemo(() => activeProducts.filter((p) => {
     if (search && !p.name?.toLowerCase().includes(search.toLowerCase())) return false;
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'archived') {
-        if (!p.discarded) return false;
-      } else {
-        if (p.discarded) return false;
-        if (getProductStatus(p.expiration_date) !== statusFilter) return false;
-      }
+    if (statusFilter === 'all') {
+      if (p.discarded) return false;
+    } else if (statusFilter === 'archived') {
+      if (!p.discarded) return false;
+    } else {
+      if (p.discarded) return false;
+      if (getProductStatus(p.expiration_date) !== statusFilter) return false;
     }
     if (categoryFilter !== 'all' && p.category !== categoryFilter) return false;
     if (rayonFilter !== 'all' && p.rayon !== rayonFilter) return false;
@@ -490,6 +490,7 @@ export default function Dashboard() {
               products={activeProducts}
               onUpdate={(id, data) => updateMutation.mutateAsync({ id, data })}
               onDiscard={(product, quantity, price) => quickDiscardMutation.mutateAsync({ product, quantity, price })}
+              onCompleteProduct={(product) => setQuickAdd({ barcode: product.barcode || null, prefill: null, existingProduct: product })}
             />
 
             {showForm &&

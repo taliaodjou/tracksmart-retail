@@ -190,7 +190,7 @@ export default function Analytics() {
           <KpiCard
             icon={<BarChart2 className="w-5 h-5 text-primary" />}
             value={totalProducts}
-            label={lang === 'fr' ? 'Total produits' : 'Total products'}
+            label={lang === 'fr' ? 'Unités en stock' : 'Stock units'}
             bg="bg-primary/10"
           />
           <KpiCard

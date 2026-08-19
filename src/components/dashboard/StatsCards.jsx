@@ -10,7 +10,7 @@ export default function StatsCards({ products, movements = [] }) {
   const { totalProducts: total, expiredProducts: expired, urgentProducts: urgent, totalLoss, stockValue } = getCoreProductMetrics(products, movements);
 
   const cards = [
-    { label: t('dash_total_products'), value: total, icon: Package, bg: 'bg-primary/10', iconColor: 'text-primary' },
+    { label: 'Unités en stock', value: total, icon: Package, bg: 'bg-primary/10', iconColor: 'text-primary' },
     { label: t('dash_expired_products'), value: expired, icon: XCircle, bg: 'bg-red-50', iconColor: 'text-red-500' },
     { label: t('dash_urgent_products'), value: urgent, icon: AlertTriangle, bg: 'bg-orange-50', iconColor: 'text-orange-500' },
     { label: 'Total pertes', value: `CHF ${totalLoss.toFixed(2)}`, icon: TrendingDown, bg: 'bg-red-50', iconColor: 'text-red-600', clickable: true },

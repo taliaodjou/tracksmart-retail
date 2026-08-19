@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getProductStatus, getDaysRemaining, statusConfig, isDiscarded } from '@/lib/productUtils';
-import { AlertTriangle, X, ChevronRight, Trash2, CalendarClock, Loader2, Check } from 'lucide-react';
+import { AlertTriangle, X, ChevronRight, Trash2, PackagePlus, Loader2, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,12 +9,11 @@ import { Button } from '@/components/ui/button';
 const PREVIEW_COUNT = 10;
 
 // Action panel for a single product inside the modal
-function ProductActionPanel({ product, onUpdate, onDiscard, lang }) {
+function ProductActionPanel({ product, onUpdate, onDiscard, onCompleteProduct, lang }) {
   const isFr = lang === 'fr';
-  const [tab, setTab] = useState('info'); // info | jeter | dlc
+  const [tab, setTab] = useState('info'); // info | jeter | complete
   const [qty, setQty] = useState('');
   const [price, setPrice] = useState(product.price_chf ? String(product.price_chf) : '');
-  const [newDlc, setNewDlc] = useState(product.expiration_date || '');
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -39,12 +38,8 @@ function ProductActionPanel({ product, onUpdate, onDiscard, lang }) {
     setDone(true);
   };
 
-  const handleDlc = async () => {
-    if (!newDlc) return;
-    setSaving(true);
-    await onUpdate(product.id, { expiration_date: newDlc });
-    setSaving(false);
-    setDone(true);
+  const handleCompleteProduct = () => {
+    if (onCompleteProduct) onCompleteProduct(product);
   };
 
   if (done) {
@@ -90,10 +85,10 @@ function ProductActionPanel({ product, onUpdate, onDiscard, lang }) {
           <Trash2 className="w-3 h-3" /> {isFr ? 'Jeter' : 'Discard'}
         </button>
         <button
-          onClick={() => setTab('dlc')}
-          className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-1 ${tab === 'dlc' ? 'bg-blue-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          onClick={() => setTab('complete')}
+          className={`flex-1 text-xs py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-1 ${tab === 'complete' ? 'bg-blue-500 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
         >
-          <CalendarClock className="w-3 h-3" /> {isFr ? 'Modifier DLC' : 'Update Expiry'}
+          <PackagePlus className="w-3 h-3" /> {isFr ? 'Compléter' : 'Add stock'}
         </button>
       </div>
 
@@ -153,29 +148,17 @@ function ProductActionPanel({ product, onUpdate, onDiscard, lang }) {
         </div>
       )}
 
-      {/* DLC tab */}
-      {tab === 'dlc' && (
-        <div className="space-y-3">
+      {/* Complete stock tab */}
+      {tab === 'complete' && (
+        <div className="space-y-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
           <div>
-            <label className="text-xs font-semibold text-foreground mb-1 block">
-              {isFr ? 'Ancienne DLC :' : 'Current expiry:'}{' '}
-              <span className="text-red-600">{product.expiration_date ? format(new Date(product.expiration_date), 'dd/MM/yyyy') : '—'}</span>
-            </label>
-            <label className="text-xs font-semibold text-foreground mb-1 block mt-2">{isFr ? 'Nouvelle DLC' : 'New expiry date'}</label>
-            <Input
-              type="date"
-              value={newDlc}
-              onChange={e => setNewDlc(e.target.value)}
-              className="h-12 text-base font-medium rounded-xl border-2 border-blue-300 focus:border-blue-500"
-              autoFocus
-            />
+            <p className="text-sm font-semibold text-foreground">{isFr ? 'Compléter un produit déjà enregistré' : 'Add stock to existing product'}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isFr ? 'Ajoutez une quantité avec sa DLC : c’est le même flux que le réassort depuis Ajouter un produit.' : 'Add a quantity with its expiry date using the same restock flow.'}
+            </p>
           </div>
-          <Button
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl"
-            disabled={!newDlc || newDlc === product.expiration_date || saving}
-            onClick={handleDlc}
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CalendarClock className="w-4 h-4" /> {isFr ? 'Mettre à jour la DLC' : 'Update expiry'}</>}
+          <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl" onClick={handleCompleteProduct}>
+            <PackagePlus className="w-4 h-4" /> {isFr ? 'Compléter un produit déjà enregistré' : 'Add stock to existing product'}
           </Button>
         </div>
       )}
@@ -238,7 +221,7 @@ function WatchBox({ title, products, icon, borderColor, bgColor, titleColor, onP
   );
 }
 
-export default function WeeklyAlert({ products, onUpdate, onDiscard }) {
+export default function WeeklyAlert({ products, onUpdate, onDiscard, onCompleteProduct }) {
   const { t, lang } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [activeProduct, setActiveProduct] = useState(null);
@@ -376,6 +359,11 @@ export default function WeeklyAlert({ products, onUpdate, onDiscard }) {
                     }
                     setActiveProduct(null);
                     setShowModal(false);
+                  }}
+                  onCompleteProduct={(product) => {
+                    setActiveProduct(null);
+                    setShowModal(false);
+                    if (onCompleteProduct) onCompleteProduct(product);
                   }}
                   lang={lang}
                 />

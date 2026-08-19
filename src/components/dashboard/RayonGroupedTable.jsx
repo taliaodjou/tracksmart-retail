@@ -16,7 +16,11 @@ function statusSummary(products) {
   const expired = products.filter(p => getProductStatus(p.expiration_date) === 'expired').length;
   const urgent = products.filter(p => getProductStatus(p.expiration_date) === 'urgent').length;
   const soon = products.filter(p => getProductStatus(p.expiration_date) === 'soon').length;
-  return { expired, urgent, soon, total: products.length };
+  const total = products.reduce((sum, product) => {
+    const quantity = product.stock_total === null || product.stock_total === undefined ? 1 : Number(product.stock_total) || 0;
+    return sum + quantity;
+  }, 0);
+  return { expired, urgent, soon, total };
 }
 
 function RayonHeader({ rayon, products, open, onClick }) {
@@ -38,7 +42,7 @@ function RayonHeader({ rayon, products, open, onClick }) {
           {rayonLabel(rayon)}
         </span>
         <span className="text-xs text-muted-foreground font-normal">
-          {total} produit{total > 1 ? 's' : ''}
+          {total} unité{total > 1 ? 's' : ''}
         </span>
       </div>
       <div className="flex items-center gap-1.5">
