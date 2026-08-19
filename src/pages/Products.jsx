@@ -464,6 +464,7 @@ export default function Products() {
         <AddProductOptionsModal
           onScan={() => { setShowAddOptions(false); setScannerMode('add'); setShowScanner(true); }}
           onSearchByName={() => { setShowAddOptions(false); setShowManualSearch(true); }}
+          onCreateManual={() => { setShowAddOptions(false); setEditProduct(null); setManualInitialProduct(null); setShowForm(true); }}
           onClose={() => setShowAddOptions(false)}
         />
       )}

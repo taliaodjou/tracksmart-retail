@@ -1,7 +1,7 @@
 import React from 'react';
-import { Package, ScanLine, X } from 'lucide-react';
+import { Keyboard, Package, ScanLine, X } from 'lucide-react';
 
-export default function AddProductOptionsModal({ onScan, onSearchByName, onClose }) {
+export default function AddProductOptionsModal({ onScan, onSearchByName, onCreateManual, onClose }) {
   return (
     <div className="fixed inset-0 z-[75] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
@@ -14,11 +14,11 @@ export default function AddProductOptionsModal({ onScan, onSearchByName, onClose
         </div>
 
         <div className="p-5 space-y-3">
-          <button onClick={onScan} className="w-full rounded-2xl border border-border/60 p-4 text-left hover:border-primary/50 hover:bg-primary/5 transition-colors flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center"><ScanLine className="w-5 h-5 text-primary" /></div>
+          <button onClick={onScan} className="w-full rounded-2xl border border-primary/30 bg-primary/5 p-4 text-left hover:border-primary/60 transition-colors flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-primary/15 flex items-center justify-center"><ScanLine className="w-5 h-5 text-primary" /></div>
             <div>
               <p className="font-bold text-sm text-foreground">Scanner le code-barres</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Pour identifier automatiquement le produit.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Option recommandée pour identifier automatiquement le produit.</p>
             </div>
           </button>
 
@@ -26,7 +26,15 @@ export default function AddProductOptionsModal({ onScan, onSearchByName, onClose
             <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center"><Package className="w-5 h-5 text-primary" /></div>
             <div>
               <p className="font-bold text-sm text-foreground">Rechercher par nom</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Pour ajouter sans scanner, avec suggestions du stock.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Pour retrouver un produit déjà présent dans le stock.</p>
+            </div>
+          </button>
+
+          <button onClick={onCreateManual} className="w-full rounded-2xl border border-border/60 p-4 text-left hover:border-primary/50 hover:bg-primary/5 transition-colors flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center"><Keyboard className="w-5 h-5 text-primary" /></div>
+            <div>
+              <p className="font-bold text-sm text-foreground">Saisir un nouveau produit</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Pour remplir les informations manuellement sans scanner.</p>
             </div>
           </button>
         </div>
