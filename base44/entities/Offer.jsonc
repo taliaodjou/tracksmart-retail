@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Email of the store owner for team scoping and RLS"
     },
+    "storeName": {
+      "type": "string",
+      "description": "Consumer-facing store name shown in marketplace lists"
+    },
     "title": {
       "type": "string",
       "description": "Consumer-facing offer title"
@@ -34,6 +38,23 @@
     "quantityAvailable": {
       "type": "number",
       "description": "Quantity reserved for this offer, derived from existing store inventory"
+    },
+    "productImageUrl": {
+      "type": "string",
+      "description": "Product image URL copied from the existing Product record for consumer display"
+    },
+    "expirationDate": {
+      "type": "string",
+      "format": "date",
+      "description": "DLC copied from the existing Product record for consumer display"
+    },
+    "category": {
+      "type": "string",
+      "description": "Product category copied from the existing Product record"
+    },
+    "barcode": {
+      "type": "string",
+      "description": "EAN/barcode copied from the existing Product record"
     },
     "startDate": {
       "type": "string",
@@ -84,7 +105,7 @@
           "data.store_owner_email": "{{user.email}}"
         },
         {
-          "data.store_owner_email": "{{user.store_owner_email}}"
+          "data.store_owner_email": "{{user.data.store_owner_email}}"
         },
         {
           "user_condition": {
@@ -99,7 +120,7 @@
           "data.store_owner_email": "{{user.email}}"
         },
         {
-          "data.store_owner_email": "{{user.store_owner_email}}"
+          "data.store_owner_email": "{{user.data.store_owner_email}}"
         },
         {
           "$and": [
@@ -108,11 +129,6 @@
             },
             {
               "data.status": "active"
-            },
-            {
-              "user_condition": {
-                "role": "consumer"
-              }
             }
           ]
         },
@@ -157,7 +173,7 @@
         {
           "$and": [
             {
-              "data.store_owner_email": "{{user.store_owner_email}}"
+              "data.store_owner_email": "{{user.data.store_owner_email}}"
             },
             {
               "$or": [
