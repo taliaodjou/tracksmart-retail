@@ -71,7 +71,7 @@ function RayonHeader({ rayon, products, open, onClick }) {
   );
 }
 
-export default function RayonGroupedTable({ products, totalProducts = products, onEdit, onDelete, onInlineSave }) {
+export default function RayonGroupedTable({ products, totalProducts = products, movements = [], onEdit, onDelete, onInlineSave, onCorrectStock, onViewHistory }) {
   // Group products by rayon — only include rayons that actually exist in the data
   const groups = useMemo(() => {
     const map = {};
@@ -145,11 +145,14 @@ export default function RayonGroupedTable({ products, totalProducts = products, 
             <div className="ml-0 animate-in slide-in-from-top-1 duration-150">
               <ProductTable
                 products={rayonProducts}
+                movements={movements}
                 hideLossFooter={true}
                 compactView={true}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onInlineSave={onInlineSave}
+                onCorrectStock={onCorrectStock}
+                onViewHistory={onViewHistory}
               />
             </div>
           )}

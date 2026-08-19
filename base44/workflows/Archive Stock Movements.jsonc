@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "archive_stock_movements",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "archive_movements": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "archiveStockMovements",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Archiver les mouvements",
+            "description": "Synth\u00e8se mensuelle"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Archive Stock Movements",
+  "description": "Agr\u00e8ge chaque mois les mouvements de stock de plus de 6 mois sans supprimer les donn\u00e9es individuelles.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 2 1 * *",
+      "one_time_date": null,
+      "timezone": "Europe/Paris",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

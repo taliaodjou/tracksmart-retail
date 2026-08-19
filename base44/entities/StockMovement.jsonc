@@ -1,0 +1,136 @@
+{
+  "name": "StockMovement",
+  "type": "object",
+  "properties": {
+    "store_owner_email": {
+      "type": "string",
+      "description": "Email of the store owner for team scoping"
+    },
+    "product_id": {
+      "type": "string",
+      "description": "Linked Product record id"
+    },
+    "batch_id": {
+      "type": "string",
+      "description": "Internal stock entry id affected by the movement"
+    },
+    "movement_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Business date of the movement"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "reception",
+        "vente"
+      ],
+      "description": "Movement type shown to the user"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "scan",
+        "manual",
+        "form",
+        "import",
+        "system"
+      ],
+      "default": "system",
+      "description": "Origin of the movement"
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Quantity concerned by the movement"
+    },
+    "quantity_before": {
+      "type": "number",
+      "description": "Total product stock before the movement"
+    },
+    "quantity_after": {
+      "type": "number",
+      "description": "Total product stock after the movement"
+    },
+    "justification": {
+      "type": "string",
+      "description": "Required reason for manual movements"
+    },
+    "values_before": {
+      "type": "string",
+      "description": "JSON snapshot before movement"
+    },
+    "values_after": {
+      "type": "string",
+      "description": "JSON snapshot after movement"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when included in long-term aggregate summaries"
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the movement was summarized"
+    }
+  },
+  "required": [
+    "store_owner_email",
+    "product_id",
+    "movement_date",
+    "type",
+    "quantity"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

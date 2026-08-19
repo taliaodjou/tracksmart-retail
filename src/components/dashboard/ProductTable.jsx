@@ -194,7 +194,7 @@ function InlineEditRow({ product, onSave, onCancel }) {
   );
 }
 
-export default function ProductTable({ products, totalProducts = products, hideLossFooter = false, compactView = false, onEdit, onDelete, onInlineSave }) {
+export default function ProductTable({ products, totalProducts = products, movements = [], hideLossFooter = false, compactView = false, onEdit, onDelete, onInlineSave, onCorrectStock, onViewHistory }) {
   const { t } = useLanguage();
   const [editingId, setEditingId] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -391,7 +391,10 @@ export default function ProductTable({ products, totalProducts = products, hideL
       {selectedProduct && (
         <ProductDetailModal
           product={selectedProduct}
+          movements={movements}
           onClose={() => setSelectedProduct(null)}
+          onCorrectStock={onCorrectStock}
+          onViewHistory={onViewHistory}
           onEdit={(product) => {
             setSelectedProduct(null);
             onEdit(product);

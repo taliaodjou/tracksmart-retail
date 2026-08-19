@@ -17,8 +17,10 @@ import ImportModal from '@/components/dashboard/ImportModal';
 import BarcodeScanner from '@/components/dashboard/BarcodeScanner';
 import QuickAddModal from '@/components/dashboard/QuickAddModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
+import StockAdjustmentModal from '@/components/dashboard/StockAdjustmentModal';
+import StockMovementHistoryModal from '@/components/dashboard/StockMovementHistoryModal';
 import { logActivity } from '@/lib/activityLogger';
-import { addStockEntry, enrichProductsWithStock } from '@/lib/stockEntries';
+import { addStockEntry, applyManualStockMovement, enrichProductsWithStock } from '@/lib/stockEntries';
 
 const XlsIcon = () => <span className="text-[10px] font-bold hidden">XLS</span>;
 
@@ -36,7 +38,12 @@ export default function Products() {
   const [showForm, setShowForm] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [scannerMode, setScannerMode] = useState('add');
   const [quickAdd, setQuickAdd] = useState(null);
+  const [showAdjustment, setShowAdjustment] = useState(false);
+  const [adjustmentProduct, setAdjustmentProduct] = useState(null);
+  const [adjustmentEntry, setAdjustmentEntry] = useState(null);
+  const [historyProduct, setHistoryProduct] = useState(null);
 
   const storeOwnerEmail = getStoreOwnerEmail(user);
   const isOwnerOrManager = user?.role === 'owner' || user?.role === 'user' || user?.role === 'manager' || isAdmin(user);
@@ -73,6 +80,12 @@ export default function Products() {
     enabled: !!user?.email && !!storeOwnerEmail
   });
 
+  const { data: stockMovements = [] } = useQuery({
+    queryKey: ['stockMovements', storeOwnerEmail],
+    queryFn: () => base44.entities.StockMovement.filter({ store_owner_email: storeOwnerEmail, archived: false }, '-movement_date', 5000),
+    enabled: !!user?.email && !!storeOwnerEmail
+  });
+
   const productsWithStock = useMemo(() => enrichProductsWithStock(products, stockEntries), [products, stockEntries]);
 
   const createMutation = useMutation({
@@ -100,6 +113,7 @@ export default function Products() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
       setQuickAdd(null);
@@ -127,6 +141,7 @@ export default function Products() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
       setShowForm(false);
       setEditProduct(null);
       setQuickAdd(null);
@@ -145,7 +160,26 @@ export default function Products() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
     }
+  });
+
+  const adjustmentMutation = useMutation({
+    mutationFn: ({ product, quantity, justification, movementDate }) => applyManualStockMovement({
+      productId: product.id,
+      storeOwnerEmail,
+      quantity,
+      justification,
+      movementDate
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
+      setShowAdjustment(false);
+      setAdjustmentProduct(null);
+      setAdjustmentEntry(null);
+    },
+    onError: (error) => window.alert(error.message || 'Impossible d’enregistrer ce mouvement.')
   });
 
   const filteredProducts = useMemo(() => productsWithStock.filter((product) => {
@@ -228,6 +262,18 @@ export default function Products() {
 
   const handleBarcodeDetected = async (code) => {
     setShowScanner(false);
+    if (scannerMode === 'movement') {
+      const product = findExistingProduct('', '', code);
+      setScannerMode('add');
+      if (product) {
+        setAdjustmentProduct(product);
+        setAdjustmentEntry(null);
+        setShowAdjustment(true);
+      } else {
+        window.alert('Aucun produit en stock ne correspond à ce code-barres.');
+      }
+      return;
+    }
     logActivity(user, 'barcode_scanned', `${user.full_name || user.email} a scanné le code-barres ${code}`, { entity_name: code });
 
     const match = barcodeDB.find((barcode) => barcode.barcode === code);
@@ -292,7 +338,11 @@ export default function Products() {
               <XlsIcon />
               {lang === 'fr' ? 'Importer' : 'Import'}
             </Button>
-            <Button variant="outline" onClick={() => setShowScanner(true)} className="rounded-full gap-2">
+            <Button variant="outline" onClick={() => { setShowAdjustment(true); setAdjustmentProduct(null); setAdjustmentEntry(null); }} className="rounded-full gap-2">
+              <Plus className="w-4 h-4" />
+              Enregistrer un mouvement
+            </Button>
+            <Button variant="outline" onClick={() => { setScannerMode('add'); setShowScanner(true); }} className="rounded-full gap-2">
               <ScanLine className="w-4 h-4" />
               {t('btn_scanner')}
             </Button>
@@ -367,9 +417,9 @@ export default function Products() {
         {isLoading ? (
           <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" /></div>
         ) : groupByRayon ? (
-          <RayonGroupedTable products={filteredProducts} totalProducts={productsWithStock} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
+          <RayonGroupedTable products={filteredProducts} totalProducts={productsWithStock} movements={stockMovements} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} onCorrectStock={(product, entry) => { setAdjustmentProduct(product); setAdjustmentEntry(entry); setShowAdjustment(true); }} onViewHistory={setHistoryProduct} />
         ) : (
-          <ProductTable products={filteredProducts} totalProducts={productsWithStock} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} />
+          <ProductTable products={filteredProducts} totalProducts={productsWithStock} movements={stockMovements} onEdit={handleEdit} onDelete={(product) => { if (window.confirm(t('confirm_delete'))) deleteMutation.mutate(product); }} onInlineSave={(id, data) => updateMutation.mutate({ id, data })} onCorrectStock={(product, entry) => { setAdjustmentProduct(product); setAdjustmentEntry(entry); setShowAdjustment(true); }} onViewHistory={setHistoryProduct} />
         )}
       </main>
 
@@ -387,7 +437,7 @@ export default function Products() {
         <BarcodeScanner
           lang={lang}
           onDetected={handleBarcodeDetected}
-          onClose={() => setShowScanner(false)}
+          onClose={() => { setScannerMode('add'); setShowScanner(false); }}
         />
       )}
 
@@ -400,6 +450,27 @@ export default function Products() {
           onUpdate={(id, data) => updateMutation.mutate({ id, data })}
           onClose={() => setQuickAdd(null)}
           saving={createMutation.isPending || updateMutation.isPending}
+        />
+      )}
+
+      {showAdjustment && (
+        <StockAdjustmentModal
+          products={productsWithStock}
+          product={adjustmentProduct}
+          entry={adjustmentEntry}
+          onProductChange={(product) => { setAdjustmentProduct(product); setAdjustmentEntry(null); }}
+          onScan={() => { setScannerMode('movement'); setShowScanner(true); }}
+          onClose={() => { setShowAdjustment(false); setAdjustmentProduct(null); setAdjustmentEntry(null); }}
+          onSubmit={(data) => adjustmentMutation.mutate(data)}
+          saving={adjustmentMutation.isPending}
+        />
+      )}
+
+      {historyProduct && (
+        <StockMovementHistoryModal
+          product={historyProduct}
+          movements={stockMovements.filter((movement) => movement.product_id === historyProduct.id).sort((a, b) => new Date(b.movement_date || b.created_date) - new Date(a.movement_date || a.created_date))}
+          onClose={() => setHistoryProduct(null)}
         />
       )}
 

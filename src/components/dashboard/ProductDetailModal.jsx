@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Package, Barcode } from 'lucide-react';
+import StockMovementList from './StockMovementList';
 import { format } from 'date-fns';
 import { useLanguage } from '@/lib/LanguageContext';
 import { categoryKeys, getDisplayStatus, getDaysRemaining, statusConfig } from '@/lib/productUtils';
@@ -37,7 +38,7 @@ function InfoRow({ label, value, highlight }) {
   );
 }
 
-export default function ProductDetailModal({ product, onClose, onEdit }) {
+export default function ProductDetailModal({ product, movements = [], onClose, onEdit, onCorrectStock, onViewHistory }) {
   const { t } = useLanguage();
   if (!product) return null;
 
@@ -51,6 +52,12 @@ export default function ProductDetailModal({ product, onClose, onEdit }) {
   const priorityEntry = stockEntries[0];
   const secondaryEntries = stockEntries.slice(1);
   const stockTotal = product.stock_total != null ? product.stock_total : null;
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const productMovements = movements
+    .filter((movement) => movement.product_id === product.id)
+    .sort((a, b) => new Date(b.movement_date || b.created_date) - new Date(a.movement_date || a.created_date));
+  const recentMovements = productMovements.filter((movement) => new Date(movement.movement_date || movement.created_date) >= thirtyDaysAgo);
 
   return (
     <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -103,22 +110,28 @@ export default function ProductDetailModal({ product, onClose, onEdit }) {
                 <span className="text-lg font-bold text-primary">{stockTotal} unités</span>
               </div>
               {priorityEntry && (
-                <div className="rounded-xl bg-white border border-border/50 px-3 py-2">
-                  <p className="text-xs font-semibold text-muted-foreground mb-1">Péremption prioritaire</p>
-                  <p className="text-sm font-bold text-foreground">{formatDate(priorityEntry.expiration_date)} <span className="text-primary">({priorityEntry.quantity_remaining} unités)</span></p>
+                <div className="rounded-xl bg-white border border-border/50 px-3 py-2 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">Péremption prioritaire</p>
+                    <p className="text-sm font-bold text-foreground">{formatDate(priorityEntry.expiration_date)} <span className="text-primary">({priorityEntry.quantity_remaining} unités)</span></p>
+                  </div>
+                  {onCorrectStock && <Button variant="outline" size="sm" onClick={() => onCorrectStock(product, priorityEntry)} className="rounded-xl">Corriger</Button>}
                 </div>
               )}
               {secondaryEntries.length > 0 && (
                 <div className="space-y-1">
                   {secondaryEntries.map((entry) => (
-                    <p key={entry.id} className="text-xs text-muted-foreground">
-                      + {entry.quantity_remaining} unités — DLC {formatDate(entry.expiration_date)}
-                    </p>
+                    <div key={entry.id} className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                      <span>+ {entry.quantity_remaining} unités — DLC {formatDate(entry.expiration_date)}</span>
+                      {onCorrectStock && <button onClick={() => onCorrectStock(product, entry)} className="font-semibold text-primary hover:underline">Corriger</button>}
+                    </div>
                   ))}
                 </div>
               )}
             </div>
           )}
+
+          <StockMovementList movements={recentMovements} onViewAll={onViewHistory ? () => onViewHistory(product) : undefined} />
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="rounded-2xl border border-border/50 p-4">
