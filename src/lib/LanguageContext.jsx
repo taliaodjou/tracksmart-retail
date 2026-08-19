@@ -73,9 +73,9 @@ const translations = {
     cat_tabac: 'Tabac',
 
     // Subscription gate
-    sub_blocked_title: 'Accès suspendu',
-    sub_blocked_msg: 'Votre accès est suspendu. Merci de renouveler votre abonnement.',
-    sub_contact: 'Contacter l\'administrateur',
+    sub_blocked_title: 'Votre demande a bien été reçue',
+    sub_blocked_msg: 'L’administrateur vous donne accès à votre compte. Merci de patienter quelques instants.',
+    sub_waiting_auto: 'Cette page vérifie automatiquement l’état de votre accès et se mettra à jour dès que votre compte sera validé.',
 
     // Reminders
     reminder_14d: 'Votre abonnement arrive bientôt à échéance. Merci d\'anticiper le renouvellement.',
@@ -294,9 +294,9 @@ const translations = {
     cat_alcool: 'Alcohol',
     cat_tabac: 'Tobacco',
 
-    sub_blocked_title: 'Access suspended',
-    sub_blocked_msg: 'Your access is suspended. Please renew your subscription.',
-    sub_contact: 'Contact administrator',
+    sub_blocked_title: 'Your request has been received',
+    sub_blocked_msg: 'The administrator is giving you access to your account. Please wait a few moments.',
+    sub_waiting_auto: 'This page automatically checks your access status and will update as soon as your account is validated.',
 
     reminder_14d: 'Your subscription is expiring soon. Please arrange renewal in advance.',
     reminder_7d: 'Reminder: your subscription expires in 7 days.',

@@ -11,6 +11,7 @@ import { fr } from 'date-fns/locale';
 import { ArrowRight, PackageX, AlertTriangle, TrendingDown, Clock, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import OnboardingProfileModal from '@/components/onboarding/OnboardingProfileModal';
+import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
 
 const floatingOrbs = [
   { size: 300, x: '10%', y: '15%', color: '#C9A646', delay: 0, duration: 8 },
@@ -26,6 +27,13 @@ export default function Welcome() {
   const canAccess = hasActiveSubscription(user);
   const userIsAdmin = isAdmin(user);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const showValidatedWelcome = new URLSearchParams(window.location.search).get('validated') === '1' || sessionStorage.getItem('tracksmart_account_validated') === 'true';
+
+  useEffect(() => {
+    if (showValidatedWelcome) {
+      sessionStorage.removeItem('tracksmart_account_validated');
+    }
+  }, [showValidatedWelcome]);
 
   // Show onboarding modal if profile not complete
   const showOnboarding = user && !userIsAdmin && !user.onboarding_complete && !onboardingCompleted;
@@ -118,6 +126,27 @@ export default function Welcome() {
       delay: 0.6,
     },
   ];
+
+  if (showValidatedWelcome) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex items-center justify-center px-4">
+        <div className="w-full max-w-xl rounded-3xl border border-[#e8dfc8] bg-white p-10 text-center shadow-sm">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-bold tracking-tight">
+            TS
+          </div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">TrackSmart Retail</p>
+          <h1 className="mb-4 text-3xl font-bold text-foreground">Bienvenue chez TrackSmart Retail</h1>
+          <p className="mx-auto max-w-md text-base leading-relaxed text-muted-foreground">
+            Votre compte a été validé. Vous avez maintenant accès à votre espace.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!canAccess && !userIsAdmin) {
+    return <SubscriptionGate />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] flex flex-col overflow-hidden relative">

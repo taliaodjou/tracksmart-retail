@@ -1,27 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 const UserNotRegisteredError = () => {
+  const { checkAppState } = useAuth();
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      checkAppState();
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [checkAppState]);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50">
-      <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border border-slate-100">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-orange-100">
-            <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-4">Access Restricted</h1>
-          <p className="text-slate-600 mb-8">
-            You are not registered to use this application. Please contact the app administrator to request access.
-          </p>
-          <div className="p-4 bg-slate-50 rounded-md text-sm text-slate-600">
-            <p>If you believe this is an error, you can:</p>
-            <ul className="list-disc list-inside mt-2 space-y-1">
-              <li>Verify you are logged in with the correct account</li>
-              <li>Contact the app administrator for access</li>
-              <li>Try logging out and back in again</li>
-            </ul>
-          </div>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fafaf8] via-white to-[#f5f0e8] px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#e8dfc8] bg-white p-10 text-center shadow-sm">
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">
+          TrackSmart Retail
+        </p>
+        <h1 className="mb-4 text-3xl font-bold text-foreground">
+          Votre demande a bien été reçue
+        </h1>
+        <p className="mx-auto max-w-sm text-base leading-relaxed text-muted-foreground">
+          L’administrateur vous donne accès à votre compte. Merci de patienter quelques instants.
+        </p>
+        <div className="mt-8 rounded-2xl border border-border bg-secondary/40 px-5 py-4 text-sm text-muted-foreground">
+          Cette page vérifie automatiquement l’état de votre accès et se mettra à jour dès que votre compte sera validé.
         </div>
       </div>
     </div>
