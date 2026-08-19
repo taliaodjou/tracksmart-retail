@@ -153,17 +153,21 @@ function StatsCards({ products }) {
   const total = active.length;
   const expired = active.filter(p => getProductStatus(p.expiration_date) === 'expired').length;
   const urgent = active.filter(p => getProductStatus(p.expiration_date) === 'urgent').length;
+  const totalLoss = calculateTotalLoss(products);
+  const stockValue = active.reduce((sum, p) => sum + (Number(p.price_chf) || 0), 0);
   const cards = [
-    { label: 'Total produits', value: total, icon: Package, bg: 'bg-primary/10', iconColor: 'text-primary' },
+    { label: 'Unités en stock', value: total, icon: Package, bg: 'bg-primary/10', iconColor: 'text-primary' },
     { label: 'Produits expirés', value: expired, icon: XCircle, bg: 'bg-red-50', iconColor: 'text-red-500' },
     { label: 'Produits urgents', value: urgent, icon: AlertTriangle, bg: 'bg-orange-50', iconColor: 'text-orange-500' },
+    { label: 'Total pertes', value: `CHF ${totalLoss.toFixed(2)}`, icon: TrendingDown, bg: 'bg-red-50', iconColor: 'text-red-600' },
+    { label: 'Valeur du stock', value: `CHF ${stockValue.toFixed(2)}`, icon: Tag, bg: 'bg-green-50', iconColor: 'text-green-700' },
   ];
   return (
-    <div className="grid grid-cols-3 gap-1.5 sm:gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 sm:gap-4">
       {cards.map((c, i) => (
         <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-6 shadow-sm border border-neutral-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
-            <div><p className="text-[10px] sm:text-sm text-muted-foreground truncate">{c.label}</p><p className="text-lg sm:text-3xl font-bold mt-0.5 sm:mt-1">{c.value}</p></div>
+            <div><p className="text-[10px] sm:text-sm text-muted-foreground leading-tight">{c.label}</p><p className="text-lg sm:text-2xl font-bold mt-0.5 sm:mt-1">{c.value}</p></div>
             <div className={`hidden sm:flex w-12 h-12 rounded-xl ${c.bg} items-center justify-center`}><c.icon className={`w-6 h-6 ${c.iconColor}`} /></div>
           </div>
         </div>
@@ -226,6 +230,26 @@ function QuickAddModal({ prefill, barcode, existingProduct, onSave, onClose }) {
 }
 
 // ═══════════ TAB: DASHBOARD ═══════════
+function OverviewTab({ products, handleProductAction, editProductDlc }) {
+  const active = products.filter(p => !isDiscarded(p));
+  const rayons = useMemo(() => Array.from(new Set(products.map(p => p.rayon).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'fr',{numeric:true,sensitivity:'base'})), [products]);
+  return (<div className="space-y-4 sm:space-y-6">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div><h1 className="text-2xl sm:text-3xl font-bold">Tableau de bord</h1><p className="text-sm text-muted-foreground mt-1">Vue d’ensemble de la boutique démo, comme dans TrackSmart Retail.</p></div>
+      <div className="bg-white rounded-full border px-4 py-2 text-xs font-semibold text-primary">5 rayons suivis · {active.length} unités actives</div>
+    </div>
+    <StatsCards products={products}/>
+    <WeeklyAlert products={products} onProductAction={handleProductAction} onEditDlc={editProductDlc}/>
+    <div className="bg-white rounded-2xl border shadow-sm p-4 sm:p-5">
+      <div className="flex items-center gap-2 mb-4"><Layers className="w-4 h-4 text-primary"/><h2 className="font-semibold text-sm">Aperçu par rayon</h2></div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        {rayons.map(rayon => {const prods = products.filter(p => p.rayon === rayon); const actifs = prods.filter(p => !isDiscarded(p)); const expired = actifs.filter(p => getProductStatus(p.expiration_date) === 'expired').length; const urgent = actifs.filter(p => getProductStatus(p.expiration_date) === 'urgent').length; const soon = actifs.filter(p => getProductStatus(p.expiration_date) === 'soon').length; const value = actifs.reduce((s,p)=>s+(Number(p.price_chf)||0),0); return <div key={rayon} className="rounded-2xl border bg-secondary/30 p-4"><p className="font-bold text-sm mb-1">{rayon}</p><p className="text-xs text-muted-foreground mb-3">{actifs.length} unités · CHF {value.toFixed(2)}</p><div className="flex flex-wrap gap-1.5 text-[11px]"><span className="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100">{expired} expiré</span><span className="px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-100">{urgent} urgent</span><span className="px-2 py-0.5 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-100">{soon} bientôt</span></div></div>})}
+      </div>
+    </div>
+  </div>);
+}
+
+// ═══════════ TAB: PRODUCTS ═══════════
 function DashboardTab({ products, addProduct, deleteProduct, handleProductAction, editProductDlc, editProductField }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -284,6 +308,7 @@ function DashboardTab({ products, addProduct, deleteProduct, handleProductAction
   };
 
   return (<div className="space-y-4 sm:space-y-6">
+    <div><h1 className="text-2xl sm:text-3xl font-bold">Produits</h1><p className="text-sm text-muted-foreground mt-1">Ajout, recherche, filtres, DLC, pertes et suivi par rayon.</p></div>
     <StatsCards products={active}/>
     {showForm&&<motion.div initial={{opacity:0,y:-10}} animate={{opacity:1,y:0}} className="bg-white rounded-2xl p-5 shadow-sm border space-y-4"><h3 className="font-bold">Ajouter un produit</h3><div className="grid sm:grid-cols-3 gap-3"><Input placeholder="Nom du produit *" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="rounded-xl h-10 text-sm"/><Input placeholder="Marque" value={form.marque} onChange={e=>setForm({...form,marque:e.target.value})} className="rounded-xl h-10 text-sm"/><Input type="date" value={form.expiration_date} onChange={e=>setForm({...form,expiration_date:e.target.value})} className="rounded-xl h-10 text-sm"/><Select value={form.category} onValueChange={v=>setForm({...form,category:v})}><SelectTrigger className="rounded-xl h-10 text-sm"><SelectValue placeholder="Catégorie"/></SelectTrigger><SelectContent>{CATEGORIES.map(c=><SelectItem key={c} value={c}>{categoryKeys[c]}</SelectItem>)}</SelectContent></Select><Select value={form.rayon} onValueChange={v=>setForm({...form,rayon:v})}><SelectTrigger className="rounded-xl h-10 text-sm"><SelectValue placeholder="Rayon"/></SelectTrigger><SelectContent>{Object.entries(rayonKeys).map(([v,l])=><SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent></Select><div className="flex gap-2"><Input type="number" placeholder="Prix CHF" value={form.price_chf} onChange={e=>setForm({...form,price_chf:e.target.value})} className="rounded-xl h-10 text-sm" step="0.01"/><Button onClick={addManual} className="rounded-xl h-10">Ajouter</Button></div></div></motion.div>}
 
@@ -317,6 +342,27 @@ function DashboardTab({ products, addProduct, deleteProduct, handleProductAction
         {thrownProducts.length===0?<p className="text-center text-sm text-muted-foreground py-4">Aucun produit jeté enregistré</p>:thrownProducts.map(p=>{const t=(p.quantity_thrown||0)*(p.price_chf||0);return <div key={p._id} className="flex items-center justify-between bg-red-50/60 border border-red-100 rounded-xl px-4 py-3"><div className="min-w-0 flex-1"><p className="font-medium text-sm truncate">{p.name}</p><div className="flex flex-wrap gap-x-2 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">{p.marque&&<span>{p.marque}</span>}{p.category&&<span>· {categoryKeys[p.category]||p.category}</span>}{p.rayon&&<span>· Rayon {p.rayon}</span>}</div><p className="text-xs text-muted-foreground mt-1">{p.quantity_thrown} unité{p.quantity_thrown>1?'s':''} × CHF {Number(p.price_chf).toFixed(2)} 🗑 Jeté le {p.discarded_at||'—'}</p></div><div className="ml-4 flex-shrink-0 text-right"><span className="text-sm font-bold text-red-700">CHF {t.toFixed(2)}</span></div></div>})}
       </div>}
     </div>
+  </div>);
+}
+
+// ═══════════ TAB: STOCK ═══════════
+function StockTab({ products, editProductField }) {
+  const active = products.filter(p => !isDiscarded(p));
+  const [counts, setCounts] = useState({});
+  const rows = active.slice().sort((a,b)=>(a.rayon||'').localeCompare(b.rayon||'', 'fr') || (a.name||'').localeCompare(b.name||'', 'fr'));
+  const changed = rows.filter(p => counts[p._id] !== undefined && Number(counts[p._id]) !== 1);
+  const totalDiff = changed.reduce((sum,p)=>sum + (1 - Math.max(0, Number(counts[p._id]) || 0)), 0);
+  const validate = () => {changed.forEach(p => {if (Number(counts[p._id]) <= 0) editProductField(p._id, { discarded: true, discarded_at: new Date().toISOString().split('T')[0], action: 'jeter', quantity_thrown: 1 });});setCounts({});};
+  return (<div className="space-y-4 sm:space-y-6">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div><h1 className="text-2xl sm:text-3xl font-bold">Gérer mon stock</h1><p className="text-sm text-muted-foreground mt-1">Recomptage périodique avec écarts de vente ou de perte, comme dans l’application réelle.</p></div>
+      <div className="bg-white rounded-2xl border px-4 py-3 text-sm"><span className="text-muted-foreground">Écart total</span><span className="font-bold ml-2">{totalDiff} unité{totalDiff>1?'s':''}</span></div>
+    </div>
+    <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
+      <div className="hidden sm:grid grid-cols-[1.3fr_1fr_120px_140px_1fr] gap-3 px-4 py-3 bg-neutral-50 text-xs font-semibold text-muted-foreground border-b"><span>Produit</span><span>Rayon</span><span>Stock théorique</span><span>Stock réel</span><span>Nature de l’écart</span></div>
+      <div className="divide-y">{rows.map(p => {const actual = counts[p._id] ?? 1; const diff = 1 - Math.max(0, Number(actual) || 0); const status = getProductStatus(p.expiration_date); return <div key={p._id} className="grid sm:grid-cols-[1.3fr_1fr_120px_140px_1fr] gap-3 px-4 py-3 items-center text-sm"><div><p className="font-medium">{p.name}</p><p className="text-xs text-muted-foreground">{p.marque || '—'} · DLC {p.expiration_date}</p></div><span className="text-muted-foreground">{p.rayon}</span><span className="font-semibold">1 unité</span><Input type="number" min="0" value={actual} onChange={e=>setCounts(c=>({...c,[p._id]:e.target.value}))} className="h-9 rounded-xl"/><div className="flex flex-wrap gap-1.5"><span className={`px-2 py-0.5 rounded-full text-xs border ${statusConfig[status].color}`}>{status==='expired'?'Expiré':status==='urgent'?'Urgent':status==='soon'?'Bientôt':'OK'}</span>{diff>0&&<span className="px-2 py-0.5 rounded-full text-xs bg-red-50 text-red-700 border border-red-100">Perte/Vente : {diff}</span>}</div></div>})}</div>
+    </div>
+    <div className="flex justify-end"><Button onClick={validate} disabled={changed.length===0} className="rounded-full">Valider le recomptage</Button></div>
   </div>);
 }
 
@@ -482,11 +528,10 @@ export default function Demo() {
   };
 
   const tabs = [
-    { key: 'dashboard', label: 'Dashboard', short: 'Dashbrd', icon: LayoutDashboard },
+    { key: 'dashboard', label: 'Tableau de bord', short: 'Accueil', icon: LayoutDashboard },
+    { key: 'products', label: 'Produits', short: 'Produits', icon: Package },
+    { key: 'stock', label: 'Gérer mon stock', short: 'Stock', icon: Layers },
     { key: 'analytics', label: 'Analytiques', short: 'Analyt.', icon: BarChart3 },
-    { key: 'orders', label: 'Commandes', short: 'Commandes', icon: ShoppingCart },
-    { key: 'documents', label: 'Documents', short: 'Docs', icon: Folder },
-    { key: 'team', label: 'Équipe', short: 'Équipe', icon: Users },
   ];
 
   return (
@@ -496,7 +541,7 @@ export default function Demo() {
         <div className="max-w-7xl mx-auto px-2 sm:px-4 h-14 sm:h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary flex items-center justify-center"><span className="text-white font-bold text-xs sm:text-sm">TS</span></div>
-            <span className="font-bold text-sm sm:text-lg tracking-tight hidden sm:inline">TrackSmart <span className="text-primary">Démo</span></span>
+            <span className="font-bold text-sm sm:text-lg tracking-tight hidden sm:inline">TrackSmart Retail <span className="text-primary">Démo</span></span>
           </Link>
           <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto flex-1 mx-1 sm:mx-0 sm:flex-none scrollbar-hide">
             {tabs.map(t => (
@@ -515,11 +560,10 @@ export default function Demo() {
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 pt-2 sm:pt-6 pb-24 sm:pb-8">
-        {tab==='dashboard'&&<DashboardTab products={products} addProduct={addProduct} deleteProduct={deleteProduct} handleProductAction={handleProductAction} editProductDlc={editProductDlc} editProductField={editProductField}/>}
+        {tab==='dashboard'&&<OverviewTab products={products} handleProductAction={handleProductAction} editProductDlc={editProductDlc}/>}
+        {tab==='products'&&<DashboardTab products={products} addProduct={addProduct} deleteProduct={deleteProduct} handleProductAction={handleProductAction} editProductDlc={editProductDlc} editProductField={editProductField}/>}
+        {tab==='stock'&&<StockTab products={products} editProductField={editProductField}/>}
         {tab==='analytics'&&<AnalyticsTab products={products}/>}
-        {tab==='orders'&&<OrdersTab products={products}/>}
-        {tab==='documents'&&<DocumentsTab/>}
-        {tab==='team'&&<TeamTab/>}
       </main>
       {showScanner&&<BarcodeScanner lang="fr" onDetected={handleBarcodeDetected} onClose={()=>setShowScanner(false)}/>}
       {quickAdd&&<QuickAddModal barcode={quickAdd.barcode} prefill={quickAdd.prefill} existingProduct={quickAdd.existingProduct} onSave={addProduct} onClose={()=>setQuickAdd(null)}/>}
