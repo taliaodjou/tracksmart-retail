@@ -6,13 +6,15 @@
       "type": "string",
       "enum": [
         "admin",
+        "merchant",
         "owner",
         "manager",
         "employee",
+        "consumer",
         "user"
       ],
       "default": "user",
-      "description": "Platform role. 'admin'=TrackSmart Retail admin, 'owner'=store owner, 'manager'=store manager, 'employee'=store employee, 'user'=legacy"
+      "description": "Platform role. 'admin'=TrackSmart Retail admin, 'merchant'/'owner'/'manager'/'employee'/'user'=Espace Boutique roles, 'consumer'=customer marketplace role."
     },
     "store_owner_email": {
       "type": "string",
@@ -37,6 +39,47 @@
     "phone_number": {
       "type": "string",
       "description": "Num\u00e9ro de t\u00e9l\u00e9phone"
+    },
+    "address": {
+      "type": "string",
+      "description": "Adresse de la boutique pour la future d\u00e9couverte consumer"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude de la boutique pour la d\u00e9couverte par proximit\u00e9"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude de la boutique pour la d\u00e9couverte par proximit\u00e9"
+    },
+    "openingHours": {
+      "type": "string",
+      "description": "Horaires d'ouverture de la boutique, au format texte ou JSON"
+    },
+    "storeSize": {
+      "type": "string",
+      "enum": [
+        "small",
+        "medium",
+        "large",
+        "unknown"
+      ],
+      "default": "unknown",
+      "description": "Taille indicative de la boutique"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true,
+      "description": "Boutique active sur la plateforme"
+    },
+    "marketplaceVisibility": {
+      "type": "string",
+      "enum": [
+        "hidden",
+        "visible"
+      ],
+      "default": "hidden",
+      "description": "Visibilit\u00e9 de la boutique dans la future exp\u00e9rience consumer"
     },
     "report_channel": {
       "type": "string",

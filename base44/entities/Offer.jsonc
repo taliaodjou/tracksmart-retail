@@ -1,0 +1,221 @@
+{
+  "name": "Offer",
+  "type": "object",
+  "properties": {
+    "productId": {
+      "type": "string",
+      "description": "Existing Product record id referenced by this offer"
+    },
+    "storeId": {
+      "type": "string",
+      "description": "Existing store identifier. In the current architecture this maps to the store owner email."
+    },
+    "store_owner_email": {
+      "type": "string",
+      "description": "Email of the store owner for team scoping and RLS"
+    },
+    "title": {
+      "type": "string",
+      "description": "Consumer-facing offer title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Consumer-facing offer description",
+      "maxLength": 1000
+    },
+    "regularPrice": {
+      "type": "number",
+      "description": "Original unit price"
+    },
+    "discountedPrice": {
+      "type": "number",
+      "description": "Discounted unit price"
+    },
+    "quantityAvailable": {
+      "type": "number",
+      "description": "Quantity reserved for this offer, derived from existing store inventory"
+    },
+    "startDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication start date"
+    },
+    "endDate": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication end date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "paused",
+        "sold_out",
+        "expired"
+      ],
+      "default": "draft",
+      "description": "Offer lifecycle status"
+    },
+    "isPublished": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when the merchant explicitly publishes the offer to TrackSmart"
+    },
+    "createdBy": {
+      "type": "string",
+      "description": "Email of the user/employee who created the offer"
+    }
+  },
+  "required": [
+    "productId",
+    "storeId",
+    "store_owner_email",
+    "title",
+    "regularPrice",
+    "discountedPrice",
+    "quantityAvailable",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "data.store_owner_email": "{{user.email}}"
+        },
+        {
+          "data.store_owner_email": "{{user.store_owner_email}}"
+        },
+        {
+          "$and": [
+            {
+              "data.isPublished": true
+            },
+            {
+              "data.status": "active"
+            },
+            {
+              "user_condition": {
+                "role": "consumer"
+              }
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "merchant"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "owner"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.store_owner_email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "employee"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "data.store_owner_email": "{{user.email}}"
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "merchant"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "owner"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "manager"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

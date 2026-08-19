@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { isAdmin } from '@/lib/productUtils';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminDashboardView from '@/components/admin/AdminDashboardView';
@@ -17,9 +17,22 @@ import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 export default function AdminPortal() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState(null);
   const [approvalState, setApprovalState] = useState(null); // 'loading' | 'done' | null
+
+  useEffect(() => {
+    if (location.pathname.includes('/admin-portal/clients')) {
+      const parts = location.pathname.split('/').filter(Boolean);
+      setSelectedClientId(parts[2] || null);
+      setActiveSection('clients');
+    } else if (location.pathname.includes('/admin-portal/subscriptions')) {
+      setActiveSection('subscriptions');
+    } else if (location.pathname.includes('/admin-portal/analytics')) {
+      setActiveSection('analytics');
+    }
+  }, [location.pathname]);
 
   // Handle approve/reject links from email
   useEffect(() => {

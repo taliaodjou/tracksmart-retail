@@ -81,8 +81,22 @@ export function isAdmin(user) {
   return user?.role === 'admin' || user?.email === 'talia.odjou@gmail.com';
 }
 
+export function isConsumer(user) {
+  return user?.role === 'consumer';
+}
+
+export function isMerchantUser(user) {
+  return !!user && !isAdmin(user) && !isConsumer(user);
+}
+
+export function getDefaultRouteForUser(user) {
+  if (isAdmin(user)) return '/admin-portal';
+  if (isConsumer(user)) return '/consumer';
+  return '/dashboard';
+}
+
 export function isStoreOwner(user) {
-  return user?.role === 'owner' || user?.role === 'user' || (!user?.store_owner_email && !isAdmin(user));
+  return user?.role === 'merchant' || user?.role === 'owner' || user?.role === 'user' || (!user?.role && !user?.store_owner_email && !isAdmin(user));
 }
 
 export function isManager(user) {
