@@ -5,7 +5,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const reasons = ['Casse', 'Vente hors système', 'Erreur de comptage', 'Autre'];
+const reasons = [
+  'Produit périmé',
+  'Produit abîmé',
+  'Casse',
+  'Erreur de comptage',
+  'Erreur de réception',
+  'Vente hors système',
+  'Retour fournisseur',
+  'Vol ou perte',
+  'Don / dégustation',
+  'Retrait qualité',
+  'Autre'
+];
 
 export default function StockAdjustmentModal({ products = [], product, entry, onProductChange, onScan, onClose, onSubmit, saving }) {
   const [search, setSearch] = useState('');
