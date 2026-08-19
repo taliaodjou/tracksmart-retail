@@ -69,14 +69,14 @@ const AuthenticatedApp = () => {
   }
 
   const MerchantGuard = ({ children }) => {
-    if (isAuthenticated && user && !isAdmin(user) && !isMerchantUser(user)) {
+    if (isAuthenticated && user && !isMerchantUser(user)) {
       return <Navigate to={getDefaultRouteForUser(user)} replace />;
     }
     return children;
   };
 
   const ConsumerGuard = ({ children }) => {
-    if (isAuthenticated && user && !isAdmin(user) && !isConsumer(user)) {
+    if (isAuthenticated && user && !isConsumer(user)) {
       return <Navigate to={getDefaultRouteForUser(user)} replace />;
     }
     return children;
