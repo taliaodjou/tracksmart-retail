@@ -24,7 +24,7 @@ export default function StockMovementList({ movements = [], limit = 5, onViewAll
             <div key={movement.id} className="flex items-center justify-between gap-3 rounded-xl bg-secondary/30 px-3 py-2">
               <div>
                 <p className="text-sm font-semibold text-foreground">{typeLabel[movement.type] || movement.type}</p>
-                <p className="text-xs text-muted-foreground">{formatDate(movement.movement_date)}</p>
+                <p className="text-xs text-muted-foreground">{formatDate(movement.movement_date)}{movement.justification ? ` · ${movement.justification}` : ''}</p>
               </div>
               <span className="text-sm font-bold text-primary">{movement.quantity} unités</span>
             </div>

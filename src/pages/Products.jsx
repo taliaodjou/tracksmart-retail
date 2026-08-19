@@ -19,8 +19,9 @@ import QuickAddModal from '@/components/dashboard/QuickAddModal';
 import DashboardFooter from '@/components/dashboard/DashboardFooter';
 import StockAdjustmentModal from '@/components/dashboard/StockAdjustmentModal';
 import StockMovementHistoryModal from '@/components/dashboard/StockMovementHistoryModal';
+import InventoryCountModal from '@/components/dashboard/InventoryCountModal';
 import { logActivity } from '@/lib/activityLogger';
-import { addStockEntry, applyManualStockMovement, enrichProductsWithStock } from '@/lib/stockEntries';
+import { addStockEntry, applyManualStockMovement, applyPeriodicStockCount, enrichProductsWithStock } from '@/lib/stockEntries';
 
 const XlsIcon = () => <span className="text-[10px] font-bold hidden">XLS</span>;
 
@@ -41,6 +42,7 @@ export default function Products() {
   const [scannerMode, setScannerMode] = useState('add');
   const [quickAdd, setQuickAdd] = useState(null);
   const [showAdjustment, setShowAdjustment] = useState(false);
+  const [showInventoryCount, setShowInventoryCount] = useState(false);
   const [adjustmentProduct, setAdjustmentProduct] = useState(null);
   const [adjustmentEntry, setAdjustmentEntry] = useState(null);
   const [historyProduct, setHistoryProduct] = useState(null);
@@ -180,6 +182,23 @@ export default function Products() {
       setAdjustmentEntry(null);
     },
     onError: (error) => window.alert(error.message || 'Impossible d’enregistrer ce mouvement.')
+  });
+
+  const inventoryCountMutation = useMutation({
+    mutationFn: (entries) => Promise.all(entries.map((entry) => applyPeriodicStockCount({
+      product: entry.product,
+      storeOwnerEmail,
+      actualQuantity: entry.actualQuantity,
+      movementDate: new Date().toISOString().split('T')[0]
+    }))),
+    onSuccess: (results) => {
+      queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
+      setShowInventoryCount(false);
+      const changedCount = results.filter(Boolean).length;
+      if (changedCount === 0) window.alert('Aucun écart détecté : aucun mouvement ajouté.');
+    },
+    onError: (error) => window.alert(error.message || 'Impossible de valider cet inventaire.')
   });
 
   const filteredProducts = useMemo(() => productsWithStock.filter((product) => {
@@ -338,6 +357,10 @@ export default function Products() {
               <XlsIcon />
               {lang === 'fr' ? 'Importer' : 'Import'}
             </Button>
+            <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
+              <Layers className="w-4 h-4" />
+              Faire l'inventaire
+            </Button>
             <Button variant="outline" onClick={() => { setShowAdjustment(true); setAdjustmentProduct(null); setAdjustmentEntry(null); }} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
               Enregistrer un mouvement
@@ -450,6 +473,15 @@ export default function Products() {
           onUpdate={(id, data) => updateMutation.mutate({ id, data })}
           onClose={() => setQuickAdd(null)}
           saving={createMutation.isPending || updateMutation.isPending}
+        />
+      )}
+
+      {showInventoryCount && (
+        <InventoryCountModal
+          products={productsWithStock}
+          onClose={() => setShowInventoryCount(false)}
+          onSubmit={(entries) => inventoryCountMutation.mutate(entries)}
+          saving={inventoryCountMutation.isPending}
         />
       )}
 

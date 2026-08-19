@@ -50,7 +50,7 @@ export function expandProductsByStockDates(products = []) {
   });
 }
 
-export async function addStockEntry({ productId, storeOwnerEmail, expirationDate, quantity, dateAdded }) {
+export async function addStockEntry({ productId, storeOwnerEmail, expirationDate, quantity, dateAdded, justification, source = 'form' }) {
   const quantityNumber = Number(quantity) || 0;
   if (!productId || !storeOwnerEmail || !expirationDate || quantityNumber <= 0) return null;
 
@@ -86,10 +86,11 @@ export async function addStockEntry({ productId, storeOwnerEmail, expirationDate
     batch_id: savedEntry.id,
     movement_date: dateAdded || today(),
     type: 'reception',
-    source: 'form',
+    source,
     quantity: quantityNumber,
     quantity_before: totalBefore,
     quantity_after: totalBefore + quantityNumber,
+    justification,
     values_before: JSON.stringify({ batch_id: savedEntry.id, quantity_remaining: beforeEntryQuantity }),
     values_after: JSON.stringify({ batch_id: savedEntry.id, quantity_remaining: afterEntryQuantity }),
   });
@@ -139,6 +140,39 @@ export async function applyManualStockMovement({ productId, storeOwnerEmail, qua
   });
 
   return { decremented: quantityNumber, missing: 0 };
+}
+
+export async function applyPeriodicStockCount({ product, storeOwnerEmail, actualQuantity, movementDate }) {
+  const actual = Number(actualQuantity);
+  const theoretical = Number(product?.stock_total) || 0;
+  if (!product?.id || !storeOwnerEmail || Number.isNaN(actual) || actual < 0) {
+    throw new Error('Produit et quantité réelle sont obligatoires.');
+  }
+
+  const difference = theoretical - actual;
+  if (difference > 0) {
+    return applyManualStockMovement({
+      productId: product.id,
+      storeOwnerEmail,
+      quantity: difference,
+      justification: 'Recomptage périodique',
+      movementDate,
+    });
+  }
+
+  if (difference < 0) {
+    return addStockEntry({
+      productId: product.id,
+      storeOwnerEmail,
+      expirationDate: product.stock_entries?.[0]?.expiration_date || product.expiration_date || movementDate || today(),
+      quantity: Math.abs(difference),
+      dateAdded: movementDate,
+      justification: 'Recomptage périodique',
+      source: 'manual',
+    });
+  }
+
+  return null;
 }
 
 export async function decrementStockFefo(productId, quantity = 1) {
