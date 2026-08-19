@@ -40,7 +40,7 @@ export default function InventoryCountModal({ products = [], onClose, onSubmit, 
         <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Gestion de stock</p>
-            <h2 className="text-lg font-bold flex items-center gap-2"><ClipboardCheck className="w-5 h-5 text-primary" />Faire l'inventaire</h2>
+            <h2 className="text-lg font-bold flex items-center gap-2"><ClipboardCheck className="w-5 h-5 text-primary" />Gérer mon stock</h2>
           </div>
           <button onClick={onClose} className="w-9 h-9 rounded-full hover:bg-secondary flex items-center justify-center"><X className="w-5 h-5 text-muted-foreground" /></button>
         </div>
@@ -86,7 +86,7 @@ export default function InventoryCountModal({ products = [], onClose, onSubmit, 
 
         <div className="px-5 py-4 border-t border-border/40 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">{countedEntries.length} produit{countedEntries.length > 1 ? 's' : ''} renseigné{countedEntries.length > 1 ? 's' : ''}{missingNatureCount > 0 ? ` · ${missingNatureCount} écart${missingNatureCount > 1 ? 's' : ''} à qualifier` : ''}</p>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={onClose} className="rounded-xl">Annuler</Button><Button disabled={countedEntries.length === 0 || missingNatureCount > 0 || saving} onClick={submit} className="rounded-xl">Valider l'inventaire</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={onClose} className="rounded-xl">Annuler</Button><Button disabled={countedEntries.length === 0 || missingNatureCount > 0 || saving} onClick={submit} className="rounded-xl">Valider</Button></div>
         </div>
       </div>
     </div>

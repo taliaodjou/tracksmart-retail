@@ -371,7 +371,7 @@ export default function Products() {
             </Button>
             <Button variant="outline" onClick={() => setShowInventoryCount(true)} className="rounded-full gap-2">
               <Layers className="w-4 h-4" />
-              Faire l'inventaire
+              Gérer mon stock
             </Button>
             <Button onClick={() => setShowAddOptions(true)} className="rounded-full gap-2">
               <Plus className="w-4 h-4" />
