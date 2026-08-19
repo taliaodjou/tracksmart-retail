@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Target, Lightbulb, Heart, Shield, Zap, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, Target, Lightbulb, Heart, Shield, Zap, Mail } from 'lucide-react';
 
 export default function About() {
   return (
@@ -119,23 +119,14 @@ export default function About() {
             <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto mb-8">
               Des questions sur nos tarifs ou sur comment devenir client ? Contactez-nous directement, nous sommes là pour vous répondre.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a href="tel:+41772229764" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
-                <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-5 h-5 text-white" />
-                </div>
-                <div className="text-left">
-                  <p className="text-xs text-muted-foreground">Téléphone</p>
-                  <p className="font-bold">+41 77 222 97 64</p>
-                </div>
-              </a>
-              <a href="mailto:contact@tracksmart.ch" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
+            <div className="flex items-center justify-center">
+              <a href="mailto:contac@tracksmart.com" className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border shadow-sm hover:shadow-md transition-all w-full sm:w-auto">
                 <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
                   <Mail className="w-5 h-5 text-white" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs text-muted-foreground">Email</p>
-                  <p className="font-bold">contact@tracksmart.ch</p>
+                  <p className="font-bold">contac@tracksmart.com</p>
                 </div>
               </a>
             </div>
