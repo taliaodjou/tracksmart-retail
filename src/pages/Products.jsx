@@ -346,7 +346,9 @@ export default function Products() {
       }
     } catch (_) {}
 
-    setQuickAdd({ barcode: code, prefill: null, existingProduct: null });
+    setManualInitialProduct({ barcode: code });
+    setEditProduct(null);
+    setShowForm(true);
   };
 
   return (
