@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/use-toast';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
 import InvoiceSidebar from '@/components/invoices/InvoiceSidebar';
 import ItemsServicesCard from '@/components/invoices/ItemsServicesCard';
+import StockProductPicker from '@/components/invoices/StockProductPicker';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
 import { applyManualStockMovement, enrichProductsWithStock } from '@/lib/stockEntries';
 import { getStoreOwnerEmail, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
@@ -34,6 +35,18 @@ export default function Invoices() {
     },
     enabled: !!user,
   });
+
+  const addProduct = (product) => {
+    setItems((prev) => {
+      const existing = prev.findIndex((i) => i.product_id === product.id);
+      if (existing !== -1) {
+        return prev.map((i, idx) => (idx === existing ? { ...i, qty: Number(i.qty || 0) + 1 } : i));
+      }
+      const line = { description: product.name, qty: 1, price: Number(product.price_chf || 0), product_id: product.id, stock_total: Number(product.stock_total || 0) };
+      const empty = prev.findIndex((i) => !i.description);
+      return empty !== -1 ? prev.map((i, idx) => (idx === empty ? line : i)) : [...prev, line];
+    });
+  };
 
   const subtotal = items.reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.price) || 0), 0);
   const tax = subtotal * (TAX_RATE / 100);
@@ -104,6 +117,7 @@ export default function Invoices() {
         <div className="mt-7 grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
           {step === 1 ? (
             <div className="space-y-6">
+              <StockProductPicker products={stockProducts} onPick={addProduct} />
               <ItemsServicesCard items={items} onChange={setItems} estimatedTotal={total} products={stockProducts} />
             </div>
           ) : (
