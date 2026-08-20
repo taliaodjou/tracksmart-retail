@@ -9,6 +9,7 @@ import { categoryKeys, getProductStatus } from '@/lib/productUtils';
 import BarcodeScanner from './BarcodeScanner';
 import ProductHistorySection from './ProductHistorySection';
 import RayonInput from './RayonInput';
+import QuantityBar from './QuantityBar';
 import { base44 } from '@/api/base44Client';
 
 const ACTION_KEYS = {
@@ -220,12 +221,15 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
           <Input type="date" value={form.reception_date} onChange={set('reception_date')} className="h-8 text-sm" />
         </div>
 
-        {!editProduct && (
-          <div className="space-y-1">
-            <Label className="text-xs">Quantité reçue *</Label>
-            <Input required type="number" min="1" value={form.quantity_received} onChange={set('quantity_received')} placeholder="0" className="h-8 text-sm" />
-          </div>
-        )}
+        <QuantityBar
+          value={form.quantity_received}
+          onChange={(value) => setForm({ ...form, quantity_received: value })}
+          required={!editProduct}
+          label={editProduct ? 'Quantité à ajouter au stock' : 'Quantité reçue'}
+          hint={editProduct
+            ? `Stock actuel : ${editProduct.stock_total ?? 0} — laissez 0 pour ne rien ajouter`
+            : 'Nombre d’unités reçues pour ce produit'}
+        />
 
         {/* DLC */}
         <div className="space-y-1">
