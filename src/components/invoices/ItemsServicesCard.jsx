@@ -1,9 +1,18 @@
 import React from 'react';
 import { ReceiptText, Plus, Trash2 } from 'lucide-react';
 
-export default function ItemsServicesCard({ items, onChange, estimatedTotal }) {
+export default function ItemsServicesCard({ items, onChange, estimatedTotal, products = [] }) {
   const updateItem = (index, field, value) => {
     onChange(items.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
+  };
+
+  const pickDescription = (index, value) => {
+    const match = products.find((p) => p.name === value);
+    onChange(items.map((item, i) => (i === index
+      ? match
+        ? { ...item, description: value, product_id: match.id, price: Number(match.price_chf || 0), stock_total: Number(match.stock_total || 0) }
+        : { ...item, description: value, product_id: null, stock_total: undefined }
+      : item)));
   };
 
   return (
@@ -17,10 +26,16 @@ export default function ItemsServicesCard({ items, onChange, estimatedTotal }) {
         <span className="col-span-2">Qté</span>
         <span className="col-span-4">Prix</span>
       </div>
+      <datalist id="invoice-products">
+        {products.map((p) => <option key={p.id} value={p.name} />)}
+      </datalist>
       <div className="space-y-2">
         {items.map((item, index) => (
           <div key={index} className="grid grid-cols-12 gap-2 items-center">
-            <input value={item.description} onChange={(e) => updateItem(index, 'description', e.target.value)} placeholder="Description" className="col-span-6 h-10 rounded-lg border border-[#d9d2c3] px-3 text-sm outline-none focus:ring-2 focus:ring-[#c9a646]/30" />
+            <div className="col-span-6">
+              <input list="invoice-products" value={item.description} onChange={(e) => pickDescription(index, e.target.value)} placeholder="Produit du stock ou description libre" className="w-full h-10 rounded-lg border border-[#d9d2c3] px-3 text-sm outline-none focus:ring-2 focus:ring-[#c9a646]/30" />
+              {item.product_id && <span className="text-[11px] text-[#6f5400] font-semibold">Lié au stock · {item.stock_total ?? 0} en stock</span>}
+            </div>
             <input type="number" min="1" value={item.qty} onChange={(e) => updateItem(index, 'qty', e.target.value)} className="col-span-2 h-10 rounded-lg border border-[#d9d2c3] px-2 text-sm outline-none focus:ring-2 focus:ring-[#c9a646]/30" />
             <div className="col-span-4 flex items-center gap-1.5">
               <button onClick={() => onChange(items.filter((_, i) => i !== index))} className="text-[#9a9689] hover:text-red-500 shrink-0"><Trash2 className="w-4 h-4" /></button>

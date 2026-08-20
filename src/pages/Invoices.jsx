@@ -9,7 +9,8 @@ import InvoiceSidebar from '@/components/invoices/InvoiceSidebar';
 import CustomerDetailsCard from '@/components/invoices/CustomerDetailsCard';
 import ItemsServicesCard from '@/components/invoices/ItemsServicesCard';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
-import { getStoreOwnerEmail, hasActiveSubscription } from '@/lib/productUtils';
+import { applyManualStockMovement, enrichProductsWithStock } from '@/lib/stockEntries';
+import { getStoreOwnerEmail, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
 
 const TAX_RATE = 8.5;
 const today = () => new Date().toISOString().split('T')[0];
@@ -28,6 +29,16 @@ export default function Invoices() {
   const { data: pastInvoices = [] } = useQuery({
     queryKey: ['invoices', storeOwnerEmail],
     queryFn: () => base44.entities.Invoice.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 100),
+    enabled: !!user,
+  });
+
+  const { data: stockProducts = [] } = useQuery({
+    queryKey: ['invoice-products', storeOwnerEmail],
+    queryFn: async () => {
+      const [products, batches] = await Promise.all([base44.entities.Product.list('-created_date', 300), base44.entities.Batch.list('-date_added', 500)]);
+      const scoped = isAdmin(user) ? products : products.filter((p) => (p.store_owner_email || user.email) === storeOwnerEmail);
+      return enrichProductsWithStock(scoped.filter((p) => !p.discarded), batches).filter((p) => Number(p.stock_total || 0) > 0);
+    },
     enabled: !!user,
   });
 
@@ -58,9 +69,20 @@ export default function Invoices() {
       items: JSON.stringify(items.filter((i) => i.description)),
       subtotal, tax_amount: tax, total, status,
     });
+
+    let deducted = 0;
+    if (status === 'final') {
+      for (const item of items.filter((i) => i.product_id && Number(i.qty) > 0)) {
+        await applyManualStockMovement({ productId: item.product_id, storeOwnerEmail, quantity: Number(item.qty), movementType: 'vente', source: 'manual', movementDate: today(), justification: `Facture ${invoiceNumber}` });
+        deducted += Number(item.qty);
+      }
+    }
+
     setIsSaving(false);
     queryClient.invalidateQueries({ queryKey: ['invoices', storeOwnerEmail] });
-    toast({ title: status === 'draft' ? 'Brouillon enregistré' : 'Facture finalisée', description: `${invoiceNumber} — ${total.toFixed(2)}€` });
+    queryClient.invalidateQueries({ queryKey: ['invoice-products', storeOwnerEmail] });
+    queryClient.invalidateQueries({ queryKey: ['products'] });
+    toast({ title: status === 'draft' ? 'Brouillon enregistré' : 'Facture finalisée', description: `${invoiceNumber} — ${total.toFixed(2)}€${deducted ? ` · ${deducted} article(s) déduit(s) du stock` : ''}` });
   };
 
   if (!hasActiveSubscription(user)) return <SubscriptionGate />;
@@ -100,7 +122,7 @@ export default function Invoices() {
           {step === 1 ? (
             <div className="space-y-6">
               <CustomerDetailsCard customer={customer} onChange={setCustomer} savedCustomers={savedCustomers} />
-              <ItemsServicesCard items={items} onChange={setItems} estimatedTotal={total} />
+              <ItemsServicesCard items={items} onChange={setItems} estimatedTotal={total} products={stockProducts} />
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-[#eee8dc] shadow-sm p-5">
