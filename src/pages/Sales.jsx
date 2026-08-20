@@ -6,7 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
-import PosSidebar from '@/components/pos/PosSidebar';
+import InvoiceSidebar from '@/components/invoices/InvoiceSidebar';
 import PosHeader from '@/components/pos/PosHeader';
 import CategoryTabs from '@/components/pos/CategoryTabs';
 import ProductCard from '@/components/pos/ProductCard';
@@ -69,7 +69,7 @@ export default function Sales() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-[#242321] flex">
-      <PosSidebar />
+      <InvoiceSidebar />
       <div className="flex-1 min-w-0"><PosHeader search={search} onSearchChange={setSearch} />
         <div className="flex flex-col xl:flex-row"><main className="flex-1 px-5 lg:px-6 py-7"><h1 className="text-xl font-extrabold mb-4">Catalogue Rapide</h1><CategoryTabs activeCategory={category} onChange={setCategory} />
           {isLoading ? <div className="mt-6 text-sm text-[#74716b]">Chargement du catalogue...</div> : <div className="mt-7 flex flex-wrap gap-4">{products.map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={addToCart} />)}<Link to="/products" className="w-full sm:w-32 h-56 rounded-xl border-2 border-dashed border-[#d6c9ad] text-[#74716b] bg-white/40 flex flex-col items-center justify-center text-center text-sm px-4"><PlusCircle className="w-10 h-10 mb-3 text-[#9a9995]" />Ajouter un produit rapide</Link></div>}
