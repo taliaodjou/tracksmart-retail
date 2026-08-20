@@ -8,6 +8,7 @@ const fallbackImages = [
 ];
 
 export default function ProductCard({ product, index, onAdd }) {
+  const isTracked = product.stock_total !== null && product.stock_total !== undefined;
   const stock = Number(product.stock_total || 0);
   const price = Number(product.price_chf || 0);
   const image = product.image_url || fallbackImages[index % fallbackImages.length];
@@ -16,13 +17,13 @@ export default function ProductCard({ product, index, onAdd }) {
     <article className="w-full sm:w-32 bg-white rounded-xl border border-[#eee8dc] shadow-sm overflow-hidden">
       <div className="h-28 relative bg-[#eee9df]">
         <img src={image} alt={product.name} className="w-full h-full object-cover" />
-        <span className="absolute top-2 right-2 text-[10px] bg-[#5e5b55]/80 text-white rounded-full px-2 py-1">En stock: {stock}</span>
+        <span className="absolute top-2 right-2 text-[10px] bg-[#5e5b55]/80 text-white rounded-full px-2 py-1">{isTracked ? `En stock: ${stock}` : 'Stock non suivi'}</span>
       </div>
       <div className="p-3">
         <h3 className="text-sm font-bold text-[#2a2926] leading-snug h-10 overflow-hidden">{product.name}</h3>
         <div className="mt-3 flex items-center justify-between">
           <p className="text-lg font-extrabold text-[#8a6500]">{price.toFixed(2)}€</p>
-          <button onClick={() => onAdd(product)} disabled={stock <= 0} className="w-8 h-8 rounded-full bg-[#c9a646] text-white flex items-center justify-center disabled:opacity-40"><Plus className="w-4 h-4" /></button>
+          <button onClick={() => onAdd(product)} disabled={isTracked && stock <= 0} className="w-8 h-8 rounded-full bg-[#c9a646] text-white flex items-center justify-center disabled:opacity-40"><Plus className="w-4 h-4" /></button>
         </div>
       </div>
     </article>

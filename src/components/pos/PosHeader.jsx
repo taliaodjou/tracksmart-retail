@@ -1,7 +1,7 @@
 import React from 'react';
-import { Bell, Barcode, CircleUserRound, Search } from 'lucide-react';
+import { Bell, Barcode, CircleUserRound, Search, RefreshCw } from 'lucide-react';
 
-export default function PosHeader({ search, onSearchChange }) {
+export default function PosHeader({ search, onSearchChange, onRefresh, isRefreshing }) {
   return (
     <header className="h-20 bg-white border-b border-[#ece8df] px-5 lg:px-6 flex items-center gap-4">
       <h2 className="text-2xl font-extrabold text-[#6f5400] hidden sm:block">TrackSmart POS</h2>
@@ -9,6 +9,10 @@ export default function PosHeader({ search, onSearchChange }) {
         <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-[#7b776f]" />
         <input value={search} onChange={(e) => onSearchChange(e.target.value)} placeholder="Rechercher un produit (Code, Nom)..." className="w-full h-11 rounded-full border border-[#d9d2c3] bg-[#fbfbfb] pl-11 pr-4 text-sm outline-none focus:ring-2 focus:ring-[#c9a646]/30" />
       </div>
+      <button onClick={onRefresh} disabled={isRefreshing} className="h-11 px-4 rounded-full border border-[#d9d2c3] bg-white text-sm font-bold text-[#4b4a46] flex items-center gap-2 shrink-0 disabled:opacity-50">
+        <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+        <span className="hidden md:inline">Actualiser les produits importés</span>
+      </button>
       <div className="hidden sm:flex items-center gap-5 text-[#2c2c2c]">
         <Barcode className="w-5 h-5" />
         <Bell className="w-5 h-5" />

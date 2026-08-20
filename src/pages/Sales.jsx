@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -26,21 +26,30 @@ export default function Sales() {
   const [isPaying, setIsPaying] = useState(false);
   const storeOwnerEmail = getStoreOwnerEmail(user);
 
-  const { data = [], isLoading } = useQuery({
+  const { data = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ['pos-products', storeOwnerEmail],
     queryFn: async () => {
-      const [products, batches] = await Promise.all([base44.entities.Product.list('-created_date', 300), base44.entities.Batch.list('-date_added', 500)]);
+      const [products, batches] = await Promise.all([base44.entities.Product.list('-created_date', 500), base44.entities.Batch.list('-date_added', 1000)]);
       const scopedProducts = isAdmin(user) ? products : products.filter((p) => (p.store_owner_email || user.email) === storeOwnerEmail);
-      return enrichProductsWithStock(scopedProducts.filter((p) => !p.discarded), batches).filter((p) => Number(p.stock_total || 0) > 0);
+      const enriched = enrichProductsWithStock(scopedProducts.filter((p) => !p.discarded), batches);
+      return enriched.filter((p) => p.stock_total === null || Number(p.stock_total) > 0);
     },
     enabled: !!user,
   });
+
+  // Synchronisation automatique dès qu'un produit ou un mouvement de stock change
+  useEffect(() => {
+    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['pos-products', storeOwnerEmail] });
+    const unsubProduct = base44.entities.Product.subscribe(invalidate);
+    const unsubBatch = base44.entities.Batch.subscribe(invalidate);
+    return () => { unsubProduct(); unsubBatch(); };
+  }, [queryClient, storeOwnerEmail]);
 
   const products = useMemo(() => data.filter((product) => {
     const term = search.trim().toLowerCase();
     const text = `${product.name || ''} ${product.barcode || ''}`.toLowerCase();
     return matchesCategory(product, category) && (!term || text.includes(term));
-  }).slice(0, 12), [data, search, category]);
+  }), [data, search, category]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price_chf * item.qty, 0);
   const tax = subtotal * 0.2;
@@ -48,8 +57,9 @@ export default function Sales() {
 
   const addToCart = (product) => setCart((items) => {
     const existing = items.find((item) => item.id === product.id);
-    if (existing) return items.map((item) => item.id === product.id ? { ...item, qty: Math.min(item.qty + 1, Number(product.stock_total || 1)) } : item);
-    return [...items, { id: product.id, name: product.name, price_chf: Number(product.price_chf || 0), stock_total: Number(product.stock_total || 0), qty: 1 }];
+    const max = product.stock_total === null ? 999 : Number(product.stock_total || 0);
+    if (existing) return items.map((item) => item.id === product.id ? { ...item, qty: Math.min(item.qty + 1, max) } : item);
+    return [...items, { id: product.id, name: product.name, price_chf: Number(product.price_chf || 0), stock_total: max, tracked: product.stock_total !== null, qty: 1 }];
   });
   const increase = (id) => setCart((items) => items.map((item) => item.id === id ? { ...item, qty: Math.min(item.qty + 1, item.stock_total) } : item));
   const decrease = (id) => setCart((items) => items.flatMap((item) => item.id !== id ? [item] : item.qty > 1 ? [{ ...item, qty: item.qty - 1 }] : []));
@@ -57,7 +67,7 @@ export default function Sales() {
   const pay = async () => {
     if (!cart.length) return;
     setIsPaying(true);
-    for (const item of cart) await applyManualStockMovement({ productId: item.id, storeOwnerEmail, quantity: item.qty, movementType: 'vente', source: 'manual', movementDate: today(), justification: 'Vente POS' });
+    for (const item of cart.filter((i) => i.tracked)) await applyManualStockMovement({ productId: item.id, storeOwnerEmail, quantity: item.qty, movementType: 'vente', source: 'manual', movementDate: today(), justification: 'Vente POS' });
     await base44.entities.SaleTransaction.create({ store_owner_email: storeOwnerEmail, cashier_email: user.email, session_label: 'Caisse 01', items: JSON.stringify(cart), subtotal_ht: subtotal, tax_amount: tax, total_ttc: total, status: 'paid', sold_at: today() });
     setCart([]);
     setIsPaying(false);
@@ -70,7 +80,7 @@ export default function Sales() {
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-[#242321] flex">
       <InvoiceSidebar />
-      <div className="flex-1 min-w-0"><PosHeader search={search} onSearchChange={setSearch} />
+      <div className="flex-1 min-w-0"><PosHeader search={search} onSearchChange={setSearch} onRefresh={() => refetch()} isRefreshing={isFetching} />
         <div className="flex flex-col xl:flex-row"><main className="flex-1 px-5 lg:px-6 py-7"><h1 className="text-xl font-extrabold mb-4">Catalogue Rapide</h1><CategoryTabs activeCategory={category} onChange={setCategory} />
           {isLoading ? <div className="mt-6 text-sm text-[#74716b]">Chargement du catalogue...</div> : <div className="mt-7 flex flex-wrap gap-4">{products.map((product, index) => <ProductCard key={product.id} product={product} index={index} onAdd={addToCart} />)}<Link to="/products" className="w-full sm:w-32 h-56 rounded-xl border-2 border-dashed border-[#d6c9ad] text-[#74716b] bg-white/40 flex flex-col items-center justify-center text-center text-sm px-4"><PlusCircle className="w-10 h-10 mb-3 text-[#9a9995]" />Ajouter un produit rapide</Link></div>}
         </main><CartPanel items={cart} subtotal={subtotal} tax={tax} total={total} onIncrease={increase} onDecrease={decrease} onClear={() => setCart([])} onPay={pay} isPaying={isPaying} /></div>
