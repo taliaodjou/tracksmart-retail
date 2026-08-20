@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -6,7 +6,6 @@ import { useAuth } from '@/lib/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import SubscriptionGate from '@/components/dashboard/SubscriptionGate';
 import InvoiceSidebar from '@/components/invoices/InvoiceSidebar';
-import CustomerDetailsCard from '@/components/invoices/CustomerDetailsCard';
 import ItemsServicesCard from '@/components/invoices/ItemsServicesCard';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
 import { applyManualStockMovement, enrichProductsWithStock } from '@/lib/stockEntries';
@@ -22,15 +21,9 @@ export default function Invoices() {
   const storeOwnerEmail = getStoreOwnerEmail(user);
   const [step, setStep] = useState(1);
   const [invoiceNumber] = useState(newInvoiceNumber);
-  const [customer, setCustomer] = useState({ name: '', address: '', email: '' });
+  const customer = { name: 'Client', address: '', email: '' };
   const [items, setItems] = useState([{ description: '', qty: 1, price: 0 }]);
   const [isSaving, setIsSaving] = useState(false);
-
-  const { data: pastInvoices = [] } = useQuery({
-    queryKey: ['invoices', storeOwnerEmail],
-    queryFn: () => base44.entities.Invoice.filter({ store_owner_email: storeOwnerEmail }, '-created_date', 100),
-    enabled: !!user,
-  });
 
   const { data: stockProducts = [] } = useQuery({
     queryKey: ['invoice-products', storeOwnerEmail],
@@ -42,22 +35,12 @@ export default function Invoices() {
     enabled: !!user,
   });
 
-  const savedCustomers = useMemo(() => {
-    const map = new Map();
-    pastInvoices.forEach((inv) => {
-      if (inv.customer_name && !map.has(inv.customer_name)) {
-        map.set(inv.customer_name, { name: inv.customer_name, address: inv.customer_address || '', email: inv.customer_email || '' });
-      }
-    });
-    return [...map.values()];
-  }, [pastInvoices]);
-
   const subtotal = items.reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.price) || 0), 0);
   const tax = subtotal * (TAX_RATE / 100);
   const total = subtotal + tax;
 
   const save = async (status) => {
-    if (!customer.name.trim()) { toast({ title: 'Client manquant', description: 'Renseignez le nom du client.', variant: 'destructive' }); return; }
+    if (!items.some((i) => i.description && Number(i.qty) > 0)) { toast({ title: 'Aucun article', description: 'Ajoutez au moins un article.', variant: 'destructive' }); return; }
     setIsSaving(true);
     await base44.entities.Invoice.create({
       store_owner_email: storeOwnerEmail,
@@ -99,7 +82,7 @@ export default function Invoices() {
             <div className="mt-3 flex items-center gap-3 text-sm">
               <span className={`flex items-center gap-2 font-bold ${step === 1 ? 'text-[#6f5400]' : 'text-[#8b877d]'}`}>
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs text-white ${step === 1 ? 'bg-[#8a6500]' : 'bg-[#b7b3a8]'}`}>1</span>
-                Client & Articles
+                Articles
               </span>
               <span className="text-[#b7b3a8]">›</span>
               <span className={`flex items-center gap-2 font-bold ${step === 2 ? 'text-[#6f5400]' : 'text-[#8b877d]'}`}>
@@ -121,7 +104,6 @@ export default function Invoices() {
         <div className="mt-7 grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
           {step === 1 ? (
             <div className="space-y-6">
-              <CustomerDetailsCard customer={customer} onChange={setCustomer} savedCustomers={savedCustomers} />
               <ItemsServicesCard items={items} onChange={setItems} estimatedTotal={total} products={stockProducts} />
             </div>
           ) : (
