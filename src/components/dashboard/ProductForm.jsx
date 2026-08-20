@@ -56,7 +56,7 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
     } else {
       setForm(empty);
     }
-  }, [editProduct, initialProduct]);
+  }, [editProduct?.id, initialProduct]);
 
   const isExpired = form.expiration_date
     ? getProductStatus(form.expiration_date) === 'expired'
@@ -114,6 +114,7 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
     }
 
     onSave(data);
+    if (editProduct) setForm((prev) => ({ ...prev, quantity_received: '' }));
   };
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target?.value ?? e });
@@ -227,7 +228,7 @@ export default function ProductForm({ onSave, onCancel, editProduct, initialProd
           required={!editProduct}
           label={editProduct ? 'Quantité à ajouter au stock' : 'Quantité reçue'}
           hint={editProduct
-            ? `Stock actuel : ${editProduct.stock_total ?? 0} — laissez 0 pour ne rien ajouter`
+            ? `Stock synchronisé actuel : ${editProduct.stock_total ?? 0} unité(s) — laissez 0 pour ne rien ajouter`
             : 'Nombre d’unités reçues pour ce produit'}
         />
 

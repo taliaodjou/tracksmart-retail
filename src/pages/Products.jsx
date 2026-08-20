@@ -95,6 +95,16 @@ export default function Products() {
 
   const productsWithStock = useMemo(() => enrichProductsWithStock(products, stockEntries), [products, stockEntries]);
 
+  // Toujours refléter le stock synchronisé le plus récent dans les écrans ouverts
+  const liveEditProduct = useMemo(
+    () => (editProduct ? productsWithStock.find((p) => p.id === editProduct.id) || editProduct : null),
+    [editProduct, productsWithStock]
+  );
+  const liveAdjustmentProduct = useMemo(
+    () => (adjustmentProduct ? productsWithStock.find((p) => p.id === adjustmentProduct.id) || adjustmentProduct : null),
+    [adjustmentProduct, productsWithStock]
+  );
+
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const stockQuantity = Number(data.quantity_received) || 0;
@@ -150,8 +160,6 @@ export default function Products() {
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['stockEntries'] });
       queryClient.invalidateQueries({ queryKey: ['stockMovements'] });
-      setShowForm(false);
-      setEditProduct(null);
       setManualInitialProduct(null);
       setQuickAdd(null);
     }
@@ -272,7 +280,11 @@ export default function Products() {
 
   const handleSave = (data) => {
     if (editProduct) {
-      updateMutation.mutate({ id: editProduct.id, data });
+      const addedStock = Number(data.quantity_received) || 0;
+      updateMutation.mutate({ id: editProduct.id, data }, {
+        // On garde la fiche ouverte après un ajout de quantité pour voir le stock synchronisé
+        onSuccess: () => { if (addedStock <= 0) { setShowForm(false); setEditProduct(null); } }
+      });
     } else {
       createMutation.mutate(data);
     }
@@ -415,7 +427,7 @@ export default function Products() {
           <ProductForm
             onSave={handleSave}
             onCancel={() => { setShowForm(false); setEditProduct(null); setManualInitialProduct(null); }}
-            editProduct={editProduct}
+            editProduct={liveEditProduct}
             initialProduct={manualInitialProduct}
           />
         )}
@@ -542,7 +554,7 @@ export default function Products() {
       {showAdjustment && (
         <StockAdjustmentModal
           products={productsWithStock}
-          product={adjustmentProduct}
+          product={liveAdjustmentProduct}
           entry={adjustmentEntry}
           onProductChange={(product) => { setAdjustmentProduct(product); setAdjustmentEntry(null); }}
           onScan={() => { setScannerMode('movement'); setShowScanner(true); }}
