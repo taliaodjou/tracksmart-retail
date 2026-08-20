@@ -10,6 +10,7 @@ import ItemsServicesCard from '@/components/invoices/ItemsServicesCard';
 import StockProductPicker from '@/components/invoices/StockProductPicker';
 import InvoicePreview from '@/components/invoices/InvoicePreview';
 import { applyManualStockMovement, enrichProductsWithStock } from '@/lib/stockEntries';
+import { lineTotal } from '@/lib/invoiceMath';
 import { getStoreOwnerEmail, hasActiveSubscription, isAdmin } from '@/lib/productUtils';
 
 const TAX_RATE = 8.5;
@@ -48,7 +49,7 @@ export default function Invoices() {
     });
   };
 
-  const subtotal = items.reduce((sum, item) => sum + (Number(item.qty) || 0) * (Number(item.price) || 0), 0);
+  const subtotal = items.reduce((sum, item) => sum + lineTotal(item), 0);
   const tax = subtotal * (TAX_RATE / 100);
   const total = subtotal + tax;
 

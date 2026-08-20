@@ -1,4 +1,5 @@
 import React from 'react';
+import { lineTotal, lineDiscountAmount } from '@/lib/invoiceMath';
 
 export default function InvoicePreview({ invoiceNumber, invoiceDate, storeName, customer, items, subtotal, tax, total, taxRate }) {
   return (
@@ -26,6 +27,7 @@ export default function InvoicePreview({ invoiceNumber, invoiceDate, storeName, 
             <th className="pb-2">Description</th>
             <th className="pb-2 text-center">Qté</th>
             <th className="pb-2 text-right">Prix unit.</th>
+            <th className="pb-2 text-right">Remise</th>
             <th className="pb-2 text-right">Montant</th>
           </tr>
         </thead>
@@ -38,7 +40,8 @@ export default function InvoicePreview({ invoiceNumber, invoiceDate, storeName, 
                 <td className="py-3 pr-2 text-[#2a2926]">{item.description}</td>
                 <td className="py-3 text-center">{qty}</td>
                 <td className="py-3 text-right">{price.toFixed(2)}€</td>
-                <td className="py-3 text-right font-semibold">{(qty * price).toFixed(2)}€</td>
+                <td className="py-3 text-right">{Number(item.discount) > 0 ? `−${lineDiscountAmount(item).toFixed(2)}€` : '—'}</td>
+                <td className="py-3 text-right font-semibold">{lineTotal(item).toFixed(2)}€</td>
               </tr>
             );
           })}
