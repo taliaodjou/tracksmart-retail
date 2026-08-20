@@ -26,6 +26,7 @@ import LegalNotice from '@/pages/LegalNotice';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import ClientSupportView from '@/pages/ClientSupportView';
 import Dashboard from '@/pages/Dashboard';
+import Sales from '@/pages/Sales';
 import Products from '@/pages/Products';
 import Stock from '@/pages/Stock';
 import Profile from '@/pages/Profile';
@@ -112,6 +113,7 @@ const AuthenticatedApp = () => {
             {/* Espace Boutique routes */}
             <Route path="/welcome" element={<PageTransition><MerchantGuard><Welcome /></MerchantGuard></PageTransition>} />
             <Route path="/dashboard" element={<PageTransition><MerchantGuard><Dashboard /></MerchantGuard></PageTransition>} />
+            <Route path="/sales" element={<PageTransition><MerchantGuard><Sales /></MerchantGuard></PageTransition>} />
             <Route path="/products" element={<PageTransition><MerchantGuard><Products /></MerchantGuard></PageTransition>} />
             <Route path="/stock" element={<PageTransition><MerchantGuard><Stock /></MerchantGuard></PageTransition>} />
             <Route path="/profile" element={<PageTransition><MerchantGuard><Profile /></MerchantGuard></PageTransition>} />

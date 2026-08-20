@@ -23,6 +23,7 @@ export default function DashboardHeader() {
   // Primary nav items shown inline
   const primaryNavItems = [
     { to: '/dashboard', label: t('nav_dashboard'), icon: null },
+    { to: '/sales', label: 'Ventes', icon: <ShoppingCart className="w-3.5 h-3.5" /> },
     { to: '/products', label: t('nav_products'), icon: null },
     { to: '/stock', label: t('nav_stock'), icon: null },
     ...(canAccessAnalytics(user) ? [{ to: '/analytics', label: t('nav_analytics'), icon: <BarChart2 className="w-3.5 h-3.5" /> }] : []),
