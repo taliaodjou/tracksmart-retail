@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Box, LogOut, Settings, ShoppingBag, Users, ClipboardList } from 'lucide-react';
+import { BarChart3, Box, LogOut, Settings, ShoppingBag, Users, ClipboardList, FileText } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 const navItems = [
   { to: '/dashboard', label: 'Tableau de bord', icon: BarChart3 },
   { to: '/sales', label: 'Ventes', icon: ShoppingBag },
   { to: '/products', label: 'Inventaire', icon: Box },
+  { to: '/invoices', label: 'Factures', icon: FileText },
   { to: '/team', label: 'Clients', icon: Users },
   { to: '/reports', label: 'Rapports', icon: ClipboardList },
 ];
